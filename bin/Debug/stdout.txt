@@ -1,1 +1,0 @@
-The current directory is: D:\Programming Projects\Planeman - RTS\bin\Debug\Planeman - RTS.exe

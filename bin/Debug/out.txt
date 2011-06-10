@@ -1,2 +1,0 @@
-The executable path is: D:\Programming Projects\Planeman - RTS\bin\Debug\Planeman - RTS.exe
-The currrent directory is: D:\Programming Projects\Planeman - RTS\bin\Debug\
