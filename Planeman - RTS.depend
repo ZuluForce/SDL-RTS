@@ -1,0 +1,14 @@
+# depslib dependency file v1.0
+1307552610 source:d:\programming projects\planeman - rts\src\std_gfx.c
+	"SDL/SDL.h"
+
+1307556100 source:d:\programming projects\planeman - rts\src\main.cpp
+	<cstdio>
+	<string>
+	"SDL/SDL.h"
+	"std_gfx.h"
+
+1307553734 d:\programming projects\planeman - rts\include\std_gfx.h
+
+1307553330 source:d:\programming projects\planeman - rts\src\physics.cpp
+
