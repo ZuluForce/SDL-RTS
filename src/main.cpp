@@ -1,9 +1,27 @@
+//#ifndef _cplusplus
+//#error A C++ compiler is required!!
+//#endif
+
 #include <cstdio>
 #include <string>
 #include <iostream>
 #include <fstream>
 #include "SDL/SDL.h"
 #include "std_gfx.h"
+#include "screen_manager.h"
+
+#ifdef __MINGW32__
+
+#include  <windows.h>
+
+#endif
+
+#ifdef __GNUC__
+
+#include <stdlib.h>
+
+#endif
+
 
 using namespace std;
 
@@ -38,6 +56,11 @@ int main(int argc, char** argv) {
         output << "The currrent directory is: " << cur_dir << "\n";
         output.close();
     }
+
+    cScreen_manager SM = cScreen_manager(640, 480, 32, SDL_SWSURFACE, true);
+    SM.SM_set_caption("Planeman-RTS");
+
+    Sleep(10000);
 
     return 0;
 }

@@ -12,3 +12,31 @@
 
 1307553330 source:d:\programming projects\planeman - rts\src\physics.cpp
 
+1307718461 source:c:\users\planeman\git repo\planeman-rts\src\physics.cpp
+
+1307718461 source:c:\users\planeman\git repo\planeman-rts\src\std_gfx.c
+	"SDL/SDL.h"
+
+1307991206 source:c:\users\planeman\git repo\planeman-rts\src\screen_manager.cpp
+	"screen_manager.h"
+	"std_gfx.h"
+
+1307988701 c:\users\planeman\git repo\planeman-rts\include\screen_manager.h
+	<cstdio>
+	<string>
+	"std_gfx.h"
+
+1307718461 c:\users\planeman\git repo\planeman-rts\include\std_gfx.h
+	"SDL/SDL.h"
+
+1307989490 source:c:\users\planeman\git repo\planeman-rts\src\main.cpp
+	<cstdio>
+	<string>
+	<iostream>
+	<fstream>
+	"SDL/SDL.h"
+	"std_gfx.h"
+	"screen_manager.h"
+	<windows.h>
+	<stdlib.h>
+

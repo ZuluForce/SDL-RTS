@@ -12,11 +12,14 @@
 				<Option type="0" />
 				<Option compiler="gcc" />
 				<Compiler>
+					<Add option="-fexpensive-optimizations" />
+					<Add option="-O3" />
 					<Add option="-g" />
 					<Add directory="include" />
 				</Compiler>
 				<Linker>
 					<Add option="-lmingw32 -lSDLmain -lSDL" />
+					<Add directory="obj\Debug" />
 				</Linker>
 			</Target>
 			<Target title="Release">
@@ -26,9 +29,11 @@
 				<Option compiler="gcc" />
 				<Compiler>
 					<Add option="-O2" />
+					<Add directory="include" />
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
+					<Add option="-lmingw32 -lSDLmain -lSDL" />
 				</Linker>
 			</Target>
 		</Build>
@@ -41,9 +46,7 @@
 		<Unit filename="src\main.cpp" />
 		<Unit filename="src\physics.cpp" />
 		<Unit filename="src\screen_manager.cpp" />
-		<Unit filename="src\std_gfx.c">
-			<Option compilerVar="CC" />
-		</Unit>
+		<Unit filename="src\std_gfx.cpp" />
 		<Extensions>
 			<code_completion />
 			<debugger />
