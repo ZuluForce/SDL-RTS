@@ -5,6 +5,7 @@ using namespace std;
 
 /* Class for controlling an SDL screen */
 
+/* Converts SDL_Color to Uint32 */
 Uint32 cScreen_manager::clr_to_uint(SDL_Color* color) {
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
 Uint32 int_color = 0x00000000;
@@ -35,6 +36,7 @@ cScreen_manager::cScreen_manager(int width, int height, int bpp, Uint32 flags, b
     }
 
     if ( show ) SDL_Flip(screen);
+    maxFPS = 30;
     return;
 }
 
@@ -68,4 +70,9 @@ bool cScreen_manager::SM_set_bg(SDL_Color* fill_color,SDL_Surface* fill_image) {
 
     fprintf(stderr, "SM_set_bg was called with no resulting action\n");
     return false;
+}
+
+bool cScreen_manager::SM_maxFPS(int max) {
+    maxFPS = max;
+    return true;
 }

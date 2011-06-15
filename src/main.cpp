@@ -9,6 +9,7 @@
 #include "SDL/SDL.h"
 #include "std_gfx.h"
 #include "screen_manager.h"
+#include "event_manager.h"
 
 #ifdef __MINGW32__
 
