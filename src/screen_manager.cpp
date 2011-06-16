@@ -5,6 +5,9 @@ using namespace std;
 
 /* Class for controlling an SDL screen */
 
+extern bool quit_threads;
+
+/* --------------------- Private SM Functions ------------------------- */
 /* Converts SDL_Color to Uint32 */
 Uint32 cScreen_manager::clr_to_uint(SDL_Color* color) {
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
@@ -22,6 +25,8 @@ int_color += (color->b * 0x10000);
 return int_color;
 }
 
+/* ----------------------- End Private SM Functions --------------------- */
+
 cScreen_manager::cScreen_manager(int width, int height, int bpp, Uint32 flags, bool show) {
     if ( SDL_Init( SDL_INIT_EVERYTHING ) == -1) {
         fprintf(stderr, "SDL failed to initialize : %s on line %d\n", __FILE__, __LINE__);
@@ -36,7 +41,9 @@ cScreen_manager::cScreen_manager(int width, int height, int bpp, Uint32 flags, b
     }
 
     if ( show ) SDL_Flip(screen);
+
     maxFPS = 30;
+    SM_active_thread = true;
     return;
 }
 
@@ -56,6 +63,13 @@ bool cScreen_manager::SM_show() {
     return true;
 }
 
+bool cScreen_manager::SM_update() {
+    if ( SDL_Flip(screen) == -1 ) {
+        fprintf(stderr, "Failed to flip the screen: %s on line %d\n",__FILE__,__LINE__);
+        return false;
+    }
+    return true;
+}
 bool cScreen_manager::SM_set_bg(SDL_Color* fill_color,SDL_Surface* fill_image) {
     if ( fill_color != NULL) {
         Uint32 fill_int = clr_to_uint(fill_color);
@@ -75,4 +89,29 @@ bool cScreen_manager::SM_set_bg(SDL_Color* fill_color,SDL_Surface* fill_image) {
 bool cScreen_manager::SM_maxFPS(int max) {
     maxFPS = max;
     return true;
+}
+
+/* To be used as a threaded function
+ * to automatically update the screen
+ * at the frame rate specified in SM
+ */
+
+SDL_Thread* SM_start(cScreen_manager* SM) {
+    SDL_Thread* SM_thread = SDL_CreateThread(start_SM_thread,SM);
+
+    if ( SM_thread == NULL ) {
+        fprintf(stderr, "Failed to start SM thread: %s on line %d\n",__FILE__,__LINE__);
+        return NULL;
+    }
+    return SM_thread;
+}
+
+int start_SM_thread(void* SM) {
+    ((cScreen_manager*) SM)->SM_active_thread = true;
+
+    while (quit_threads == false) {
+        ((cScreen_manager* ) SM) -> SM_update();
+        SDL_Delay(10);
+    }
+    return 0;
 }

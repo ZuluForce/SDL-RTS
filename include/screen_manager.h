@@ -17,13 +17,12 @@ typedef class cScreen_manager {
 
         std_timer fps_timer;
 
-        SDL_Thread SM_thread;
-
         Uint32 clr_to_uint(SDL_Color* color);
 
     public:
+        bool SM_active_thread;
+
         cScreen_manager(int width, int height, int bpp, Uint32 flags, bool show);
-        SM_start
 
         bool SM_set_caption(char* cap, char* icon = NULL);
         bool SM_show();
@@ -32,5 +31,8 @@ typedef class cScreen_manager {
         bool SM_maxFPS(int max);
         bool SM_showFPS();
 } cScreen_manager;
+
+SDL_Thread* SM_start(cScreen_manager* SM);
+int start_SM_thread(void* SM);
 
 #endif // SCREEN_MANAGER_H_INCLUDED

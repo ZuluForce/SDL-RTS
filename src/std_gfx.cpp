@@ -1,4 +1,5 @@
 #include "SDL/SDL.h"
+#include "std_gfx.h"
 
 SDL_Surface *load_image(const char* filename ) {
     SDL_Surface* loadedImage = NULL;
@@ -29,14 +30,14 @@ void apply_surface( int x, int y, SDL_Surface* source, SDL_Surface* destination 
     SDL_BlitSurface( source, NULL, destination, &offset );
 }
 
-Timer::Timer() {
+std_timer::std_timer() {
     startTicks = 0;
     pausedTicks = 0;
     paused = false;
     started = false;
 }
 
-void Timer::start() {
+void std_timer::start() {
     started = true;
     paused = false;
 
@@ -45,12 +46,12 @@ void Timer::start() {
     return;
 }
 
-void Timer::stop() {
+void std_timer::stop() {
     started = false;
     paused = false;
 }
 
-int Timer::get_ticks() {
+int std_timer::get_ticks() {
     if (started == true) {
         if ( paused == true ) {
             return pausedTicks;
@@ -62,7 +63,7 @@ int Timer::get_ticks() {
     return 0;
 }
 
-void Timer::pause() {
+void std_timer::pause() {
     if ( ( started == true ) && ( paused == false ) ) {
         paused = true;
 
@@ -70,7 +71,7 @@ void Timer::pause() {
     }
 }
 
-void Timer::unpause() {
+void std_timer::unpause() {
     if ( paused == true ) {
         paused = false;
 
@@ -80,10 +81,10 @@ void Timer::unpause() {
     }
 }
 
-bool Timer::is_started() {
+bool std_timer::is_started() {
     return started;
 }
 
-bool Timer::is_paused() {
+bool std_timer::is_paused() {
     return paused;
 }

@@ -4,22 +4,22 @@
 	<File name="include\physics.h" open="1" top="0" tabpos="7">
 		<Cursor position="215" topLine="0" />
 	</File>
-	<File name="include\screen_manager.h" open="1" top="1" tabpos="5">
-		<Cursor position="384" topLine="0" />
+	<File name="include\screen_manager.h" open="1" top="0" tabpos="5">
+		<Cursor position="335" topLine="9" />
 	</File>
 	<File name="include\std_gfx.h" open="1" top="0" tabpos="3">
-		<Cursor position="575" topLine="0" />
+		<Cursor position="389" topLine="10" />
 	</File>
-	<File name="src\main.cpp" open="1" top="0" tabpos="1">
-		<Cursor position="1178" topLine="19" />
+	<File name="src\main.cpp" open="1" top="1" tabpos="1">
+		<Cursor position="1614" topLine="57" />
 	</File>
 	<File name="src\physics.cpp" open="1" top="0" tabpos="6">
 		<Cursor position="20" topLine="0" />
 	</File>
 	<File name="src\screen_manager.cpp" open="1" top="0" tabpos="4">
-		<Cursor position="803" topLine="0" />
+		<Cursor position="3051" topLine="97" />
 	</File>
 	<File name="src\std_gfx.cpp" open="1" top="0" tabpos="2">
-		<Cursor position="1585" topLine="45" />
+		<Cursor position="42" topLine="0" />
 	</File>
 </CodeBlocks_layout_file>

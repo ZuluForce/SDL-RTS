@@ -5,7 +5,7 @@
 void apply_surface( int x, int y, SDL_Surface* source, SDL_Surface* destination );
 SDL_Surface *load_image(const char* filename );
 
-typedef class Timer {
+typedef class std_timer {
     private:
         int startTicks;
         int pausedTicks;
@@ -14,7 +14,7 @@ typedef class Timer {
         bool started;
 
     public:
-        Timer();
+        std_timer();
 
         void start();
         void stop();
