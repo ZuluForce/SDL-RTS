@@ -30,6 +30,22 @@ void apply_surface( int x, int y, SDL_Surface* source, SDL_Surface* destination 
     SDL_BlitSurface( source, NULL, destination, &offset );
 }
 
+Uint32 clr_to_uint(SDL_Color* color) {
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+Uint32 int_color = 0x00000000;
+int_color += (color->r * 0x10000);
+int_color += (color->g * 0x100);
+int_color += color->b;
+#else
+Uint32 int_color = 0x00000000;
+int_color += color->r;
+int_color += (color->g * 0x100);
+int_color += (color->b * 0x10000);
+#endif
+
+return int_color;
+}
+
 std_timer::std_timer() {
     startTicks = 0;
     pausedTicks = 0;
@@ -87,4 +103,27 @@ bool std_timer::is_started() {
 
 bool std_timer::is_paused() {
     return paused;
+}
+
+std_fuse::std_fuse(int length) {
+    fuseLength = length;
+    return;
+}
+
+void std_fuse::start() {
+    startTick = SDL_GetTicks();
+    return;
+}
+
+bool std_fuse::check() {
+    if ( (SDL_GetTicks() - startTick) >= fuseLength ) return false;
+    return true;
+}
+
+void std_fuse::reset(bool restart, int new_length) {
+    startTick = 0;
+    if ( new_length != NULL) fuseLength = new_length;
+
+    if ( restart ) start();
+    return;
 }
