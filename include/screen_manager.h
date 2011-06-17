@@ -12,16 +12,27 @@ typedef class cScreen_manager {
     private:
         SDL_Surface* screen;
         bool visible;
+        int maxFPS; //Initialized to 30
+        int frame;
+
+        std_timer fps_timer;
 
         Uint32 clr_to_uint(SDL_Color* color);
 
     public:
+        bool SM_active_thread;
+
         cScreen_manager(int width, int height, int bpp, Uint32 flags, bool show);
 
-        /* May need to be changed to const char* */
         bool SM_set_caption(char* cap, char* icon = NULL);
         bool SM_show();
+        bool SM_update();
         bool SM_set_bg(SDL_Color* fill_color = NULL, SDL_Surface* fill_image = NULL);
+        bool SM_maxFPS(int max);
+        bool SM_showFPS();
 } cScreen_manager;
+
+SDL_Thread* SM_start(cScreen_manager* SM);
+int start_SM_thread(void* SM);
 
 #endif // SCREEN_MANAGER_H_INCLUDED

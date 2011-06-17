@@ -13,6 +13,7 @@
 				<Option compiler="gcc" />
 				<Compiler>
 					<Add option="-fexpensive-optimizations" />
+					<Add option="-Os" />
 					<Add option="-O3" />
 					<Add option="-g" />
 					<Add directory="include" />
@@ -38,11 +39,18 @@
 			</Target>
 		</Build>
 		<Compiler>
+			<Add option="-Os" />
+			<Add option="-O3" />
 			<Add option="-Wall" />
 		</Compiler>
+		<Linker>
+			<Add option="-lmingw32 -lSDLmain -lSDL" />
+		</Linker>
+		<Unit filename="include\event_manager.h" />
 		<Unit filename="include\physics.h" />
 		<Unit filename="include\screen_manager.h" />
 		<Unit filename="include\std_gfx.h" />
+		<Unit filename="src\event_manager.cpp" />
 		<Unit filename="src\main.cpp" />
 		<Unit filename="src\physics.cpp" />
 		<Unit filename="src\screen_manager.cpp" />

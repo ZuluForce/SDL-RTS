@@ -9,6 +9,7 @@
 #include "SDL/SDL.h"
 #include "std_gfx.h"
 #include "screen_manager.h"
+#include "event_manager.h"
 
 #ifdef __MINGW32__
 
@@ -30,6 +31,8 @@ using namespace std;
 
 #define DELIMIT() str(\\)
 #define str(s) #s
+
+bool quit_threads = false;
 
 typedef class {
     private:
@@ -59,8 +62,17 @@ int main(int argc, char** argv) {
 
     cScreen_manager SM = cScreen_manager(640, 480, 32, SDL_SWSURFACE, true);
     SM.SM_set_caption("Planeman-RTS");
+    SM.SM_maxFPS(20);
+    SM_start(&SM);
 
-    Sleep(10000);
+    while( true ) {
+        SM.SM_set_caption("Planeman-RTS.");
+        SDL_Delay(500);
+        SM.SM_set_caption("Planeman-RTS..");
+        SDL_Delay(500);
+        SM.SM_set_caption("Planeman-RTS...");
+        SDL_Delay(500);
+    }
 
     return 0;
 }
