@@ -109,9 +109,26 @@ SDL_Thread* SM_start(cScreen_manager* SM) {
 int start_SM_thread(void* SM) {
     ((cScreen_manager*) SM)->SM_active_thread = true;
 
+    SDL_Color black = {255,255,255};
+    SDL_Color white = {0,0,0};
+
+    bool screen_color = true;
+
     while (quit_threads == false) {
+
+        /* Makes the screen flash black/white */
+        if ( screen_color ) {
+            screen_color = false;
+            ((cScreen_manager*) SM)->SM_set_bg(&white);
+        } else {
+            screen_color = true;
+            ((cScreen_manager*) SM)->SM_set_bg(&black);
+        }
+
+        /*------------------------------------*/
+
         ((cScreen_manager* ) SM) -> SM_update();
-        SDL_Delay(10);
+        SDL_Delay(300);
     }
     return 0;
 }

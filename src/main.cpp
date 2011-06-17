@@ -33,6 +33,9 @@ using namespace std;
 #define str(s) #s
 
 bool quit_threads = false;
+//Will cause threads to clean up their space upon exit
+//If only planning on pausing don't set to true
+bool cleanup_threads = false;
 
 typedef class {
     private:
@@ -64,6 +67,7 @@ int main(int argc, char** argv) {
     SM.SM_set_caption("Planeman-RTS");
     SM.SM_maxFPS(20);
     SM_start(&SM);
+
 
     while( true ) {
         SM.SM_set_caption("Planeman-RTS.");

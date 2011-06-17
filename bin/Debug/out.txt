@@ -1,2 +1,0 @@
-The executable path is: C:\Users\Planeman\Git Repo\Planeman-RTS\bin\Debug\Planeman - RTS.exe
-The currrent directory is: C:\Users\Planeman\Git Repo\Planeman-RTS\bin\Debug\
