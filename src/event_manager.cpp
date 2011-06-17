@@ -5,6 +5,8 @@
  */
 #define CALL_INIT_SIZE 20
 #define RESIZE_FACTOR 2
+#define DEFAULT_TIMEOUT 1000
+
 #define LOAD call_loads[event][0]
 #define _LOAD(x) call_loads[x][0]
 #define MAX_LOAD call_loads[event][1]
@@ -24,13 +26,13 @@ cEvent_dispatch::cEvent_dispatch(int init_size, bool resize) {
 bool cEvent_dispatch::ED_reg_callback(Uint8 event, void (*call) (SDL_Event*)) {
     if (LOAD == 0) {
         /* Initialize */
-        callbacks[event] = (void (*) (SDL_Event*)) malloc( CALL_INIT_SIZE * sizeof( void (*) () ) ) ;
+        callbacks[event] = (void (**) (SDL_Event*)) malloc( CALL_INIT_SIZE * sizeof( void (*) () ) ) ;
         MAX_LOAD = CALL_INIT_SIZE;
     }
     else if ( LOAD == MAX_LOAD) {
         if ( resize ) {
             /* Resize */
-            void (*temp) (SDL_Event*) = (void (*) (SDL_Event*)) malloc( (LOAD * RESIZE_FACTOR) * sizeof( void (*) () ) );
+            void (**temp) (SDL_Event*) = (void (**) (SDL_Event*)) malloc( (LOAD * RESIZE_FACTOR) * sizeof( void (*) () ) );
             MAX_LOAD = LOAD * RESIZE_FACTOR;
 
             for (int i = 0; i < LOAD; ++i) {
@@ -53,15 +55,15 @@ bool cEvent_dispatch::ED_reg_callback(Uint8 event, void (*call) (SDL_Event*)) {
 }
 
 int cEvent_dispatch::ED_manage_events(int timeout) {
-    manage_timeout(true, timeout);
+    manage_timeout->reset(true, timeout);
 
     SDL_Event event;
 
-    while ( SDL_PollEvent(&event) && manage_timeout.check() ) {
+    while ( SDL_PollEvent(&event) && manage_timeout->check() ) {
         for (int i = 0; i < _LOAD(event.type); ++i) {
             CALL_PTR(event.type,i)(&event);
 
-            if ( !manage_timeout.check() ) {
+            if ( !manage_timeout->check() ) {
                 if ( ++i == _LOAD(event.type)) return 1;
 
                 saved_event = event;

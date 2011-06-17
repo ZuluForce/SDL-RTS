@@ -6,12 +6,14 @@
 
 #define CALL_INIT_SIZE 20
 #define DEFAULT_TIMEOUT 1000
+#define CALL_HEADER void (*) (SDL_Event*)
+#define _CALL_HEADER(name, arg) void(*name) (SDL_Event* arg)
 
 typedef class cEvent_dispatch {
     private:
         bool resize;
 
-        void (*callbacks[SDL_NUMEVENTS]) (SDL_Event* event);
+        void (**callbacks[SDL_NUMEVENTS]) (SDL_Event* event);
 
         /* [Current load, Max load] */
         int call_loads[SDL_NUMEVENTS][2];
@@ -22,7 +24,7 @@ typedef class cEvent_dispatch {
         SDL_Event saved_event;
         int saved_callback;
 
-        std_fuse manage_timeout;
+        std_fuse* manage_timeout;
 
     public:
         cEvent_dispatch(int init_size = CALL_INIT_SIZE, bool resize = false);

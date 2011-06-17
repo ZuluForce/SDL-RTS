@@ -41,7 +41,7 @@ typedef class std_fuse {
          * false : Fuse is burnt out (boom!)
          */
         bool check();
-        void reset(bool start = false, int new_length = NULL);
+        void reset(bool start = false, int new_length = 0);
 } std_fuse;
 
 #endif //STD_GFX_H_INCLUDED

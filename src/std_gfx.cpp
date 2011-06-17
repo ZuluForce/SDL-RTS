@@ -122,7 +122,7 @@ bool std_fuse::check() {
 
 void std_fuse::reset(bool restart, int new_length) {
     startTick = 0;
-    if ( new_length != NULL) fuseLength = new_length;
+    if ( new_length != 0) fuseLength = new_length;
 
     if ( restart ) start();
     return;
