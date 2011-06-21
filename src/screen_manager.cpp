@@ -4,6 +4,7 @@
 using namespace std;
 
 /* Class for controlling an SDL screen */
+#define CLEANUP_TIMEOUT 2000
 
 extern bool quit_threads;
 
@@ -43,7 +44,26 @@ cScreen_manager::cScreen_manager(int width, int height, int bpp, Uint32 flags, b
     if ( show ) SDL_Flip(screen);
 
     maxFPS = 30;
-    SM_active_thread = true;
+    SM_active_thread = false;
+    SM_thread_ptr = NULL;
+    return;
+}
+
+cScreen_manager::~cScreen_manager() {
+    fprintf(stdout,"Made it here 0\n");
+    std_fuse cleanupFuse = std_fuse();
+    cleanupFuse.start( CLEANUP_TIMEOUT );
+
+    while ( SM_active_thread ) {
+        if ( !cleanupFuse.check() ) {
+            fprintf(stderr, "Timeout while waiting to cleanup the Screen Manager.\n");
+            SDL_KillThread( SM_thread_ptr );
+            return;
+        }
+        SDL_Delay(10);
+    }
+    SDL_FreeSurface(screen);
+    free(fps_timer);
     return;
 }
 
@@ -97,17 +117,18 @@ bool cScreen_manager::SM_maxFPS(int max) {
  */
 
 SDL_Thread* SM_start(cScreen_manager* SM) {
-    SDL_Thread* SM_thread = SDL_CreateThread(start_SM_thread,SM);
+    SM->SM_thread_ptr = SDL_CreateThread(start_SM_thread,SM);
 
-    if ( SM_thread == NULL ) {
+    if ( SM->SM_thread_ptr == NULL ) {
         fprintf(stderr, "Failed to start SM thread: %s on line %d\n",__FILE__,__LINE__);
         return NULL;
     }
-    return SM_thread;
+    return SM->SM_thread_ptr;
 }
 
 int start_SM_thread(void* SM) {
-    ((cScreen_manager*) SM)->SM_active_thread = true;
+    cScreen_manager* _SM = (cScreen_manager* ) SM;
+    _SM->SM_active_thread = true;
 
     SDL_Color black = {255,255,255};
     SDL_Color white = {0,0,0};
@@ -119,16 +140,17 @@ int start_SM_thread(void* SM) {
         /* Makes the screen flash black/white */
         if ( screen_color ) {
             screen_color = false;
-            ((cScreen_manager*) SM)->SM_set_bg(&white);
+            _SM->SM_set_bg(&white);
         } else {
             screen_color = true;
-            ((cScreen_manager*) SM)->SM_set_bg(&black);
+            _SM->SM_set_bg(&black);
         }
 
         /*------------------------------------*/
 
-        ((cScreen_manager* ) SM) -> SM_update();
-        SDL_Delay(300);
+        _SM -> SM_update();
+        SDL_Delay(10);
     }
+    _SM->SM_active_thread = false;
     return 0;
 }

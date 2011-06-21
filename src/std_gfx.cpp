@@ -105,25 +105,19 @@ bool std_timer::is_paused() {
     return paused;
 }
 
-std_fuse::std_fuse(int length) {
-    fuseLength = length;
+std_fuse::std_fuse() {
+    fuseLength = 0;
+    startTicks = 0;
     return;
 }
 
-void std_fuse::start() {
-    startTick = SDL_GetTicks();
+void std_fuse::start(int time) {
+    fuseLength = time;
+    startTicks = SDL_GetTicks();
     return;
 }
 
 bool std_fuse::check() {
-    if ( (SDL_GetTicks() - startTick) >= fuseLength ) return false;
+    if ( (SDL_GetTicks() - startTicks) >= fuseLength ) return false;
     return true;
-}
-
-void std_fuse::reset(bool restart, int new_length) {
-    startTick = 0;
-    if ( new_length != 0) fuseLength = new_length;
-
-    if ( restart ) start();
-    return;
 }

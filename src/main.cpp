@@ -47,6 +47,11 @@ typedef class {
 
 } cSettings;
 
+void onQuit(SDL_Event* event) {
+    printf("Quit has been pressed!\n");
+    quit_threads = true;
+}
+
 int main(int argc, char** argv) {
 
     /* Chop executable filename off the directory argument */
@@ -63,20 +68,29 @@ int main(int argc, char** argv) {
         output.close();
     }
 
+    /* Setting up the screen */
     cScreen_manager SM = cScreen_manager(640, 480, 32, SDL_SWSURFACE, true);
     SM.SM_set_caption("Planeman-RTS");
     SM.SM_maxFPS(20);
     SM_start(&SM);
 
+    /* Setting up the event manager */
+    cEvent_dispatch EM = cEvent_dispatch();
+    EM.ED_reg_callback(SDL_QUIT,onQuit);
 
-    while( true ) {
-        SM.SM_set_caption("Planeman-RTS.");
-        SDL_Delay(500);
-        SM.SM_set_caption("Planeman-RTS..");
-        SDL_Delay(500);
-        SM.SM_set_caption("Planeman-RTS...");
-        SDL_Delay(500);
+
+    while( true && !quit_threads) {
+        EM.ED_manage_events(250);
+        //SM.SM_set_caption("Planeman-RTS.");
+        //SDL_Delay(500);
+        //SM.SM_set_caption("Planeman-RTS..");
+        //SDL_Delay(500);
+        //SM.SM_set_caption("Planeman-RTS...");
+        //SDL_Delay(500);
+        SDL_Delay(10);
     }
+    delete(&SM);
 
+    SDL_Quit();
     return 0;
 }

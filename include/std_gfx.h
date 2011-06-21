@@ -30,18 +30,17 @@ typedef class std_timer {
 
 typedef class std_fuse {
     private:
-        int startTick;
+        int startTicks;
         int fuseLength;
 
     public:
-        std_fuse(int length);
-        void start();
+        std_fuse();
+        void start(int time);
         /* Return Values:
          * true  : Fuse is still running (safe)
          * false : Fuse is burnt out (boom!)
          */
         bool check();
-        void reset(bool start = false, int new_length = 0);
 } std_fuse;
 
 #endif //STD_GFX_H_INCLUDED

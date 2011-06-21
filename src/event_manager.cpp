@@ -1,7 +1,8 @@
 #include "event_manager.h"
 
-/* When a function is first to register itseld uncer a
+/* When a function is first to register itself under a
  * particular event, space is allocated for future funcitons
+ * according to the amount here.
  */
 #define CALL_INIT_SIZE 20
 #define RESIZE_FACTOR 2
@@ -19,7 +20,7 @@ cEvent_dispatch::cEvent_dispatch(int init_size, bool resize) {
         call_loads[i][0] = 0;
     }
     cEvent_dispatch::resize = resize;
-    std_fuse manage_timeout(DEFAULT_TIMEOUT);
+    manage_timeout = new std_fuse();
     return;
 }
 
@@ -51,11 +52,12 @@ bool cEvent_dispatch::ED_reg_callback(Uint8 event, void (*call) (SDL_Event*)) {
     /* Add the callback */
     callbacks[event][LOAD] = call;
     LOAD++;
+    printf("Added Callback function for event ( %d )\n",event);
     return true;
 }
 
 int cEvent_dispatch::ED_manage_events(int timeout) {
-    manage_timeout->reset(true, timeout);
+    manage_timeout->start(timeout);
 
     SDL_Event event;
 
