@@ -10,6 +10,7 @@
 #include "std_gfx.h"
 #include "screen_manager.h"
 #include "event_manager.h"
+#include "ID.h"
 
 #ifdef __MINGW32__
 
@@ -78,6 +79,13 @@ int main(int argc, char** argv) {
     cEvent_dispatch EM = cEvent_dispatch();
     EM.ED_reg_callback(SDL_QUIT,onQuit);
 
+    cID_dispatch ID = cID_dispatch();
+    printf("Current ID is %d\n",ID.ID_getid());
+    printf("Current ID is %d\n",ID.ID_getid());
+    printf("Current ID is %d\n",ID.ID_getid());
+    ID.ID_returnid(2);
+    printf("Current ID is %d\n",ID.ID_getid());
+    printf("Current ID is %d\n",ID.ID_getid());
 
     while( true && !quit_threads) {
         EM.ED_manage_events(250);
@@ -89,8 +97,7 @@ int main(int argc, char** argv) {
         //SDL_Delay(500);
         SDL_Delay(10);
     }
-    delete(&SM);
-
+    SM.cleanup(DEFAULT_TIMEOUT);
     SDL_Quit();
     return 0;
 }

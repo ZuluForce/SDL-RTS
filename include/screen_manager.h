@@ -10,6 +10,8 @@ using namespace std;
 
 typedef class cScreen_manager {
     private:
+        bool cleaned;
+
         SDL_Surface* screen;
         bool visible;
         int maxFPS; //Initialized to 30
@@ -34,9 +36,12 @@ typedef class cScreen_manager {
         bool SM_set_bg(SDL_Color* fill_color = NULL, SDL_Surface* fill_image = NULL);
         bool SM_maxFPS(int max);
         bool SM_showFPS();
+
+        void cleanup(int timeout);
 } cScreen_manager;
 
 SDL_Thread* SM_start(cScreen_manager* SM);
+bool SM_wait_to_finish(cScreen_manager* SM,int timeout);
 int start_SM_thread(void* SM);
 
 #endif // SCREEN_MANAGER_H_INCLUDED

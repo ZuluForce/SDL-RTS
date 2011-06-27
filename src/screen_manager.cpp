@@ -46,11 +46,12 @@ cScreen_manager::cScreen_manager(int width, int height, int bpp, Uint32 flags, b
     maxFPS = 30;
     SM_active_thread = false;
     SM_thread_ptr = NULL;
+    cleaned = false;
     return;
 }
 
 cScreen_manager::~cScreen_manager() {
-    fprintf(stdout,"Made it here 0\n");
+    if ( cleaned ) return;
     std_fuse cleanupFuse = std_fuse();
     cleanupFuse.start( CLEANUP_TIMEOUT );
 
@@ -64,6 +65,27 @@ cScreen_manager::~cScreen_manager() {
     }
     SDL_FreeSurface(screen);
     free(fps_timer);
+    return;
+}
+
+/* This is incase you want to call SDL_Quit before the destructor is called */
+void cScreen_manager::cleanup(int timeout) {
+    std_fuse cleanupFuse = std_fuse();
+    cleanupFuse.start( timeout );
+
+    while ( SM_active_thread ) {
+        if ( !cleanupFuse.check() ) {
+            fprintf(stderr, "Timeout while waiting to cleanup the Screen Manager.\n");
+            SDL_KillThread( SM_thread_ptr );
+            return;
+        }
+        SDL_Delay(10);
+    }
+
+    SDL_FreeSurface( screen );
+    free( fps_timer );
+    cleaned = true;
+
     return;
 }
 
@@ -124,6 +146,19 @@ SDL_Thread* SM_start(cScreen_manager* SM) {
         return NULL;
     }
     return SM->SM_thread_ptr;
+}
+
+bool SM_wait_to_finish(cScreen_manager* SM, int timeout) {
+    std_fuse wait_timeout = std_fuse();
+    wait_timeout.start( timeout );
+    while ( SM->SM_active_thread ) {
+        if ( !wait_timeout.check() ) {
+            fprintf(stderr, "Timeout while waiting to cleanup the Screen Manager.\n");
+            return false;
+        }
+        SDL_Delay(10);
+    }
+    return true;
 }
 
 int start_SM_thread(void* SM) {
