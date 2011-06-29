@@ -4,7 +4,7 @@
 #include "actor_manager.h"
 #include "std_gfx.h"
 
-class Dot::cActor_static {
+class Dot: public cActor_static {
     private:
         sDisplay_info curr_info;
     public:
@@ -14,7 +14,7 @@ class Dot::cActor_static {
         int set_priority(int);
         bool set_image(char* filename);
         void set_pos(int x, int y);
-}
+};
 
 
 #endif // SIMPLE_ACTORS_H_INCLUDED
