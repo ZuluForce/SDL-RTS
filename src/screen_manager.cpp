@@ -184,7 +184,7 @@ int start_SM_thread(void* SM) {
         /*------------------------------------*/
 
         _SM -> SM_update();
-        SDL_Delay(5);
+        SDL_Delay(6);
     }
     _SM->SM_active_thread = false;
     return 0;

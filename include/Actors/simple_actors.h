@@ -4,7 +4,7 @@
 #include "actor_manager.h"
 #include "std_gfx.h"
 
-class Dot: public cActor_static {
+class Dot: public cActor {
     private:
         sDisplay_info curr_info;
     public:
