@@ -1,11 +1,14 @@
 #ifndef ACTOR_MANAGER_H_INCLUDED
 #define ACTOR_MANAGER_H_INCLUDED
 
+#include <vector>
 #include <cstddef>
 #include "SDL/SDL.h"
 #include "physics.h"
 #include "priority.h"
 #include "ID.h"
+
+using namespace std;
 
 struct sDisplay_info {
     SDL_Surface* surf;
@@ -47,7 +50,8 @@ class cActor_manager {
 
         /* Event Buffers */
 
-        SDL_Event** Event_Buffer;
+        //SDL_Event** Event_Buffer;
+        vector<SDL_Event*> **Event_Buffer;
 
         /* Structures for the storage and sorting of
          * Actors according to their priority and

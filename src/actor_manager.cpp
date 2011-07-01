@@ -30,7 +30,8 @@ cActor_manager::cActor_manager() {
     Draw_Buffer = NULL;
 
     //Redo using the C++ vector class
-    Event_Buffer = (SDL_Event** ) malloc( SDL_NUMEVENTS * sizeof( SDL_Event* ) * EVENT_BUFFER_INIT );
+    //Event_Buffer = (SDL_Event** ) malloc( SDL_NUMEVENTS * sizeof( SDL_Event* ) * EVENT_BUFFER_INIT );
+    Event_Buffer = new vector<SDL_Event*>* [SDL_NUMEVENTS];
 
     actor_objs = new_pqueue(100, true, min_actor);
 
