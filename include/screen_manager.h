@@ -17,11 +17,13 @@ typedef class cScreen_manager {
         int maxFPS; //Initialized to 30
         int frame;
 
-        std_timer* fps_timer;
+        std_fuse* fps_timer;
 
         //Prevent SM desctructor from being called while auto-update thread is running
 
         Uint32 clr_to_uint(SDL_Color* color);
+
+        SDL_sem* screen_lock;
 
     public:
         bool SM_active_thread;
@@ -34,6 +36,7 @@ typedef class cScreen_manager {
         bool SM_show();
         bool SM_update();
         bool SM_set_bg(SDL_Color* fill_color = NULL, SDL_Surface* fill_image = NULL);
+        void SM_blit(int x, int y, SDL_Surface* src, SDL_Rect* clip = NULL);
         bool SM_maxFPS(int max);
         bool SM_showFPS();
 

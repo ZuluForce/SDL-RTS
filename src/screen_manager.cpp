@@ -44,9 +44,12 @@ cScreen_manager::cScreen_manager(int width, int height, int bpp, Uint32 flags, b
     if ( show ) SDL_Flip(screen);
 
     maxFPS = 30;
+    fps_timer = new std_fuse();
     SM_active_thread = false;
     SM_thread_ptr = NULL;
     cleaned = false;
+
+    screen_lock = SDL_CreateSemaphore(1);
     return;
 }
 
@@ -65,6 +68,7 @@ cScreen_manager::~cScreen_manager() {
     }
     SDL_FreeSurface(screen);
     free(fps_timer);
+    SDL_DestroySemaphore( screen_lock );
     return;
 }
 
@@ -115,17 +119,28 @@ bool cScreen_manager::SM_update() {
 bool cScreen_manager::SM_set_bg(SDL_Color* fill_color,SDL_Surface* fill_image) {
     if ( fill_color != NULL) {
         Uint32 fill_int = clr_to_uint(fill_color);
+        SDL_SemWait( screen_lock );
         SDL_FillRect(screen, NULL, fill_int);
+        SDL_SemPost( screen_lock );
         return true;
     }
 
     if ( fill_image != NULL ) {
+        SDL_SemWait( screen_lock );
         apply_surface(0, 0, fill_image, screen);
+        SDL_SemPost( screen_lock );
         return true;
     }
 
     fprintf(stderr, "SM_set_bg was called with no resulting action\n");
     return false;
+}
+
+void cScreen_manager::SM_blit(int x, int y, SDL_Surface* src, SDL_Rect* clip) {
+    SDL_SemWait( screen_lock );
+    apply_surface(x, y, src, screen, clip);
+    SDL_SemPost( screen_lock );
+return;
 }
 
 bool cScreen_manager::SM_maxFPS(int max) {
@@ -170,21 +185,34 @@ int start_SM_thread(void* SM) {
 
     bool screen_color = true;
 
+    int fps_interval = 1000 / _SM->maxFPS;
+
     while (quit_threads == false) {
+        _SM->fps_timer->start(_SM->maxFPS);
+        _SM->fps_timer->wait_out();
+
+        SDL_SemWait( _SM->screen_lock );
+
+        _SM -> SM_update();
+
+        SDL_SemPost( _SM->screen_lock );
 
         /* Makes the screen flash black/white */
+        /*
         if ( screen_color ) {
             screen_color = false;
             _SM->SM_set_bg(&white);
         } else {
             screen_color = true;
             _SM->SM_set_bg(&black);
-        }
+        } */
 
         /*------------------------------------*/
 
-        _SM -> SM_update();
-        SDL_Delay(6);
+        //_SM -> SM_update();
+        //SDL_Delay(6);
+
+
     }
     _SM->SM_active_thread = false;
     return 0;

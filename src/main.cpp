@@ -9,6 +9,7 @@
 #include "SDL/SDL.h"
 #include "std_gfx.h"
 #include "screen_manager.h"
+#include "actor_manager.h"
 #include "event_manager.h"
 #include "ID.h"
 
@@ -75,17 +76,13 @@ int main(int argc, char** argv) {
     SM.SM_maxFPS(20);
     SM_start(&SM);
 
+    /* Setting up the Actor Manager */
+    cActor_manager AM = cActor_manager();
+
     /* Setting up the event manager */
     cEvent_dispatch EM = cEvent_dispatch();
     EM.ED_reg_callback(SDL_QUIT,onQuit);
-
-    cID_dispatch ID = cID_dispatch();
-    printf("Current ID is %d\n",ID.ID_getid());
-    printf("Current ID is %d\n",ID.ID_getid());
-    printf("Current ID is %d\n",ID.ID_getid());
-    ID.ID_returnid(2);
-    printf("Current ID is %d\n",ID.ID_getid());
-    printf("Current ID is %d\n",ID.ID_getid());
+    EM.ED_reg_callback(ALL_EVENTS, AM_input_events);
 
     while( true && !quit_threads) {
         EM.ED_manage_events(250);

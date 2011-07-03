@@ -21,6 +21,9 @@ cEvent_dispatch::cEvent_dispatch(int init_size, bool resize) {
     }
     cEvent_dispatch::resize = resize;
     manage_timeout = new std_fuse();
+
+    saved_callback = -1;
+
     return;
 }
 
@@ -57,12 +60,34 @@ bool cEvent_dispatch::ED_reg_callback(Uint8 event, void (*call) (SDL_Event*)) {
 }
 
 int cEvent_dispatch::ED_manage_events(int timeout) {
+    int i;
     manage_timeout->start(timeout);
-
     SDL_Event event;
 
+    /* Callbacks remaining becuase of a previous timeout */
+    if (saved_callback != -1) {
+        for (i = saved_callback; i < _LOAD(saved_event.type); ++i) {
+            CALL_PTR(saved_event.type,i) (&saved_event);
+        }
+        saved_callback = -1;
+    }
+
     while ( SDL_PollEvent(&event) && manage_timeout->check() ) {
-        for (int i = 0; i < _LOAD(event.type); ++i) {
+
+        /* Registered Callbacks for every event type */
+        for (i = 0; i < _LOAD(0); ++i) {
+            CALL_PTR(0,i)(&event);
+            if ( !manage_timeout->check() ) {
+                if ( ++i == _LOAD(0)) return 1;
+
+                saved_event = event;
+                saved_callback = i;
+                return -1;
+            }
+        }
+
+        /* Registered Callbacks for particular events */
+        for (i = 0; i < _LOAD(event.type); ++i) {
             CALL_PTR(event.type,i)(&event);
 
             if ( !manage_timeout->check() ) {

@@ -9,7 +9,9 @@
 #define RIGHT(curr) (curr * 2) + 1
 #define PARENT(curr) curr / 2;
 
-
+/* This was originally written in C so you will find a mix of C/C++
+ * elements. It could be re-written in C++ and made very readable.
+ */
 /*------------------ Priority Queue Implementation -------------*/
 
 p_queue* new_pqueue(int max_size, bool resize, bool (*prop) (void*, void*)) {
@@ -19,6 +21,8 @@ p_queue* new_pqueue(int max_size, bool resize, bool (*prop) (void*, void*)) {
 	temp->max = max_size;
 	temp->rescale = resize;
 	temp->property = prop;
+	temp->left = 1;
+	temp->right = 1;
 	return temp;
 }
 
@@ -99,5 +103,22 @@ bool max_heap(void* parent, void* child) {
 	if (*((int*) parent) < *((int*) child)) return true;
 	return false;
 }
+
+/*
+void* pq_walk(p_queue* iQ) {
+    if ( ePQ(left) == ePQ(right) && ePQ(left) <= ePQ(end)) {
+        void return_val = ePQ(data)[1];
+        ePQ(left) = LEFT(ePQ(left));
+        ePQ(right) = RIGHT(ePQ(right));
+        return return_val;
+    }
+    void* left_val = ePQ(data)[ePQ(left)];
+    void* right_val = ePQ(data)[ePQ(right)];
+
+    if ( ePQ(property) (left_val, right_val) && ePQ(right) <= ePQ(end) ) {
+        /* Return the right value */
+        //void* return_val = ePQ(data)[ePQ(right)];
+    //}
+//}
 
 /*------------------ End Priority Queue ------------------------*/

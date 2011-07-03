@@ -9,6 +9,8 @@
 #define CALL_HEADER void (*) (SDL_Event*)
 #define _CALL_HEADER(name, arg) void(*name) (SDL_Event* arg)
 
+#define ALL_EVENTS 0
+
 typedef class cEvent_dispatch {
     private:
         bool resize;

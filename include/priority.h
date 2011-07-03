@@ -7,8 +7,11 @@ typedef struct {
 	int max;
 	bool rescale;
 
-	/* Return (1) to fix heap */
-	/* Return (0) if heap is fine */
+    /* Used for walking the tree */
+    int left,right;
+
+	/* Return (true) to fix heap */
+	/* Return (false) if heap is fine */
 	bool (*property) (void*, void*);
 } p_queue;
 
@@ -17,3 +20,4 @@ bool pq_insert(p_queue* iQ, void* item);
 void* pq_extract(p_queue* iQ);
 bool min_heap(void* parent, void* child);
 bool max_heap(void* parent, void* child);
+//void* pq_walk(p_queue* iQ);

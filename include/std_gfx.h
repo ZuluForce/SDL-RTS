@@ -2,7 +2,7 @@
 #define STD_GFX_H_INCLUDED
 
 #include "SDL/SDL.h"
-void apply_surface( int x, int y, SDL_Surface* source, SDL_Surface* destination );
+void apply_surface( int x, int y, SDL_Surface* source, SDL_Surface* destination, SDL_Rect* clip = NULL );
 SDL_Surface *load_image(const char* filename );
 Uint32 clr_to_uint(SDL_Color* color);
 
@@ -41,6 +41,7 @@ typedef class std_fuse {
          * false : Fuse is burnt out (boom!)
          */
         bool check();
+        void wait_out();
 } std_fuse;
 
 #endif //STD_GFX_H_INCLUDED

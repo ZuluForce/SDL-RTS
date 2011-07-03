@@ -17,7 +17,7 @@ SDL_Surface *load_image(const char* filename ) {
     return optimizedImage;
 }
 
-void apply_surface( int x, int y, SDL_Surface* source, SDL_Surface* destination )
+void apply_surface( int x, int y, SDL_Surface* source, SDL_Surface* destination, SDL_Rect* clip )
 {
     //Temporary Offsets
     SDL_Rect offset;
@@ -27,7 +27,7 @@ void apply_surface( int x, int y, SDL_Surface* source, SDL_Surface* destination 
     offset.y = y;
 
     //Blit the surface
-    SDL_BlitSurface( source, NULL, destination, &offset );
+    SDL_BlitSurface( source, clip, destination, &offset );
 }
 
 Uint32 clr_to_uint(SDL_Color* color) {
@@ -120,4 +120,9 @@ void std_fuse::start(int time) {
 bool std_fuse::check() {
     if ( (SDL_GetTicks() - startTicks) >= fuseLength ) return false;
     return true;
+}
+
+void std_fuse::wait_out() {
+    if ( !check() ) return;
+    SDL_Delay(1);
 }
