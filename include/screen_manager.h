@@ -41,6 +41,8 @@ typedef class cScreen_manager {
         bool SM_showFPS();
 
         void cleanup(int timeout);
+
+        friend int start_SM_thread(void* SM);
 } cScreen_manager;
 
 SDL_Thread* SM_start(cScreen_manager* SM);

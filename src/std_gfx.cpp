@@ -30,6 +30,12 @@ void apply_surface( int x, int y, SDL_Surface* source, SDL_Surface* destination,
     SDL_BlitSurface( source, clip, destination, &offset );
 }
 
+void std_sleep(Uint32 timeout) {
+    /* Sleep for *timeout* milliseconds */
+    Sleep(timeout);
+    return;
+}
+
 Uint32 clr_to_uint(SDL_Color* color) {
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
 Uint32 int_color = 0x00000000;

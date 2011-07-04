@@ -77,7 +77,7 @@ int main(int argc, char** argv) {
     SM_start(&SM);
 
     /* Setting up the Actor Manager */
-    cActor_manager AM = cActor_manager();
+    cActor_manager AM = cActor_manager(&SM);
 
     /* Setting up the event manager */
     cEvent_dispatch EM = cEvent_dispatch();

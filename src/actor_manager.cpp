@@ -67,7 +67,7 @@ void cActor_manager::AM_blit_buffer(int x, int y, SDL_Surface* src, SDL_Rect* cl
 }
 
 void cActor_manager::AM_blit_buffer(sDisplay_info* sdi) {
-    apply_surface(sdi->x, sdi->y, sdi->src, Draw_Buffer, sdi->clip);
+    apply_surface(sdi->x, sdi->y, sdi->surf, Draw_Buffer, sdi->clip);
     return;
 }
 
@@ -100,7 +100,7 @@ int AM_thread_loop(void* AM) {
     while ( quit_threads == false ) {
         /* Lock the Event Buffer */
         /* Send out Event Updates */
-        while ( (actor_update == (cActor* ) pq_extract(_AM->actor_objs)) != NULL ) {
+        while ( (actor_update == (cActor*)pq_extract(_AM->actor_objs)) != NULL ) {
             actor_update->check_events(_AM->Event_Buffer, _AM->event_buf_load);
         }
         pq_insert(_AM->actor_objs, actor_update);
@@ -115,7 +115,8 @@ int AM_thread_loop(void* AM) {
             }
         }
         /*--------------------------------------*/
-        SDL_Delay(10);
+        //SDL_Delay(10);
+        std_sleep(10);
     }
     return 0;
 }

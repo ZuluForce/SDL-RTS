@@ -2,8 +2,22 @@
 #define STD_GFX_H_INCLUDED
 
 #include "SDL/SDL.h"
+
+#ifdef __MINGW32__
+
+#include  <windows.h>
+
+#endif
+
+#ifdef __GNUC__
+
+#include <stdlib.h>
+
+#endif
+
 void apply_surface( int x, int y, SDL_Surface* source, SDL_Surface* destination, SDL_Rect* clip = NULL );
 SDL_Surface *load_image(const char* filename );
+void std_sleep(Uint32 timeout);
 Uint32 clr_to_uint(SDL_Color* color);
 
 typedef class std_timer {

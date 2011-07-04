@@ -72,6 +72,7 @@ class cActor_manager {
         void AM_blit_buffer(sDisplay_info*);
         void AM_flip_buffer();
         friend void AM_input_events(SDL_Event* event);
+        friend int AM_thread_loop(void* );
         SDL_Thread* AM_start_thread();
 };
 
