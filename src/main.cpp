@@ -92,7 +92,8 @@ int main(int argc, char** argv) {
         //SDL_Delay(500);
         //SM.SM_set_caption("Planeman-RTS...");
         //SDL_Delay(500);
-        SDL_Delay(10);
+        AM.AM_update();
+        SDL_Delay(2);
     }
     SM.cleanup(DEFAULT_TIMEOUT);
     SDL_Quit();

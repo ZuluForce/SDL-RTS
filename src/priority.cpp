@@ -104,21 +104,8 @@ bool max_heap(void* parent, void* child) {
 	return false;
 }
 
-/*
-void* pq_walk(p_queue* iQ) {
-    if ( ePQ(left) == ePQ(right) && ePQ(left) <= ePQ(end)) {
-        void return_val = ePQ(data)[1];
-        ePQ(left) = LEFT(ePQ(left));
-        ePQ(right) = RIGHT(ePQ(right));
-        return return_val;
-    }
-    void* left_val = ePQ(data)[ePQ(left)];
-    void* right_val = ePQ(data)[ePQ(right)];
-
-    if ( ePQ(property) (left_val, right_val) && ePQ(right) <= ePQ(end) ) {
-        /* Return the right value */
-        //void* return_val = ePQ(data)[ePQ(right)];
-    //}
-//}
+void* pq_top(p_queue* iQ) {
+    return ePQ(data)[1];
+}
 
 /*------------------ End Priority Queue ------------------------*/

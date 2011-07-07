@@ -2,6 +2,7 @@
 #define ACTOR_MANAGER_H_INCLUDED
 
 #include <vector>
+#include <list>
 #include <cstddef>
 #include "SDL/SDL.h"
 #include "screen_manager.h"
@@ -42,8 +43,25 @@ bool min_actor(void* actor1, void* actor2);
 
 bool max_actor(void* actor1, void* actor2);
 
-/*------------------------------------------*/
+template <class T>
+class proirity_stack {
+    private:
+        vector< list <T> >* levels;
+        int (*get_priority) (T*);
 
+    public:
+        priority_stack(int init_size);
+        void reg_accessor(int (*foo) (T*))
+        void insert(T* obj);
+        void insert(T* obj, int priority);
+        T* remove(T* obj);
+        T* remove(T* obj, int priority);
+
+        T* walk();
+        void reset();
+}
+
+/*------------------------------------------*/
 class cActor_manager {
     private:
         SDL_Thread* AM_thread;
@@ -71,12 +89,10 @@ class cActor_manager {
         void AM_blit_buffer(int x, int y, SDL_Surface* src, SDL_Rect* clip = NULL);
         void AM_blit_buffer(sDisplay_info*);
         void AM_flip_buffer();
+        void AM_update();
         friend void AM_input_events(SDL_Event* event);
-        friend int AM_thread_loop(void* );
-        SDL_Thread* AM_start_thread();
 };
 
 void AM_input_events(SDL_Event* event);
-int AM_thread_loop(void* );
 
 #endif // ACTOR_MANAGER_H_INCLUDED

@@ -3,4 +3,6 @@
 *.layout
 *.txt
 *.save
+*.exe
+*.o
 !.gitignore

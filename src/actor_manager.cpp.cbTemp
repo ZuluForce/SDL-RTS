@@ -38,7 +38,6 @@ void reg_accessor(int (*foo) (T*)) {
 
 void T priority_stack<T>::insert(T* obj) {
     int priority = get_priority(obj);
-
 }
 
 /*-----------------------------------------------*/

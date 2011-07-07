@@ -8,6 +8,8 @@ class Dot: public cActor {
     private:
         sDisplay_info curr_info;
         vector<SDL_EventType> _event_binds;
+
+        int move_speed;
     public:
         Dot(int _typeID);
 

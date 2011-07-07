@@ -20,4 +20,4 @@ bool pq_insert(p_queue* iQ, void* item);
 void* pq_extract(p_queue* iQ);
 bool min_heap(void* parent, void* child);
 bool max_heap(void* parent, void* child);
-//void* pq_walk(p_queue* iQ);
+void* pq_top(p_queue*);

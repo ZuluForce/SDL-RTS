@@ -9,6 +9,8 @@ Dot::Dot(int _typeID) {
     curr_info.x = 0;
     curr_info.y = 0;
 
+    move_speed = 5;
+
     vector<int> _event_binds(1,SDL_KEYDOWN);
 }
 
@@ -17,6 +19,33 @@ bool Dot::check() {
 }
 
 void Dot::check_events(event_vector** events, int* load) {
+    event_vector* key_events = events[SDL_KEYDOWN];
+    int i;
+    SDL_Event* key_event;
+    printf("Dot is handling an Event\n");
+    for (i = 0; i < load[SDL_KEYDOWN]; ++i) {
+        key_event = key_events->at(i);
+        switch( key_event->key.keysym.sym) {
+            case SDLK_UP:
+                curr_info.y += move_speed;
+                update = true;
+                break;
+            case SDLK_DOWN:
+                curr_info.y -= move_speed;
+                update = true;
+                break;
+            case SDLK_LEFT:
+                curr_info.x -= move_speed;
+                update = true;
+                break;
+            case SDLK_RIGHT:
+                curr_info.x += move_speed;
+                update = true;
+                break;
+            default:
+                break;
+        }
+    }
     return;
 }
 
