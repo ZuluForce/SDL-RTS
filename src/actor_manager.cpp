@@ -28,6 +28,9 @@ T priority_stack<T>::priority_stack(int init_size) {
     levels = new vector < list<T> >(2);
     levels[0] = new list<T>(init_size);
     levels[1] = new list<T>(init_size);
+
+    lvl_it = NULL;
+    walk_it = NULL;
     return;
 }
 
@@ -38,7 +41,33 @@ void reg_accessor(int (*foo) (T*)) {
 
 void T priority_stack<T>::insert(T* obj) {
     int priority = get_priority(obj);
+    levels[priority]->push_back(obj);
+    return;
+}
 
+void T priority_stack<T>::insert(T* obj, int priority) {
+    levels[priority]->push_back(obj);
+    return;
+}
+
+T* T priority_stack<T>::remove(T* obj) {
+    int priority = get_priority(obj);
+    levels[priority]->remove(obj);
+    return;
+}
+
+T* T priority_stack<T>::remove(T* obj, int priority) {
+    levels[priority]->remove(obj);
+    return;
+}
+
+T* T priority_stack<T>::walk() {
+    if ( lvl_it == NULL ) {
+        lvl_it = &(levels->begin());
+        walk_it = &(*it->begin());
+    } else if ( walk_it == NULL ) {
+        walk_it = &(*(++lvl_it)->begin());
+    }
 }
 
 /*-----------------------------------------------*/

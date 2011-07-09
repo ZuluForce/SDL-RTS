@@ -46,7 +46,9 @@ bool max_actor(void* actor1, void* actor2);
 template <class T>
 class proirity_stack {
     private:
-        vector< list <T> >* levels;
+        vector< list<T*> >* levels;
+        vector< list<T*> >::iterator* lvl_it;
+        list<T*>::iterator* walk_it;
         int (*get_priority) (T*);
 
     public:
