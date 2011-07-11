@@ -26,10 +26,15 @@ bool max_actor(void* actor1, void* actor2) {
 /*-----------------------------------------------*/
 
 cActor_manager::cActor_manager(cScreen_manager* _SM) {
-    AM_thread = NULL;
     SM = _SM;
 
-    Draw_Buffer = NULL;
+    Draw_Buffer = SDL_CreateRGBSurface(_SM->SM_get_flags(),_SM->SM_get_w(), _SM->SM_get_h(), _SM->SM_get_depth(),
+                                       0,0,0,0);
+
+    if (Draw_Buffer == NULL) {
+        fprintf(stderr,"Failed to create the Draw Buffer: %s on line %d\n",__FILE__,__LINE__);
+        fprintf(stderr,"\tError: %s\n",SDL_GetError());
+    }
 
     int i;
     for (i = 0; i < SDL_NUMEVENTS; ++i) {
@@ -51,15 +56,15 @@ void cActor_manager::AM_register(cActor* obj) {
 
     actor_objs.insert(obj);
 
-    vector<SDL_EventType>* events = obj->event_binds();
+    vector<Uint8>* events = obj->event_binds();
     Uint16 i;
     for (i = 0; i < events->size(); ++i) {
         if ( event_buf_load[events->at(i)] == -1) {
             /* Signals that we want to collect events of this type */
+            printf("Actor Manager is now collecting Events of Type (%d)\n",events->at(i));
             event_buf_load[events->at(i)] = 0;
         }
     }
-    printf("Registered object of typeID (%d) with address %p\n",obj->typeID,obj);
     return;
 }
 
@@ -78,6 +83,14 @@ void cActor_manager::AM_flip_buffer() {
     return;
 }
 
+void cActor_manager::AM_clear_load_buf() {
+    for (int i = 0; i < SDL_NUMEVENTS; ++i) {
+        if (event_buf_load[i] != -1) {
+            event_buf_load[i] = 0;
+        }
+    }
+    return;
+}
 void AM_input_events(SDL_Event* event) {
     //printf("Actor Manager recieved event of type: %d\n",event->type);
     cActor_manager* _AM = event_listener;
@@ -85,18 +98,19 @@ void AM_input_events(SDL_Event* event) {
 
     if ( _AM->event_buf_load[type] == -1) return;
 
-    _AM->Event_Buffer[type]->at( _AM->event_buf_load[type]++ ) = event;
+    _AM->Event_Buffer[type]->at( _AM->event_buf_load[type]++ ) = *event;
     return;
 }
 
 void cActor_manager::AM_update() {
     cActor* actor_update = NULL;
     sDisplay_info* actor_info;
+    Uint8* key_states = SDL_GetKeyState(NULL);
 
     /* Send out Event Updates */
     actor_update = actor_objs.walk();
     //while ( (actor_update = (cActor*)pq_top( actor_objs )) != NULL ) {
-        actor_update->check_events(Event_Buffer, event_buf_load);
+        actor_update->check_events(Event_Buffer, event_buf_load, key_states);
     //}
 
     /*------------------------*/
@@ -110,7 +124,7 @@ void cActor_manager::AM_update() {
 
     AM_flip_buffer();
     /*--------------------------------------*/
-
+    AM_clear_load_buf();
     return;
 }
 

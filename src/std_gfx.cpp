@@ -8,7 +8,7 @@ SDL_Surface *load_image(const char* filename ) {
     SDL_Surface* optimizedImage = NULL;
 
     loadedImage = SDL_LoadBMP( filename );
-
+    printf("Address of loaded image: %p\n",loadedImage);
     if( loadedImage != NULL )
     {
         optimizedImage = SDL_DisplayFormat( loadedImage );
@@ -16,6 +16,7 @@ SDL_Surface *load_image(const char* filename ) {
         SDL_FreeSurface( loadedImage );
     } else {
         fprintf(stderr,"Failed to load image: \"%s\" : %s on line %d\n",filename,__FILE__,__LINE__);
+        fprintf(stderr,"\tFail Reason: %s\n",SDL_GetError());
     }
     return optimizedImage;
 }

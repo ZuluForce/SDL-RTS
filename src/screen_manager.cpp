@@ -48,6 +48,7 @@ cScreen_manager::cScreen_manager(int width, int height, int bpp, Uint32 flags, b
     SM_active_thread = false;
     SM_thread_ptr = NULL;
     cleaned = false;
+    pixel_depth = bpp;
 
     screen_lock = SDL_CreateSemaphore(1);
     return;
@@ -91,6 +92,22 @@ void cScreen_manager::cleanup(int timeout) {
     cleaned = true;
 
     return;
+}
+
+int cScreen_manager::SM_get_w() {
+    return screen->w;
+}
+
+int cScreen_manager::SM_get_h() {
+    return screen->h;
+}
+
+int cScreen_manager::SM_get_depth() {
+    return pixel_depth;
+}
+
+Uint32 cScreen_manager::SM_get_flags() {
+    return screen->flags;
 }
 
 bool cScreen_manager::SM_set_caption(char* cap, char* icon) {
@@ -137,7 +154,6 @@ bool cScreen_manager::SM_set_bg(SDL_Color* fill_color,SDL_Surface* fill_image) {
 }
 
 void cScreen_manager::SM_blit(int x, int y, SDL_Surface* src, SDL_Rect* clip) {
-    printf("The Main Screen is being blitted\n");
     SDL_SemWait( screen_lock );
     apply_surface(x, y, src, screen, clip);
     SDL_SemPost( screen_lock );
@@ -193,7 +209,6 @@ int start_SM_thread(void* SM) {
         _SM->fps_timer->wait_out();
 
         SDL_SemWait( _SM->screen_lock );
-
         _SM -> SM_update();
 
         SDL_SemPost( _SM->screen_lock );

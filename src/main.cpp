@@ -53,6 +53,19 @@ typedef class {
 void onQuit(SDL_Event* event) {
     printf("Quit has been pressed!\n");
     quit_threads = true;
+    return;
+}
+
+/* Main Purpose is for checking Escape */
+void onKeyDown(SDL_Event* event) {
+    switch( event->key.keysym.sym) {
+        case SDLK_ESCAPE:
+            quit_threads = true;
+            break;
+        default:
+            break;
+    }
+    return;
 }
 
 int main(int argc, char** argv) {
@@ -83,7 +96,8 @@ int main(int argc, char** argv) {
     /* Setting up the event manager */
     cEvent_dispatch EM = cEvent_dispatch();
     EM.ED_reg_callback(SDL_QUIT,onQuit);
-    EM.ED_reg_callback(ALL_EVENTS, AM_input_events);
+    EM.ED_reg_callback(ALL_EVENTS,AM_input_events);
+    EM.ED_reg_callback(SDL_KEYDOWN,onKeyDown);
 
     /* Initializes the Actor Objects */
     init_game_screen(&AM);

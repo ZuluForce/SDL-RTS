@@ -12,7 +12,7 @@
 
 using namespace std;
 
-typedef vector<SDL_Event*> event_vector;
+typedef vector<SDL_Event> event_vector;
 
 struct sDisplay_info {
     SDL_Surface* surf;
@@ -31,10 +31,10 @@ class cActor {
         int priority, priorityID;
 
         virtual bool check();
-        virtual void check_events(event_vector**, int* load);
+        virtual void check_events(event_vector**, int* load, Uint8* key_states);
         virtual sDisplay_info* get_display();
         virtual int set_priority(int);
-        virtual vector<SDL_EventType>* event_binds();
+        virtual vector<Uint8>* event_binds();
 };
 
 /* Functions for mantaining order in the priority queue */
@@ -69,7 +69,6 @@ class priority_stack {
 /*------------------------------------------*/
 class cActor_manager {
     private:
-        SDL_Thread* AM_thread;
         cScreen_manager* SM;
 
         /* Screen Buffers */
@@ -94,6 +93,7 @@ class cActor_manager {
         void AM_blit_buffer(sDisplay_info*);
         void AM_flip_buffer();
         void AM_update();
+        void AM_clear_load_buf();
         friend void AM_input_events(SDL_Event* event);
 };
 

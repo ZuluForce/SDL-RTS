@@ -16,6 +16,7 @@ typedef class cScreen_manager {
         bool visible;
         int maxFPS; //Initialized to 30
         int frame;
+        int pixel_depth;
 
         std_fuse* fps_timer;
 
@@ -32,6 +33,10 @@ typedef class cScreen_manager {
         cScreen_manager(int width, int height, int bpp, Uint32 flags, bool show);
         ~cScreen_manager();
 
+        int SM_get_w();
+        int SM_get_h();
+        int SM_get_depth();
+        Uint32 SM_get_flags();
         bool SM_set_caption(char* cap, char* icon = NULL);
         bool SM_show();
         bool SM_update();

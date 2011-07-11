@@ -20,7 +20,6 @@ cID_dispatch::cID_dispatch() {
 
     /* free_buffer is a singly-linked list of free ID's */
     free_buffer = NULL;
-    printf("The max ID value is: %d\n", ID_limit);
     return;
 }
 
