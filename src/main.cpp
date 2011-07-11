@@ -12,6 +12,7 @@
 #include "actor_manager.h"
 #include "event_manager.h"
 #include "ID.h"
+#include "run_game.h"
 
 #ifdef __MINGW32__
 
@@ -73,7 +74,7 @@ int main(int argc, char** argv) {
     /* Setting up the screen */
     cScreen_manager SM = cScreen_manager(640, 480, 32, SDL_SWSURFACE, true);
     SM.SM_set_caption("Planeman-RTS");
-    SM.SM_maxFPS(20);
+    SM.SM_maxFPS(30);
     SM_start(&SM);
 
     /* Setting up the Actor Manager */
@@ -83,6 +84,11 @@ int main(int argc, char** argv) {
     cEvent_dispatch EM = cEvent_dispatch();
     EM.ED_reg_callback(SDL_QUIT,onQuit);
     EM.ED_reg_callback(ALL_EVENTS, AM_input_events);
+
+    /* Initializes the Actor Objects */
+    init_game_screen(&AM);
+    SDL_Color white = {0,0,0};
+    SM.SM_set_bg(&white);
 
     while( true && !quit_threads) {
         EM.ED_manage_events(250);

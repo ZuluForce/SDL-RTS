@@ -2,6 +2,7 @@
 #include "std_gfx.h"
 
 SDL_Surface *load_image(const char* filename ) {
+    printf("Loading Image: %s\n",filename);
     SDL_Surface* loadedImage = NULL;
 
     SDL_Surface* optimizedImage = NULL;
@@ -13,6 +14,8 @@ SDL_Surface *load_image(const char* filename ) {
         optimizedImage = SDL_DisplayFormat( loadedImage );
 
         SDL_FreeSurface( loadedImage );
+    } else {
+        fprintf(stderr,"Failed to load image: \"%s\" : %s on line %d\n",filename,__FILE__,__LINE__);
     }
     return optimizedImage;
 }

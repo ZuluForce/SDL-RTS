@@ -22,7 +22,6 @@ void Dot::check_events(event_vector** events, int* load) {
     event_vector* key_events = events[SDL_KEYDOWN];
     int i;
     SDL_Event* key_event;
-    printf("Dot is handling an Event\n");
     for (i = 0; i < load[SDL_KEYDOWN]; ++i) {
         key_event = key_events->at(i);
         switch( key_event->key.keysym.sym) {

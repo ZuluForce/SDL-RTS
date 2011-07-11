@@ -3,6 +3,7 @@
 
 #include <cstddef>
 #include <cstdio>
+#include <climits>
 
 typedef struct node {
     public:

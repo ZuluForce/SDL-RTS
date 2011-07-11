@@ -1,6 +1,7 @@
 #ifndef RUN_GAME_H_INCLUDED
 #define RUN_GAME_H_INCLUDED
 
+#include <cstdio>
 #include "actor_manager.h"
 #include "Actors/simple_actors.h"
 

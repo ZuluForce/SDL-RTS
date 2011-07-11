@@ -5,6 +5,6 @@ void init_game_screen(cActor_manager* AM) {
     Dot* obj1 = new Dot( type_ids.ID_getid() );
     obj1->set_image("dot1.bmp");
     obj1->set_pos(100,100);
-
+    obj1->priority = 0;
     AM->AM_register(obj1);
 }

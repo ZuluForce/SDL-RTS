@@ -28,7 +28,7 @@ class cActor {
 
     public:
         int ID,typeID;
-        int priority;
+        int priority, priorityID;
 
         virtual bool check();
         virtual void check_events(event_vector**, int* load);
@@ -43,32 +43,34 @@ bool min_actor(void* actor1, void* actor2);
 
 bool max_actor(void* actor1, void* actor2);
 
-template <class T>
-class proirity_stack {
+template <typename T>
+class priority_stack {
     private:
-        vector< list<T*> >* levels;
-        vector< list<T*> >::iterator* lvl_it;
-        list<T*>::iterator* walk_it;
-        int (*get_priority) (T*);
+        list<T>** levels;
+        typename list<T>::iterator lvl_it;
+        int (*get_priority) (T);
+        int (*get_priorityID) (T);
+        void (*mod_priorityID) (T,int);
+
+        cID_dispatch priority_id_manager;
 
     public:
-        priority_stack(int init_size);
-        void reg_accessor(int (*foo) (T*))
-        void insert(T* obj);
-        void insert(T* obj, int priority);
-        T* remove(T* obj);
-        T* remove(T* obj, int priority);
+        priority_stack (int init_size = 10);
+        void reg_accessor(int (*foo) (T));
+        void reg_IDaccessor(int (*foo) (T));
+        void reg_IDmodifier(void (*foo) (T,int));
+        void insert(T obj);
+        T remove(T obj);
 
-        T* walk();
+        T walk();
         void reset();
-}
+};
 
 /*------------------------------------------*/
 class cActor_manager {
     private:
         SDL_Thread* AM_thread;
         cScreen_manager* SM;
-        cID_dispatch* actor_id_manager;
 
         /* Screen Buffers */
 
@@ -83,7 +85,7 @@ class cActor_manager {
          * Actors according to their priority and
          * type */
 
-         p_queue* actor_objs;
+         priority_stack<cActor*> actor_objs;
 
     public:
         cActor_manager(cScreen_manager*);
@@ -96,5 +98,69 @@ class cActor_manager {
 };
 
 void AM_input_events(SDL_Event* event);
+int Actor_Priority(cActor*);
+int Actor_PriorityID(cActor*);
+void Actor_modID(cActor*,int);
+
+/* Definitions of template functions */
+
+template <class T>
+priority_stack<T>::priority_stack(int init_size) {
+    levels = (list<T>** )malloc(init_size * sizeof( list<T>* ));
+    for (int i = 0; i < init_size; ++i) {
+        levels[i] = new list<T>;
+    }
+
+    priority_id_manager = cID_dispatch();
+    lvl_it = levels[0]->begin();
+    return;
+}
+
+template <class T>
+void priority_stack<T>::reg_accessor(int (*foo) (T)) {
+    get_priority = foo;
+    return;
+}
+
+template <class T>
+void priority_stack<T>::reg_IDaccessor(int (*foo) (T)) {
+    get_priorityID = foo;
+    return;
+}
+
+template <class T>
+void priority_stack<T>::reg_IDmodifier(void (*foo) (T,int)) {
+    mod_priorityID = foo;
+    return;
+}
+
+template <class T>
+void priority_stack<T>::insert(T obj) {
+    int priority = get_priority(obj);
+    mod_priorityID(obj,priority_id_manager.ID_getid());
+    levels[priority]->push_back(obj);
+    printf("Priority Stack inserted object with address %p at lvl (%d)\n",obj,priority);
+    return;
+}
+
+template <class T>
+T priority_stack<T>::remove(T obj) {
+    int priority = get_priority(obj);
+    levels[priority]->erase(get_priorityID(obj));
+    return;
+}
+
+template <class T>
+T priority_stack<T>::walk() {
+    /*
+    if ( lvl_it == NULL ) {
+        lvl_it = &(levels->begin());
+        walk_it = &(*it->begin());
+    } else if ( walk_it == NULL ) {
+        walk_it = &(*(++lvl_it)->begin());
+    }
+    */
+    return levels[0]->front();
+}
 
 #endif // ACTOR_MANAGER_H_INCLUDED

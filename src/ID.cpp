@@ -16,7 +16,9 @@ node::node(int id, node* next_node) {
 
 cID_dispatch::cID_dispatch() {
     ID_counter = 0;
-    ID_limit = !0 >> 1;
+    ID_limit = INT_MAX;
+
+    /* free_buffer is a singly-linked list of free ID's */
     free_buffer = NULL;
     printf("The max ID value is: %d\n", ID_limit);
     return;
@@ -30,7 +32,7 @@ cID_dispatch::cID_dispatch(int limit) {
 }
 
 int cID_dispatch::ID_getid() {
-    if ( free_buffer == NULL ) return ++ID_counter;
+    if ( free_buffer == NULL ) return ID_counter++;
     int new_id = free_buffer->value;
 
     free_ID* temp = free_buffer;

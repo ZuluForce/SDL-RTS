@@ -23,59 +23,11 @@ bool max_actor(void* actor1, void* actor2) {
     return false;
 }
 
-template <class T>
-T priority_stack<T>::priority_stack(int init_size) {
-    levels = new vector < list<T> >(2);
-    levels[0] = new list<T>(init_size);
-    levels[1] = new list<T>(init_size);
-
-    lvl_it = NULL;
-    walk_it = NULL;
-    return;
-}
-
-void reg_accessor(int (*foo) (T*)) {
-    get_priority = foo;
-    return;
-}
-
-void T priority_stack<T>::insert(T* obj) {
-    int priority = get_priority(obj);
-    levels[priority]->push_back(obj);
-    return;
-}
-
-void T priority_stack<T>::insert(T* obj, int priority) {
-    levels[priority]->push_back(obj);
-    return;
-}
-
-T* T priority_stack<T>::remove(T* obj) {
-    int priority = get_priority(obj);
-    levels[priority]->remove(obj);
-    return;
-}
-
-T* T priority_stack<T>::remove(T* obj, int priority) {
-    levels[priority]->remove(obj);
-    return;
-}
-
-T* T priority_stack<T>::walk() {
-    if ( lvl_it == NULL ) {
-        lvl_it = &(levels->begin());
-        walk_it = &(*it->begin());
-    } else if ( walk_it == NULL ) {
-        walk_it = &(*(++lvl_it)->begin());
-    }
-}
-
 /*-----------------------------------------------*/
 
 cActor_manager::cActor_manager(cScreen_manager* _SM) {
     AM_thread = NULL;
     SM = _SM;
-    cID_dispatch* actor_id_manager = new cID_dispatch();
 
     Draw_Buffer = NULL;
 
@@ -85,16 +37,19 @@ cActor_manager::cActor_manager(cScreen_manager* _SM) {
         event_buf_load[i] = -1;
     }
 
-    actor_objs = new_pqueue(100, true, min_actor);
+    actor_objs = priority_stack<cActor*>(10);
+    actor_objs.reg_accessor(Actor_Priority);
+    actor_objs.reg_IDaccessor(Actor_PriorityID);
+    actor_objs.reg_IDmodifier(Actor_modID);
+
     event_listener = this;
 
     return;
 }
 
 void cActor_manager::AM_register(cActor* obj) {
-    obj->ID = actor_id_manager->ID_getid();
 
-    pq_insert(actor_objs, obj);
+    actor_objs.insert(obj);
 
     vector<SDL_EventType>* events = obj->event_binds();
     Uint16 i;
@@ -104,7 +59,7 @@ void cActor_manager::AM_register(cActor* obj) {
             event_buf_load[events->at(i)] = 0;
         }
     }
-
+    printf("Registered object of typeID (%d) with address %p\n",obj->typeID,obj);
     return;
 }
 
@@ -119,7 +74,6 @@ void cActor_manager::AM_blit_buffer(sDisplay_info* sdi) {
 }
 
 void cActor_manager::AM_flip_buffer() {
-    printf("Flipping the Actor Manager Buffer\n");
     SM->SM_blit(0,0,Draw_Buffer,NULL);
     return;
 }
@@ -140,16 +94,12 @@ void cActor_manager::AM_update() {
     sDisplay_info* actor_info;
 
     /* Send out Event Updates */
-    printf("SM1\n");
-    actor_update = (cActor*)pq_top( actor_objs );
+    actor_update = actor_objs.walk();
     //while ( (actor_update = (cActor*)pq_top( actor_objs )) != NULL ) {
-        printf("SM1.5\n");
-        printf("Address of actor_update: %p\n", actor_update);
         actor_update->check_events(Event_Buffer, event_buf_load);
     //}
 
     /*------------------------*/
-    printf("SM2\n");
     /* Check which objects need re-blitting */
     //while ( (actor_update = (cActor* ) pq_top( actor_objs )) != NULL ) {
         if ( actor_update->check() ) {
@@ -161,5 +111,18 @@ void cActor_manager::AM_update() {
     AM_flip_buffer();
     /*--------------------------------------*/
 
+    return;
+}
+
+int Actor_Priority(cActor* actor) {
+    return actor->priority;
+}
+
+int Actor_PriorityID(cActor* actor) {
+    return actor->priorityID;
+}
+
+void Actor_modID(cActor* actor, int id) {
+    actor->priorityID = id;
     return;
 }

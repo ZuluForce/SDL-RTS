@@ -137,6 +137,7 @@ bool cScreen_manager::SM_set_bg(SDL_Color* fill_color,SDL_Surface* fill_image) {
 }
 
 void cScreen_manager::SM_blit(int x, int y, SDL_Surface* src, SDL_Rect* clip) {
+    printf("The Main Screen is being blitted\n");
     SDL_SemWait( screen_lock );
     apply_surface(x, y, src, screen, clip);
     SDL_SemPost( screen_lock );
