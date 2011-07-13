@@ -65,6 +65,7 @@ void cActor_manager::AM_register(cActor* obj) {
             event_buf_load[events->at(i)] = 0;
         }
     }
+    actor_objs.reset_walk();
     return;
 }
 
@@ -108,23 +109,24 @@ void cActor_manager::AM_update() {
     Uint8* key_states = SDL_GetKeyState(NULL);
 
     /* Send out Event Updates */
-    actor_update = actor_objs.walk();
-    //while ( (actor_update = (cActor*)pq_top( actor_objs )) != NULL ) {
+    //actor_update = actor_objs.walk();
+    while ( (actor_update = actor_objs.walk()) != NULL ) {
         actor_update->check_events(Event_Buffer, event_buf_load, key_states);
-    //}
-
+    }
     /*------------------------*/
+    actor_objs.reset_walk();
     /* Check which objects need re-blitting */
-    //while ( (actor_update = (cActor* ) pq_top( actor_objs )) != NULL ) {
+    while ( ( actor_update = actor_objs.walk() ) != NULL ) {
         if ( actor_update->check() ) {
             actor_info = actor_update->get_display();
             AM_blit_buffer(actor_info);
         }
-    //}
+    }
 
     AM_flip_buffer();
     /*--------------------------------------*/
     AM_clear_load_buf();
+    actor_objs.reset_walk();
     return;
 }
 

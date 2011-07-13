@@ -47,7 +47,16 @@ template <typename T>
 class priority_stack {
     private:
         list<T>** levels;
+        /* Iterator for the list we are in */
         typename list<T>::iterator lvl_it;
+        /* Index of the list we are in */
+        int lvl_index;
+        /* Top Index in the array ocntaining the lists */
+        int top_lvl;
+        int low_lvl;
+        /* If the end of all lvls have been reached this will be true */
+        bool end_walk;
+
         int (*get_priority) (T);
         int (*get_priorityID) (T);
         void (*mod_priorityID) (T,int);
@@ -63,7 +72,7 @@ class priority_stack {
         T remove(T obj);
 
         T walk();
-        void reset();
+        void reset_walk();
 };
 
 /*------------------------------------------*/
@@ -106,6 +115,9 @@ void Actor_modID(cActor*,int);
 
 template <class T>
 priority_stack<T>::priority_stack(int init_size) {
+    if ( init_size < 1 ) {
+        fprintf(stderr,"Cannot create a priority_stack with no levels: init_size = %d\n",init_size);
+    }
     levels = (list<T>** )malloc(init_size * sizeof( list<T>* ));
     for (int i = 0; i < init_size; ++i) {
         levels[i] = new list<T>;
@@ -113,6 +125,10 @@ priority_stack<T>::priority_stack(int init_size) {
 
     priority_id_manager = cID_dispatch();
     lvl_it = levels[0]->begin();
+    lvl_index = 0;
+    top_lvl = init_size - 1;
+    low_lvl = 0;
+    end_walk = true;
     return;
 }
 
@@ -139,7 +155,10 @@ void priority_stack<T>::insert(T obj) {
     int priority = get_priority(obj);
     mod_priorityID(obj,priority_id_manager.ID_getid());
     levels[priority]->push_back(obj);
+    low_lvl = priority < low_lvl ? priority : low_lvl;
+    end_walk = false;
     printf("Priority Stack inserted object with address %p at lvl (%d)\n",obj,priority);
+    printf("# of Actors at level (%d): %d\n",priority, levels[priority]->size());
     return;
 }
 
@@ -152,15 +171,37 @@ T priority_stack<T>::remove(T obj) {
 
 template <class T>
 T priority_stack<T>::walk() {
-    /*
-    if ( lvl_it == NULL ) {
-        lvl_it = &(levels->begin());
-        walk_it = &(*it->begin());
-    } else if ( walk_it == NULL ) {
-        walk_it = &(*(++lvl_it)->begin());
-    }
-    */
-    return levels[0]->front();
+    if ( end_walk ) return NULL;
+    T ret_val = *lvl_it;
+
+    if ( lvl_it == levels[lvl_index]->end() ) {
+        /* We have reached the very end of the walk */
+        if ( lvl_index >= top_lvl ) {
+            end_walk = true;
+            ret_val = NULL;
+            return ret_val;
+        }
+        /* Find the next non-empty level or stop if end is reached */
+        while ( levels[++lvl_index]->empty()) {
+            if ( lvl_index >= top_lvl ) {
+                end_walk = true;
+                ret_val = NULL;
+                return ret_val;
+            }
+        }
+        /* Assign the iterator to the new level */
+        lvl_it = levels[lvl_index]->begin();
+    } else ++lvl_it;
+
+    return ret_val;
+    //return levels[0]->front();
+}
+
+template<class T>
+void priority_stack<T>::reset_walk() {
+    lvl_index = low_lvl;
+    end_walk = false;
+    lvl_it = levels[lvl_index]->begin();
 }
 
 #endif // ACTOR_MANAGER_H_INCLUDED

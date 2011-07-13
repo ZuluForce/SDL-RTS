@@ -9,7 +9,7 @@ Dot::Dot(int _typeID) {
     curr_info.x = 0;
     curr_info.y = 0;
 
-    move_speed = 1;
+    move_speed = 2;
     pressed_key = {-1,-1};
 
     _event_binds = vector<Uint8>(1,SDL_KEYDOWN);
