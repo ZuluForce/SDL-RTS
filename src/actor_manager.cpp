@@ -41,8 +41,10 @@ cActor_manager::cActor_manager(cScreen_manager* _SM) {
         Event_Buffer[i] = new event_vector (EVENT_BUFFER_INIT);
         event_buf_load[i] = -1;
     }
-
+    /* CHANGE THIS FOR HOW MANY LEVELS YOU NEED */
     actor_objs = priority_stack<cActor*>(10);
+    /*------------------------------------------*/
+
     actor_objs.reg_accessor(Actor_Priority);
     actor_objs.reg_IDaccessor(Actor_PriorityID);
     actor_objs.reg_IDmodifier(Actor_modID);

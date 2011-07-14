@@ -64,6 +64,8 @@ class priority_stack {
         cID_dispatch priority_id_manager;
 
     public:
+        /* This data type will not resize so allocate
+           space for all the levels you may need up front */
         priority_stack (int init_size = 10);
         void reg_accessor(int (*foo) (T));
         void reg_IDaccessor(int (*foo) (T));
@@ -126,7 +128,7 @@ priority_stack<T>::priority_stack(int init_size) {
     priority_id_manager = cID_dispatch();
     lvl_it = levels[0]->begin();
     lvl_index = 0;
-    top_lvl = init_size - 1;
+    top_lvl = 0;
     low_lvl = 0;
     end_walk = true;
     return;
@@ -156,6 +158,7 @@ void priority_stack<T>::insert(T obj) {
     mod_priorityID(obj,priority_id_manager.ID_getid());
     levels[priority]->push_back(obj);
     low_lvl = priority < low_lvl ? priority : low_lvl;
+    top_lvl = priority > top_lvl ? priority : top_lvl;
     end_walk = false;
     printf("Priority Stack inserted object with address %p at lvl (%d)\n",obj,priority);
     printf("# of Actors at level (%d): %d\n",priority, levels[priority]->size());
@@ -172,7 +175,7 @@ T priority_stack<T>::remove(T obj) {
 template <class T>
 T priority_stack<T>::walk() {
     if ( end_walk ) return NULL;
-    T ret_val = *lvl_it;
+    T ret_val;
 
     if ( lvl_it == levels[lvl_index]->end() ) {
         /* We have reached the very end of the walk */
@@ -191,7 +194,10 @@ T priority_stack<T>::walk() {
         }
         /* Assign the iterator to the new level */
         lvl_it = levels[lvl_index]->begin();
-    } else ++lvl_it;
+    }
+
+    ret_val = *lvl_it;
+    ++lvl_it;
 
     return ret_val;
     //return levels[0]->front();
