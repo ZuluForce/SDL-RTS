@@ -87,7 +87,7 @@ int main(int argc, char** argv) {
     /* Setting up the screen */
     cScreen_manager SM = cScreen_manager(640, 480, 32, SDL_SWSURFACE, true);
     SM.SM_set_caption("Planeman-RTS");
-    SM.SM_maxFPS(30);
+    SM.SM_maxFPS(2);
     SM_start(&SM);
 
     /* Setting up the Actor Manager */
@@ -101,17 +101,11 @@ int main(int argc, char** argv) {
 
     /* Initializes the Actor Objects */
     init_game_screen(&AM);
-    SDL_Color white = {0,0,0};
-    SM.SM_set_bg(&white);
+    SDL_Color white = {255,255,255};
+    AM.AM_set_bg(&white);
 
     while( true && !quit_threads) {
         EM.ED_manage_events(250);
-        //SM.SM_set_caption("Planeman-RTS.");
-        //SDL_Delay(500);
-        //SM.SM_set_caption("Planeman-RTS..");
-        //SDL_Delay(500);
-        //SM.SM_set_caption("Planeman-RTS...");
-        //SDL_Delay(500);
         AM.AM_update();
         SDL_Delay(2);
     }

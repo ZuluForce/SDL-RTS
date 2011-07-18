@@ -8,7 +8,6 @@ SDL_Surface *load_image(const char* filename ) {
     SDL_Surface* optimizedImage = NULL;
 
     loadedImage = SDL_LoadBMP( filename );
-    printf("Address of loaded image: %p\n",loadedImage);
     if( loadedImage != NULL )
     {
         optimizedImage = SDL_DisplayFormat( loadedImage );
