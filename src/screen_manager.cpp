@@ -134,7 +134,9 @@ bool cScreen_manager::SM_update() {
     return true;
 }
 bool cScreen_manager::SM_set_bg(SDL_Color* fill_color,SDL_Surface* fill_image) {
+    printf("SM_set_bg was called\n");
     if ( fill_color != NULL) {
+        printf("Filling the screen with a color\n");
         Uint32 fill_int = clr_to_uint(fill_color);
         SDL_SemWait( screen_lock );
         SDL_FillRect(screen, NULL, fill_int);
@@ -197,11 +199,6 @@ int start_SM_thread(void* SM) {
     cScreen_manager* _SM = (cScreen_manager* ) SM;
     _SM->SM_active_thread = true;
 
-    SDL_Color black = {255,255,255};
-    SDL_Color white = {0,0,0};
-
-    bool screen_color = true;
-
     int fps_interval = 1000 / _SM->maxFPS;
 
     while (quit_threads == false) {
@@ -212,21 +209,6 @@ int start_SM_thread(void* SM) {
         _SM -> SM_update();
 
         SDL_SemPost( _SM->screen_lock );
-
-        /* Makes the screen flash black/white */
-        /*
-        if ( screen_color ) {
-            screen_color = false;
-            _SM->SM_set_bg(&white);
-        } else {
-            screen_color = true;
-            _SM->SM_set_bg(&black);
-        } */
-
-        /*------------------------------------*/
-
-        //_SM -> SM_update();
-        //SDL_Delay(6);
 
 
     }

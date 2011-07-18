@@ -72,6 +72,7 @@ class priority_stack {
         void reg_IDmodifier(void (*foo) (T,int));
         void insert(T obj);
         T remove(T obj);
+        list<T>* get_level(int level);
 
         T walk();
         void reset_walk();
@@ -85,9 +86,15 @@ class cActor_manager {
         /* Screen Buffers */
 
         SDL_Surface* Draw_Buffer;
+        SDL_Surface* Background;
+        Uint32 Back_Color;
+        /* 0 - No Permanent Background
+           1 - Fill Color
+           2 - SDL_Surface Backgorund
+           */
+        Uint8 back_type;
 
         /* Event Buffers */
-
         event_vector* Event_Buffer[SDL_NUMEVENTS];
         int event_buf_load[SDL_NUMEVENTS];
 
@@ -100,8 +107,10 @@ class cActor_manager {
     public:
         cActor_manager(cScreen_manager*);
         void AM_register(cActor* obj);
+        void AM_set_bg(SDL_Color* fill_color = NULL, SDL_Surface* fill_surf = NULL);
         void AM_blit_buffer(int x, int y, SDL_Surface* src, SDL_Rect* clip = NULL);
         void AM_blit_buffer(sDisplay_info*);
+        void AM_blit_buffer(Uint32);
         void AM_flip_buffer();
         void AM_update();
         void AM_clear_load_buf();
@@ -161,7 +170,6 @@ void priority_stack<T>::insert(T obj) {
     top_lvl = priority > top_lvl ? priority : top_lvl;
     end_walk = false;
     printf("Priority Stack inserted object with address %p at lvl (%d)\n",obj,priority);
-    printf("# of Actors at level (%d): %d\n",priority, levels[priority]->size());
     return;
 }
 
@@ -170,6 +178,11 @@ T priority_stack<T>::remove(T obj) {
     int priority = get_priority(obj);
     levels[priority]->erase(get_priorityID(obj));
     return;
+}
+
+template <class T>
+list<T>* priority_stack<T>::get_level(int level) {
+    return levels[level];
 }
 
 template <class T>

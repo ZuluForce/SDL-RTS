@@ -35,6 +35,7 @@ cActor_manager::cActor_manager(cScreen_manager* _SM) {
         fprintf(stderr,"Failed to create the Draw Buffer: %s on line %d\n",__FILE__,__LINE__);
         fprintf(stderr,"\tError: %s\n",SDL_GetError());
     }
+    back_type = 0;
 
     int i;
     for (i = 0; i < SDL_NUMEVENTS; ++i) {
@@ -71,6 +72,21 @@ void cActor_manager::AM_register(cActor* obj) {
     return;
 }
 
+void cActor_manager::AM_set_bg(SDL_Color* fill_color, SDL_Surface* fill_surf) {
+    if ( fill_color != NULL ) {
+        back_type = 1;
+        Back_Color = clr_to_uint(fill_color);
+        return;
+    }
+    if ( fill_surf != NULL) {
+        back_type = 2;
+        *Background = *fill_surf;
+        return;
+    }
+    back_type = 0;
+    fprintf(stderr, "AM_set_bg was called with no resulting action\n");
+}
+
 void cActor_manager::AM_blit_buffer(int x, int y, SDL_Surface* src, SDL_Rect* clip) {
     apply_surface(x,y,src,Draw_Buffer,clip);
     return;
@@ -79,6 +95,10 @@ void cActor_manager::AM_blit_buffer(int x, int y, SDL_Surface* src, SDL_Rect* cl
 void cActor_manager::AM_blit_buffer(sDisplay_info* sdi) {
     apply_surface(sdi->x, sdi->y, sdi->surf, Draw_Buffer, sdi->clip);
     return;
+}
+
+void cActor_manager::AM_blit_buffer(Uint32 fill) {
+    SDL_FillRect(Draw_Buffer,NULL, fill);
 }
 
 void cActor_manager::AM_flip_buffer() {
@@ -117,12 +137,26 @@ void cActor_manager::AM_update() {
     }
     /*------------------------*/
     actor_objs.reset_walk();
+
+    switch ( back_type ) {
+        case 0:
+            break;
+        case 1:
+            AM_blit_buffer(Back_Color);
+            break;
+        case 2:
+            AM_blit_buffer(0,0,Background,NULL);
+            break;
+        default:
+            break;
+    }
+
     /* Check which objects need re-blitting */
     while ( ( actor_update = actor_objs.walk() ) != NULL ) {
-        if ( actor_update->check() ) {
+        //if ( actor_update->check() ) {
             actor_info = actor_update->get_display();
             AM_blit_buffer(actor_info);
-        }
+        //}
     }
 
     AM_flip_buffer();
