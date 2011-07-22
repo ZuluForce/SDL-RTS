@@ -28,6 +28,8 @@ void cPhysic_manager::PM_set_collide_zone(int x, int y, int width, int height, i
     new_rect->height = height;
     new_rect->level = level;
     collision_zone_grid[x / grid_w][y / grid_h];
+
+    //Add across grid span
 }
 
 void cPhysic_manager::PM_register_collision_obj(phys_rect* obj) {
