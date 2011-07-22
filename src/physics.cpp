@@ -84,3 +84,8 @@ phys_rect** cPhysic_manager::PM_merge_rects(phys_rect* rect1, phys_rect* rect2) 
     //DO NOT MAKE SEPARATE OVERLAPPING/CONNECTED COLLISIONS ZONES
     ;
 }
+
+void cPhysic_manager::PM_move_obj(phys_rect* rect, int x, int y) {
+    phys_rect* obj_rect;
+    obj_rect = collision_obj_grid[rect->x][rect->y];
+}
