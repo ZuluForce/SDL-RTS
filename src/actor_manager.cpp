@@ -31,6 +31,8 @@ cActor_manager::cActor_manager(cScreen_manager* _SM) {
     Draw_Buffer = SDL_CreateRGBSurface(_SM->SM_get_flags(),_SM->SM_get_w(), _SM->SM_get_h(), _SM->SM_get_depth(),
                                        0,0,0,0);
 
+    printf("The draw buffer address is: %p\n", Draw_Buffer);
+
     if (Draw_Buffer == NULL) {
         fprintf(stderr,"Failed to create the Draw Buffer: %s on line %d\n",__FILE__,__LINE__);
         fprintf(stderr,"\tError: %s\n",SDL_GetError());
@@ -131,7 +133,6 @@ void cActor_manager::AM_update() {
     Uint8* key_states = SDL_GetKeyState(NULL);
 
     /* Send out Event Updates */
-    //actor_update = actor_objs.walk();
     while ( (actor_update = actor_objs.walk()) != NULL ) {
         actor_update->check_events(Event_Buffer, event_buf_load, key_states);
     }

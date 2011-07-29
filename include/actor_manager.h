@@ -22,8 +22,7 @@ struct sDisplay_info {
 
 class cActor {
     protected:
-        phys_rect* rect;
-        SDL_Surface* image;
+        sDisplay_info* curr_info;
         bool update;
 
     public:

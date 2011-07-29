@@ -3,6 +3,7 @@
 
 #include <cstdio>
 #include "actor_manager.h"
+#include "std_gfx.h"
 #include "Actors/simple_actors.h"
 
 void init_game_screen(cActor_manager* AM);

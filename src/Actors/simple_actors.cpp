@@ -4,16 +4,27 @@ Dot::Dot(int _typeID) {
     typeID = _typeID;
     update = true;
 
-    sDisplay_info curr_info;
-    curr_info.clip = NULL;
-    curr_info.x = 0;
-    curr_info.y = 0;
+    //sDisplay_info curr_info;
+    curr_info = new sDisplay_info;
+    curr_info->x = 0;
+    curr_info->y = 0;
+    curr_info->clip = NULL;
+    curr_info->surf = NULL;
 
     move_speed = 2;
     pressed_key = {-1,-1};
 
     _event_binds = vector<Uint8>(1,SDL_KEYDOWN);
     _event_binds.push_back(SDL_KEYUP);
+
+    p_container = new phys_cont;
+    p_container->x = 0;
+    p_container->y = 0;
+    p_container->obj_info = curr_info;
+    p_container->contType = 0;
+    p_container->actorType = _typeID;
+    pPM->PM_register_collision_obj(this);
+
     return;
 }
 
@@ -27,25 +38,29 @@ void Dot::check_events(event_vector** events, int* load, Uint8* key_states) {
         switch ( pressed_key[i] ) {
             case SDLK_UP:
                 if ( key_states[SDLK_UP] ) {
-                    curr_info.y -= move_speed;
+                    curr_info->y -= move_speed;
+                    //pPM->PM_move(p_container,0,-move_speed);
                     update = true;
                     break;
                 }
             case SDLK_DOWN:
                 if ( key_states[SDLK_DOWN] ) {
-                    curr_info.y += move_speed;
+                    curr_info->y += move_speed;
+                    //pPM->PM_move(p_container,0,move_speed);
                     update = true;
                     break;
                 }
             case SDLK_LEFT:
                 if ( key_states[SDLK_LEFT] ) {
-                    curr_info.x -= move_speed;
+                    curr_info->x -= move_speed;
+                    //pPM->PM_move(p_container,-move_speed,0);
                     update = true;
                     break;
                 }
             case SDLK_RIGHT:
                 if ( key_states[SDLK_RIGHT] ) {
-                    curr_info.x += move_speed;
+                    curr_info->x += move_speed;
+                    //pPM->PM_move(p_container,move_speed,0);
                     update = true;
                     break;
                 }
@@ -61,22 +76,26 @@ void Dot::check_events(event_vector** events, int* load, Uint8* key_states) {
         key_event = key_events->at(i);
         switch( key_event.key.keysym.sym) {
             case SDLK_UP:
-                curr_info.y -= move_speed;
+                curr_info->y -= move_speed;
+                //pPM->PM_move(p_container,0,-move_speed);
                 update = true;
                 pressed_key[0] = SDLK_UP;
                 break;
             case SDLK_DOWN:
-                curr_info.y += move_speed;
+                curr_info->y += move_speed;
+                //pPM->PM_move(p_container,0,move_speed);
                 update = true;
                 pressed_key[0] = SDLK_DOWN;
                 break;
             case SDLK_LEFT:
-                curr_info.x -= move_speed;
+                curr_info->x -= move_speed;
+                //pPM->PM_move(p_container,-move_speed,0);
                 update = true;
                 pressed_key[1] = SDLK_LEFT;
                 break;
             case SDLK_RIGHT:
-                curr_info.x += move_speed;
+                curr_info->x += move_speed;
+                //pPM->PM_move(p_container,move_speed,0);
                 update = true;
                 pressed_key[1] = SDLK_RIGHT;
                 break;
@@ -90,25 +109,25 @@ void Dot::check_events(event_vector** events, int* load, Uint8* key_states) {
         key_event = key_events->at(i);
         switch( key_event.key.keysym.sym) {
             case SDLK_UP:
-                curr_info.y += move_speed;
+                curr_info->y += move_speed;
                 update = true;
                 if ( pressed_key[0] != SDLK_UP ) break;
                 pressed_key[0] = -1;
                 break;
             case SDLK_DOWN:
-                curr_info.y -= move_speed;
+                curr_info->y -= move_speed;
                 update = true;
                 if ( pressed_key[0] != SDLK_DOWN ) break;
                 pressed_key[0] = -1;
                 break;
             case SDLK_LEFT:
-                curr_info.x += move_speed;
+                curr_info->x += move_speed;
                 update = true;
                 if ( pressed_key[1] != SDLK_LEFT ) break;
                 pressed_key[1] = -1;
                 break;
             case SDLK_RIGHT:
-                curr_info.x -= move_speed;
+                curr_info->x -= move_speed;
                 update = true;
                 if ( pressed_key[1] != SDLK_RIGHT ) break;
                 pressed_key[1] = -1;
@@ -121,17 +140,22 @@ void Dot::check_events(event_vector** events, int* load, Uint8* key_states) {
 }
 
 bool Dot::set_image(char* filename) {
-    curr_info.surf = load_image(filename);
-    if ( curr_info.surf == NULL ) {
+    curr_info->surf = load_image(filename);
+    if ( curr_info->surf == NULL ) {
         fprintf(stderr,"Failed to set Dot image\n");
         return false;
     }
     return true;
 }
 
+bool Dot::set_image(SDL_Surface* image) {
+    curr_info->surf = image;
+    return true;
+}
+
 void Dot::set_pos(int x, int y) {
-    curr_info.x = x;
-    curr_info.y = y;
+    curr_info->x = x;
+    curr_info->y = y;
     return;
 }
 
@@ -146,6 +170,10 @@ vector<Uint8>* Dot::event_binds() {
 
 sDisplay_info* Dot::get_display() {
     update = false;
+    //curr_info->clip = NULL;
+    return curr_info;
+}
 
-    return &curr_info;
+SDL_Rect* Dot::get_clip() {
+    return curr_info->clip;
 }
