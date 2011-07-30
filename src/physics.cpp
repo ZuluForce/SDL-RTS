@@ -171,19 +171,39 @@ void cPhysic_manager::PM_check_rect_circle(phys_cont* obj, phys_cont* obj2) {
 }
 
 void cPhysic_manager::PM_check_circle_circle(phys_cont* obj, phys_cont* obj2) {
-    int distance = ( obj2->x - obj1->x) / (obj2->y - obj1->y);
+    /*
+    int distance = sqrt( (obj2->x - obj1->x) << 2 + (obj2->y - obj1->y) << 2 );
     //distance = distance < 0 ? -distance : distance;
     //Minimum separation without colliding - current distance apart
     if ( distance = ((obj1.param->radius + obj2.param->radius) - distance) >= 0 ) {
+        int slope = ( obj2->x - obj1->x) / (obj2->y - obj1->y);
+        //For the time being I will assume the object being hit is static
+        switch( obj->collType ) {
+            case 0:
+                int x_factor = asin(slope);
+                int y_factor = acos(slope);
+                //If two static objects hit eachother they both stop accelerating
+                tx_accel = ty_accel = 0;
+                tx_vel = x_vel * x_factor;
+                ty_vel = y_vel * y_factor;
+                break;
+            case 1:
+                break;
+            case 2:
+                break;
+            default:
+                break;
+        }
         return;
-    }
+    } */
     return;
 }
 
 coordinates* cPhysic_manager::PM_resolve_collision(coordinates* coor1, coordinates* coor2) {
     if ( coor1 == NULL ) return coor2;
     if ( coor2 == NULL ) return coor1;
-    return NULL;
+    return coor2;
+    //return NULL;
 }
 
 void cPhysic_manager::PM_move(phys_cont* cont, int x, int y) {

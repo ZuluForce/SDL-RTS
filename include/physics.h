@@ -4,13 +4,14 @@
 struct phys_cont; //so that the import of actor_manager.h will work
 struct sDisplay_info;
 
+#include <cmath>
 #include <vector>
 #include <list>
 #include "actor_manager.h"
 #include "ID.h"
 #include "SDL/SDL.h"
 
-extern pAM;
+extern cActor_manager* pAM;
 
 typedef pair<int,int> coordinates;
 
@@ -28,15 +29,22 @@ typedef struct phys_cont {
          */
         int contType;
         int actorType; //Filed in by actor manager or creator of actor
-        int PM_ID;
+
+        /* 0 = Static, nothing can move it
+         * 1 = Elastic
+         * 2 = Inelastic
+         */
+        int collType;
+        int PM_ID; //For use by the physics manager
 
         sDisplay_info* obj_info; //User must fill before register
 
         int x; //User must fill before register if obj_info isn't
         int y;
 
-        int x_vel, y_vel;
-        int x_accel, y_accel;
+        int x_vel, y_vel, tx_vel, ty_vel;
+        int x_accel, y_accel, tx_accel, ty_accel;
+        int mass;
 
         params param;
         int level;
