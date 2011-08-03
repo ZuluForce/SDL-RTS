@@ -11,8 +11,6 @@ struct sDisplay_info;
 #include "ID.h"
 #include "SDL/SDL.h"
 
-extern cActor_manager* pAM;
-
 typedef pair<int,int> coordinates;
 
 union params {
@@ -39,8 +37,8 @@ typedef struct phys_cont {
 
         sDisplay_info* obj_info; //User must fill before register
 
-        int x; //User must fill before register if obj_info isn't
-        int y;
+        int x,tx;
+        int y,ty;
 
         int x_vel, y_vel, tx_vel, ty_vel;
         int x_accel, y_accel, tx_accel, ty_accel;
@@ -51,7 +49,6 @@ typedef struct phys_cont {
 
         void init(int contType, int level = 0);
 
-    private:
         //[min_x,min_y,max_x,max_y]
         int* move_bounds[4];
         //Used to determine what direction an object is being moved
@@ -83,25 +80,32 @@ typedef class Particle {
 class cPhysic_manager{
     private:
         int grid_w, grid_h;
-        list<phys_cont*>*** collision_zone_grid;
-        list<phys_cont*>*** collision_obj_grid;
-        short** obj_grid_load;
+        //list<phys_cont*>*** collision_zone_grid;
+        //list<phys_cont*>*** collision_obj_grid;
+
+        //Temporary hack
+        list<phys_cont*>* collision_zone_grid[3][3];
+        list<phys_cont*>* collision_obj_grid[3][3];
+
+        //short** obj_grid_load;
+        short obj_grid_load[3][3];
 
         cID_dispatch obj_id_manage;
 
+        void PM_init_grid(int,int);
         void PM_init_grid_loc_0(phys_cont*);
 
         //Called with the type of the first object
         /* Knowing the type of the first object, they call
            the given check function for all those it could
            possibly collide with */
-        coordinates* PM_check_rect_(phys_cont*);
-        coordinates* PM_check_circle_(phys_cont*);
+        void PM_check_rect_(phys_cont*);
+        //coordinates* PM_check_circle_(phys_cont*);
 
         //These modify the coor_buffer inside the phys_container
         void PM_check_rect_rect(phys_cont*,phys_cont*);
-        void PM_check_rect_circle(phys_cont*,phys_cont*);
-        void PM_check_circle_circle(phys_cont*,phys_cont*);
+        //void PM_check_rect_circle(phys_cont*,phys_cont*);
+        //void PM_check_circle_circle(phys_cont*,phys_cont*);
 
         coordinates* PM_resolve_collision(coordinates*,coordinates*);
 
@@ -111,10 +115,16 @@ class cPhysic_manager{
         /* If nothing is passed for level it will collide with objects across all levels */
         void PM_set_collide_zone(int x, int y, params parameters, int type = 0, int level = -1);
         void PM_register_collision_obj(phys_cont*);
-        coordinates* PM_check_collision(phys_cont*,bool);
+        void PM_check_collision(phys_cont*,bool);
+        /* Use this for objects with discrete movements (non-continual).
+           It will check for collisions but reactions will be different than
+           usual. */
         void PM_move(phys_cont*,int x, int y);
+        /* Use this to check for collisions and update according to
+           current velocity and acceleration */
+        void PM_update(phys_cont*);
         void PM_set_pos(phys_cont*, int x, int y);
-        void PM_set_vel(phys_cont*, int velocity);
+        void PM_set_velocity(phys_cont*, int x_vel, int y_vel);
         void PM_set_accel(phys_cont*, int accel);
 };
 

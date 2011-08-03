@@ -5,8 +5,6 @@
 #include "std_gfx.h"
 #include "physics.h"
 
-extern pAM,pPM;
-
 class Dot: public cActor {
     private:
         sDisplay_info* curr_info;
@@ -15,7 +13,7 @@ class Dot: public cActor {
         phys_cont* p_container;
 
         int move_speed;
-        int pressed_key[2];
+        //int pressed_key[2];
     public:
         Dot(int _typeID);
 

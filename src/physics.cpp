@@ -2,6 +2,8 @@
 
 #define VECTOR_GRID_INIT_SIZE 10
 
+extern cActor_manager* pAM;
+
 void phys_cont::init(int _contType, int _level) {
     x = obj_info->x;
     y = obj_info->y;
@@ -23,22 +25,26 @@ void phys_cont::init(int _contType, int _level) {
 }
 
 cPhysic_manager::cPhysic_manager(int grid_width, int grid_height) {
-    collision_zone_grid = (list<phys_cont*>***) malloc( grid_width * grid_height * sizeof(list<phys_cont*>*) );
-    collision_obj_grid = (list<phys_cont*>***) malloc( grid_width * grid_height * sizeof(vector<phys_cont*>*) );
-    obj_grid_load = (short**) malloc( grid_width * grid_height * sizeof(short) );
+    //collision_zone_grid = (list<phys_cont*>***) malloc( grid_width * grid_height * sizeof(list<phys_cont*>*) );
+    //collision_obj_grid = (list<phys_cont*>***) malloc( grid_width * grid_height * sizeof(vector<phys_cont*>*) );
+    //obj_grid_load = (short**) malloc( grid_width * grid_height * sizeof(short) );
 
-    for (int i = 0; i < grid_width; ++i) {
-        for (int j = 0; j < grid_height; ++j) {
-            collision_zone_grid[i][j] = new list<phys_cont*>;
-            collision_obj_grid[i][j] = new list<phys_cont*>(VECTOR_GRID_INIT_SIZE);
-            obj_grid_load[i][j] = 0;
-        }
-    }
+    PM_init_grid(grid_width, grid_height);
 
     obj_id_manage = cID_dispatch();
     grid_w = grid_width;
     grid_h = grid_height;
     return;
+}
+
+void cPhysic_manager::PM_init_grid(int width, int height) {
+    for (int i = 0; i < width; ++i) {
+        for (int j = 0; j < height; ++j) {
+            collision_zone_grid[i][j] = new list<phys_cont*>;
+            collision_zone_grid[i][j] = new list<phys_cont*>(VECTOR_GRID_INIT_SIZE);
+            obj_grid_load[i][j] = 0;
+        }
+    }
 }
 
 void cPhysic_manager::PM_set_collide_zone(int x, int y, params parameters, int type, int level) {
@@ -52,6 +58,19 @@ void cPhysic_manager::PM_set_collide_zone(int x, int y, params parameters, int t
 }
 
 void cPhysic_manager::PM_register_collision_obj(phys_cont* obj) {
+    /*
+    if ( obj->obj_info != NULL) {
+        obj->x = obj->obj_info->x;
+        obj->y = obj->obj_info->y;
+
+        switch ( obj->contType ) {
+            case 0:
+                obj->param.w_h->first = obj->obj_info->width;
+                obj->param.w_h->second = obj->obj_info->height;
+            case 1:
+                obj->param.radius = obj->width;
+        }
+    } */
     int grid_x, grid_y;
     obj->grid_locations = vector< pair<int,int> > (1);
     obj->PM_ID = obj_id_manage.ID_getid();
@@ -82,28 +101,37 @@ void cPhysic_manager::PM_register_collision_obj(phys_cont* obj) {
     return;
 }
 
-coordinates* cPhysic_manager::PM_check_collision(phys_cont* obj, bool shift) {
+void cPhysic_manager::PM_check_collision(phys_cont* obj, bool shift) {
     switch ( obj->contType ) {
         case 0: //Rectangle
             PM_check_rect_(obj);
             break;
+            /*
         case 1: //Circle
             PM_check_circle_(obj);
             break;
+            */
         default:
             break;
     }
-    return NULL;
+    if ( shift ) {
+        obj->x = obj->coor_buffer->first;
+        obj->y = obj->coor_buffer->second;
+
+        obj->obj_info->x = obj->coor_buffer->first;
+        obj->obj_info->y = obj->coor_buffer->second;
+    }
+    return;
 }
 
-coordinates* cPhysic_manager::PM_check_rect_(phys_cont* obj) {
+void cPhysic_manager::PM_check_rect_(phys_cont* obj) {
     coordinates* saved_collision = new coordinates(0,0);
     coordinates* temp_collision = new coordinates(0,0);
 
     vector< pair<int,int> >::iterator coor_it;
-    vector< pair<int,int> >* grid_vector = obj->grid_locations;
+    vector< pair<int,int> >* grid_vector = &obj->grid_locations;
 
-    list< phys_cont*>::iterator* actor_it;
+    list< phys_cont*>::iterator actor_it;
     list< phys_cont*>* cont_list;
     coordinates index;
 
@@ -111,15 +139,16 @@ coordinates* cPhysic_manager::PM_check_rect_(phys_cont* obj) {
         index = *coor_it;
         cont_list = collision_obj_grid[index.first][index.second];
         for (actor_it = cont_list->begin(); actor_it != cont_list->end(); ++cont_list) {
-            switch ( *actor_it->contType ) {
+            switch ( (*actor_it)->contType ) {
                 case 0:
-                    temp_collision = PM_check_rect_rect(obj, *actor_it);
-                    saved_collision = PM_resolve_collision(saved_collision, temp_collision);
+                    PM_check_rect_rect(obj, *actor_it);
+                    //saved_collision = PM_resolve_collision(saved_collision, temp_collision);
                     break;
+                    /*
                 case 1:
                     temp_collision = PM_check_rect_circle(obj, *actor_it);
                     saved_collision = PM_resolve_collision(saved_collision, temp_collision);
-                    break;
+                    break;*/
                 default:
                     break;
             }
@@ -129,36 +158,42 @@ coordinates* cPhysic_manager::PM_check_rect_(phys_cont* obj) {
 
         //Checking the collision "zones"
         for (actor_it = cont_list->begin(); actor_it != cont_list->end(); ++cont_list) {
-            switch ( *actor_it->contType ) {
+            switch ( (*actor_it)->contType ) {
                 case 0:
-                    temp_collision = PM_check_rect_rect(obj, *actor_it);
-                    saved_collision = PM_resolve_collision(saved_collision, temp_collision);
+                    PM_check_rect_rect(obj, *actor_it);
+                    //saved_collision = PM_resolve_collision(saved_collision, temp_collision);
                     break;
+                    /*
                 case 1:
                     temp_collision = PM_check_rect_circle(obj, *actor_it);
                     saved_collision = PM_resolve_collision(saved_collision, temp_collision);
                     break;
+                    */
                 default:
                     break;
             }
         }
     }
-    return saved_collision;
+    //obj->coor_buffer = saved_collision;
+    return;
 }
 
+/*
 coordinates* cPhysic_manager::PM_check_circle_(phys_cont* obj) {
     return NULL;
-}
+}*/
 
 void cPhysic_manager::PM_check_rect_rect(phys_cont* obj1, phys_cont* obj2) {
     //Check if any of the x-coordinates overlap
-    if ( ((obj1->x <= obj2->x) && (obj2->x <= (obj1->x + obj1->param.w_h->first))) ||
-        ((obj2->x <= obj1->x) && (obj1->x <= (obj2->x + obj2->param.w_h->first))) ) {
+    if ( ((obj1->tx <= obj2->x) && (obj2->x <= (obj1->tx + obj1->param.w_h->first))) ||
+        ((obj2->x <= obj1->tx) && (obj1->tx <= (obj2->x + obj2->param.w_h->first))) ) {
 
         //If so, check if any of the y-coordinates overlap
-        if ( ((obj1->y <= obj2->y) && (obj2->y <= (obj1->y + obj1->param.w_h->second))) ||
-            ((obj2->y <= obj1->y) && (obj1->y <= (obj2->y + obj2->param.w_h->second))) ) {
-                obj1->coor_buffer = ((obj2->x - obj1->x), (obj2->y - obj1->y));
+        if ( ((obj1->ty <= obj2->y) && (obj2->y <= (obj1->ty + obj1->param.w_h->second))) ||
+            ((obj2->y <= obj1->ty) && (obj1->ty <= (obj2->y + obj2->param.w_h->second))) ) {
+                obj1->coor_buffer->first = obj2->x - obj1->tx;
+                obj2->coor_buffer->second = obj2->y - obj1->ty;
+                obj1->x_vel = obj1->y_vel = obj1->x_accel = obj1->y_accel = 0;
                 return;
         }
     }
@@ -166,38 +201,14 @@ void cPhysic_manager::PM_check_rect_rect(phys_cont* obj1, phys_cont* obj2) {
     return;
 }
 
+/*
 void cPhysic_manager::PM_check_rect_circle(phys_cont* obj, phys_cont* obj2) {
     return NULL;
 }
 
 void cPhysic_manager::PM_check_circle_circle(phys_cont* obj, phys_cont* obj2) {
-    /*
-    int distance = sqrt( (obj2->x - obj1->x) << 2 + (obj2->y - obj1->y) << 2 );
-    //distance = distance < 0 ? -distance : distance;
-    //Minimum separation without colliding - current distance apart
-    if ( distance = ((obj1.param->radius + obj2.param->radius) - distance) >= 0 ) {
-        int slope = ( obj2->x - obj1->x) / (obj2->y - obj1->y);
-        //For the time being I will assume the object being hit is static
-        switch( obj->collType ) {
-            case 0:
-                int x_factor = asin(slope);
-                int y_factor = acos(slope);
-                //If two static objects hit eachother they both stop accelerating
-                tx_accel = ty_accel = 0;
-                tx_vel = x_vel * x_factor;
-                ty_vel = y_vel * y_factor;
-                break;
-            case 1:
-                break;
-            case 2:
-                break;
-            default:
-                break;
-        }
-        return;
-    } */
     return;
-}
+}*/
 
 coordinates* cPhysic_manager::PM_resolve_collision(coordinates* coor1, coordinates* coor2) {
     if ( coor1 == NULL ) return coor2;
@@ -210,10 +221,18 @@ void cPhysic_manager::PM_move(phys_cont* cont, int x, int y) {
     cont->x += x;
     cont->y += y;
 
-    PM_check_collision(cont);
+    PM_check_collision(cont, true);
 
     cont->obj_info->x = x;
     cont->obj_info->y = y;
+    return;
+}
+
+void cPhysic_manager::PM_update(phys_cont* cont) {
+    cont->tx = cont->x + cont->x_vel;
+    cont->ty = cont->y + cont->y_vel;
+
+    PM_check_collision(cont, true);
     return;
 }
 
@@ -221,8 +240,11 @@ void cPhysic_manager::PM_init_grid_loc_0(phys_cont* obj) {
     int grid_x = obj->x / grid_w;
     int grid_y = obj->y / grid_h;
 
-    int x_span = obj->param.w_h->first / grid_w;
-    int y_span = obj->param.w_h->second / grid_h;
+    //int x_span = obj->param.w_h->first / grid_w;
+    //int y_span = obj->param.w_h->second / grid_h;
+
+    int x_span = 1;
+    int y_span = 1;
 
     /* Adding all the spans across the x-axis */
     int i,j;
@@ -262,4 +284,10 @@ void cPhysic_manager::PM_set_pos(phys_cont* cont, int x, int y) {
 
     cont->obj_info->x = x;
     cont->obj_info->y = y;
+}
+
+void cPhysic_manager::PM_set_velocity(phys_cont* cont, int x, int y) {
+    cont->x_vel = x;
+    cont->y_vel = y;
+    return;
 }

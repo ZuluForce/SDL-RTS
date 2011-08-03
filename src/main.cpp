@@ -44,8 +44,7 @@ bool cleanup_threads = false;
 //--These need to be defined for other managers to work--//
 cEvent_dispatch* pEM;
 cActor_manager* pAM;
-cScreen_manager* cSM;
-cPhysic_manager* cPM;
+cScreen_manager* pSM;
 cPhysic_manager* pPM;
 
 //------------------------------------------------------//
@@ -114,7 +113,7 @@ int main(int argc, char** argv) {
 
     /* Setting up the Physics Manager */
     cPhysic_manager PM = cPhysic_manager(3,3);
-    pPM = PM;
+    pPM = &PM;
 
     /* Initializes the Actor Objects */
     init_game_screen(&AM);
