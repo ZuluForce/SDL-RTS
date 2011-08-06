@@ -47,7 +47,7 @@ typedef struct phys_cont {
         params param;
         int level;
 
-        void init(int contType, int level = 0);
+        void init(int contType = 0, int level = 0, int actorType = -1);
 
         //[min_x,min_y,max_x,max_y]
         int* move_bounds[4];
@@ -55,7 +55,7 @@ typedef struct phys_cont {
         //so collision responses can be handled correctly
         coordinates* move_direction;
 
-        vector< coordinates > grid_locations;
+        vector< coordinates >* grid_locations;
 
         coordinates* coor_buffer;
 
@@ -84,11 +84,11 @@ class cPhysic_manager{
         //list<phys_cont*>*** collision_obj_grid;
 
         //Temporary hack
-        list<phys_cont*>* collision_zone_grid[3][3];
-        list<phys_cont*>* collision_obj_grid[3][3];
+        list<phys_cont*>*** collision_zone_grid;
+        list<phys_cont*>*** collision_obj_grid;
 
         //short** obj_grid_load;
-        short obj_grid_load[3][3];
+        short** obj_grid_load;
 
         cID_dispatch obj_id_manage;
 
@@ -125,6 +125,8 @@ class cPhysic_manager{
         void PM_update(phys_cont*);
         void PM_set_pos(phys_cont*, int x, int y);
         void PM_set_velocity(phys_cont*, int x_vel, int y_vel);
+        void PM_set_x_velocity(phys_cont* cont, int x);
+        void PM_set_y_velocity(phys_cont* cont, int y);
         void PM_set_accel(phys_cont*, int accel);
 };
 

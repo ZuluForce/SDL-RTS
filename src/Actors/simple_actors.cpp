@@ -21,15 +21,13 @@ Dot::Dot(int _typeID) {
     _event_binds.push_back(SDL_KEYUP);
 
     p_container = new phys_cont;
-    p_container->x = 0;
-    p_container->y = 0;
     p_container->obj_info = curr_info;
-    p_container->contType = 0;
-    p_container->actorType = _typeID;
-    //p_container->param.w_h->first = 20;
-    //p_container->param.w_h->second = 20;
-    pPM->PM_register_collision_obj(p_container);
+    p_container->init();
 
+    p_container->actorType = _typeID;
+    p_container->param.w_h->first = 20;
+    p_container->param.w_h->second = 20;
+    pPM->PM_register_collision_obj(p_container);
     return;
 }
 
@@ -83,25 +81,25 @@ void Dot::check_events(event_vector** events, int* load, Uint8* key_states) {
         switch( key_event.key.keysym.sym) {
             case SDLK_UP:
                 //curr_info->y -= move_speed;
-                pPM->PM_set_velocity(p_container,0,-move_speed);
+                pPM->PM_set_y_velocity(p_container,move_speed);
                 update = true;
                 //pressed_key[0] = SDLK_UP;
                 break;
             case SDLK_DOWN:
                 //curr_info->y += move_speed;
-                pPM->PM_set_velocity(p_container,0,move_speed);
+                pPM->PM_set_y_velocity(p_container,-move_speed);
                 update = true;
                 //pressed_key[0] = SDLK_DOWN;
                 break;
             case SDLK_LEFT:
                 //curr_info->x -= move_speed;
-                pPM->PM_set_velocity(p_container,-move_speed,0);
+                pPM->PM_set_x_velocity(p_container,-move_speed);
                 update = true;
                 //pressed_key[1] = SDLK_LEFT;
                 break;
             case SDLK_RIGHT:
                 //curr_info->x += move_speed;
-                pPM->PM_set_velocity(p_container,move_speed,0);
+                pPM->PM_set_x_velocity(p_container,move_speed);
                 update = true;
                 //pressed_key[1] = SDLK_RIGHT;
                 break;
@@ -169,6 +167,8 @@ bool Dot::set_image(SDL_Surface* image) {
 void Dot::set_pos(int x, int y) {
     curr_info->x = x;
     curr_info->y = y;
+
+    pPM->PM_move(p_container,x,y);
     return;
 }
 
