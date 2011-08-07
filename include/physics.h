@@ -40,6 +40,8 @@ typedef struct phys_cont {
         int x,tx;
         int y,ty;
 
+        bool new_x,new_y;
+
         int x_vel, y_vel, tx_vel, ty_vel;
         int x_accel, y_accel, tx_accel, ty_accel;
         int mass;
@@ -55,7 +57,8 @@ typedef struct phys_cont {
         //so collision responses can be handled correctly
         coordinates* move_direction;
 
-        vector< coordinates >* grid_locations;
+        //vector< coordinates >* grid_locations;
+        coordinates grid_loc;
 
         coordinates* coor_buffer;
 
@@ -80,10 +83,8 @@ typedef class Particle {
 class cPhysic_manager{
     private:
         int grid_w, grid_h;
-        //list<phys_cont*>*** collision_zone_grid;
-        //list<phys_cont*>*** collision_obj_grid;
+        int screen_w, screen_h;
 
-        //Temporary hack
         list<phys_cont*>*** collision_zone_grid;
         list<phys_cont*>*** collision_obj_grid;
 
@@ -94,6 +95,7 @@ class cPhysic_manager{
 
         void PM_init_grid(int,int);
         void PM_init_grid_loc_0(phys_cont*);
+        void PM_reset_grid_loc(phys_cont*);
 
         //Called with the type of the first object
         /* Knowing the type of the first object, they call
@@ -110,7 +112,8 @@ class cPhysic_manager{
         coordinates* PM_resolve_collision(coordinates*,coordinates*);
 
     public:
-        cPhysic_manager(int grid_width, int grid_height);
+        cPhysic_manager(int grid_width, int grid_height,
+                        int screen_width = -1, int screen_height = -1);
         /* Sets up a collision zone so any colision objects cannot pass through it */
         /* If nothing is passed for level it will collide with objects across all levels */
         void PM_set_collide_zone(int x, int y, params parameters, int type = 0, int level = -1);

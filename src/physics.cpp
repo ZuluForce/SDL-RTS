@@ -1,8 +1,10 @@
 #include "physics.h"
 
 #define VECTOR_GRID_INIT_SIZE 10
+#define GRID_LOC cont->grid_loc
 
 extern cActor_manager* pAM;
+extern cScreen_manager* pSM;
 
 void phys_cont::init(int _contType, int _level, int _actorType) {
     x = obj_info->x;
@@ -31,7 +33,7 @@ void phys_cont::init(int _contType, int _level, int _actorType) {
     return;
 }
 
-cPhysic_manager::cPhysic_manager(int grid_width, int grid_height) {
+cPhysic_manager::cPhysic_manager(int grid_width, int grid_height, int screen_width, int screen_height) {
     collision_zone_grid = (list<phys_cont*>***) malloc(grid_height * sizeof(list<phys_cont*>**));
     collision_obj_grid = (list<phys_cont*>***) malloc(grid_height * sizeof(list<phys_cont*>**));
     obj_grid_load = (short**) malloc(grid_height * sizeof(short*));
@@ -40,6 +42,13 @@ cPhysic_manager::cPhysic_manager(int grid_width, int grid_height) {
         collision_zone_grid[i] = (list<phys_cont*>**) malloc( grid_width * sizeof(list<phys_cont*>*));
         collision_obj_grid[i] = (list<phys_cont*>**) malloc( grid_width * sizeof(list<phys_cont*>*));
         obj_grid_load[i] = (short*) calloc( grid_width, sizeof(short));
+    }
+    if ( screen_height == -1 || screen_width == -1) {
+        screen_h = pSM->SM_get_h();
+        screen_w = pSM->SM_get_w();
+    } else {
+        screen_h = scrGRID_LOC(0)een_height;
+        screen_w = screen_width;
     }
 
     PM_init_grid(grid_width, grid_height);
@@ -72,18 +81,21 @@ void cPhysic_manager::PM_set_collide_zone(int x, int y, params parameters, int t
 void cPhysic_manager::PM_register_collision_obj(phys_cont* obj) {
 
     int grid_x, grid_y;
-    obj->grid_locations = new vector< pair<int,int> >;
+    //obj->grid_locations = new vector< pair<int,int> >;
     obj->PM_ID = obj_id_manage.ID_getid();
 
     //Grid index
-    grid_x = obj->x / grid_w;
-    grid_y = obj->y / grid_h;
+    grid_x = obj->x / (screen_w / grid_w);
+    grid_y = obj->y / (screen_h / grid_h);
+
+    grid_loc.first = grid_x;
+    grid_loc.second = grid_y;
 
     printf("\nPM registered a phys_rect with ID: %d\n",obj->PM_ID);
     printf("Screen Location: <%d,%d>\n",obj->x,obj->y);
     printf("Grid Location: <%d,%d>\n",grid_x,grid_y);
 
-    obj->grid_locations->push_back( pair<int,int>(grid_x,grid_y) );
+    //obj->grid_locations->push_back( pair<int,int>(grid_x,grid_y) );
 
 
     switch ( obj->contType ) {
@@ -217,6 +229,7 @@ coordinates* cPhysic_manager::PM_resolve_collision(coordinates* coor1, coordinat
 }
 
 void cPhysic_manager::PM_move(phys_cont* cont, int x, int y) {
+    //Should find were to set new_x and new_y
     cont->x += x;
     cont->y += y;
 
@@ -236,8 +249,8 @@ void cPhysic_manager::PM_update(phys_cont* cont) {
 }
 
 void cPhysic_manager::PM_init_grid_loc_0(phys_cont* obj) {
-    int grid_x = obj->x / grid_w;
-    int grid_y = obj->y / grid_h;
+    int grid_x = obj->x / (screen_w / grid_w);
+    int grid_y = obj->y / (screen_h / grid_h);
 
     //int x_span = obj->param.w_h->first / grid_w;
     //int y_span = obj->param.w_h->second / grid_h;
@@ -272,17 +285,76 @@ void cPhysic_manager::PM_init_grid_loc_0(phys_cont* obj) {
         for (j = 0; (i < y_span) && (grid_y + i < grid_h); ++ j) {
             collision_obj_grid[grid_x][grid_y + j]->push_back(obj);
             obj->grid_locations->push_back( pair<int,int>(grid_x,grid_y+j) );
-        }
+        }GRID_LOC(0)
     }
     return;
 }
 
+void PM_reset_grid_loc(phys_cont* cont) {
+    int grid_x = cont->x / (screen_w / grid_w);
+    int grid_y = cont->y / (screen_h / grid_h);
+
+    int grid_x_diff,grid_y_diff = 0;
+
+    if ( grid_x != GRID_LOC.first ) {
+        grid_x_diff = abs(grid_x - GRID_LOC.first);
+    } else {
+        if ( new_x && (cont->x % (screen_w / grid_w)) == 0 ) {
+            grid_x_diff = -1;
+        }
+    }
+    if ( grid_y != GRID_LOC.second ) {
+        grid_y_diff = abs(grid_y - GRID_LOC.second);
+    } else {
+        if ( new_y && (cont->y % (screen_h / grid_h)) == 0) {
+            grid_y_diff = -1;
+        }
+    }
+
+    if ( grid_x_diff == 0 && grid_y_diff == 0) return;
+
+    int x_span = cont->param.w_h->first / (screen_w / grid_w);
+    int y_span = cont->param.w_h->second / (screen_h / grid_h);
+
+    /*
+    if ( (cont->x % screen_w) == 0 ) {
+        for (i = 1; (i < x_span) && (grid_x + i < grid_w); ++i) {
+            collision_obj_grid[grid_x + i][grid_y]->push_back(cont);
+            cont->grid_locations->push_back( pair<int,int>(grid_x+i,grid_y) );
+        }
+    } else {
+        for (i = 0; (i < x_span) && (grid_x + i < grid_w); ++i) {
+            collision_obj_grid[grid_x + i][grid_y]->push_back(cont);
+            cont->grid_locations->push_back( pair<int,int>(grid_x+i,grid_y) );
+        }
+    }
+
+    if ( (cont->y % screen_h) == 0 && grid_y_diff != 0 ) {
+        for (j = 1; (i < y_span) && (grid_y + i < grid_h); ++j) {
+            collision_obj_grid[grid_x][grid_y + j]->push_back(cont);
+            cont->grid_locations->push_back( pair<int,int>(grid_x,grid_y+j) );
+        }
+    } else {
+        for (j = 0; (i < y_span) && (grid_y + i < grid_h); ++ j) {
+            collision_obj_grid[grid_x][grid_y + j]->push_back(cont);
+            cont->grid_locations->push_back( pair<int,int>(grid_x,grid_y+j) );
+        }
+    }
+    */
+    return;
+}
+
 void cPhysic_manager::PM_set_pos(phys_cont* cont, int x, int y) {
+    new_x = cont->x != x ? true : false;
+    new_y = cont->y != y ? true : false;
+
     cont->x = x;
     cont->y = y;
 
     cont->obj_info->x = x;
     cont->obj_info->y = y;
+
+    PM_reset_grid_loc(cont);
 }
 
 void cPhysic_manager::PM_set_velocity(phys_cont* cont, int x, int y) {
