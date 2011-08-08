@@ -124,7 +124,7 @@ void cPhysic_manager::PM_check_collision(phys_cont* obj, bool shift) {
             break;
     }
     if ( shift ) {
-        printf("Moving object to <%d,%d>\n",obj->coor_buffer->first,obj->coor_buffer->second);
+        //printf("Moving object to <%d,%d>\n",obj->coor_buffer->first,obj->coor_buffer->second);
         obj->x = obj->coor_buffer->first;
         obj->y = obj->coor_buffer->second;
 
@@ -176,7 +176,8 @@ void cPhysic_manager::PM_check_rect_(phys_cont* obj) {
             }
         }
     }
-    //obj->coor_buffer = saved_collision;
+    obj->coor_buffer->first = obj->tx;
+    obj->coor_buffer->second = obj->ty;
     return;
 }
 
@@ -199,7 +200,9 @@ void cPhysic_manager::PM_check_rect_rect(phys_cont* obj1, phys_cont* obj2) {
                 return;
         }
     }
-    obj1->coor_buffer = NULL;
+    //obj1->coor_buffer = NULL;
+    obj1->coor_buffer->first = obj1->tx;
+    obj1->coor_buffer->second = obj1->ty;
     return;
 }
 

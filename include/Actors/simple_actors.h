@@ -13,7 +13,7 @@ class Dot: public cActor {
         phys_cont* p_container;
 
         int move_speed;
-        //int pressed_key[2];
+        int pressed_key[2];
     public:
         Dot(int _typeID);
 
