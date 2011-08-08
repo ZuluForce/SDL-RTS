@@ -144,7 +144,6 @@ void Dot::check_events(event_vector** events, int* load, Uint8* key_states) {
                 break;
         }
     }
-
     /* Make sure all collisions are checked and the obj is moved */
     pPM->PM_update(p_container);
     return;
@@ -168,7 +167,7 @@ void Dot::set_pos(int x, int y) {
     curr_info->x = x;
     curr_info->y = y;
 
-    pPM->PM_move(p_container,x,y);
+    pPM->PM_set_pos(p_container,x,y);
     return;
 }
 

@@ -56,8 +56,9 @@ typedef struct phys_cont {
         //Used to determine what direction an object is being moved
         //so collision responses can be handled correctly
         coordinates* move_direction;
+        int x_span,y_span;
 
-        //vector< coordinates >* grid_locations;
+        vector< coordinates >* grid_locations;
         coordinates grid_loc;
 
         coordinates* coor_buffer;
@@ -96,6 +97,9 @@ class cPhysic_manager{
         void PM_init_grid(int,int);
         void PM_init_grid_loc_0(phys_cont*);
         void PM_reset_grid_loc(phys_cont*);
+
+        void PM_remove_from_grid(phys_cont*, int, int);
+        void PM_add_to_grid(phys_cont*,int,int);
 
         //Called with the type of the first object
         /* Knowing the type of the first object, they call
