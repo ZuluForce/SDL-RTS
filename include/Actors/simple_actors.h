@@ -14,6 +14,7 @@ class Dot: public cActor {
 
         int move_speed;
         int pressed_key[2];
+        bool wasd;
     public:
         Dot(int _typeID);
 
@@ -25,6 +26,7 @@ class Dot: public cActor {
         bool set_image(char* filename);
         bool set_image(SDL_Surface* image);
         void set_pos(int x, int y);
+        void change_control();
         vector<Uint8>* event_binds();
         SDL_Rect* get_clip();
 };

@@ -123,6 +123,7 @@ int main(int argc, char** argv) {
     while( true && !quit_threads) {
         EM.ED_manage_events(250);
         AM.AM_update();
+        //PM.PM_print_grid();
         std_sleep(2);
     }
 

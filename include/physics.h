@@ -59,13 +59,19 @@ typedef struct phys_cont {
         int x_span,y_span;
 
         vector< coordinates >* grid_locations;
-        coordinates grid_loc;
 
         coordinates* coor_buffer;
 
         short gravity;
 
 } phys_cont;
+
+struct collision_zone {
+    int x,y;
+    int contType;
+    int PM_ID;
+    params param;
+};
 
 typedef class Particle {
     private:
@@ -86,7 +92,7 @@ class cPhysic_manager{
         int grid_w, grid_h;
         int screen_w, screen_h;
 
-        list<phys_cont*>*** collision_zone_grid;
+        list<collision_zone*>*** collision_zone_grid;
         list<phys_cont*>*** collision_obj_grid;
 
         //short** obj_grid_load;
@@ -110,6 +116,7 @@ class cPhysic_manager{
 
         //These modify the coor_buffer inside the phys_container
         void PM_check_rect_rect(phys_cont*,phys_cont*);
+        void PM_check_rect_zone(phys_cont*,collision_zone*);
         //void PM_check_rect_circle(phys_cont*,phys_cont*);
         //void PM_check_circle_circle(phys_cont*,phys_cont*);
 
@@ -120,7 +127,7 @@ class cPhysic_manager{
                         int screen_width = -1, int screen_height = -1);
         /* Sets up a collision zone so any colision objects cannot pass through it */
         /* If nothing is passed for level it will collide with objects across all levels */
-        void PM_set_collide_zone(int x, int y, params parameters, int type = 0, int level = -1);
+        void PM_set_collide_zone(int x, int y, params* _param, int _type = 0);
         void PM_register_collision_obj(phys_cont*);
         void PM_check_collision(phys_cont*,bool);
         /* Use this for objects with discrete movements (non-continual).
@@ -135,6 +142,11 @@ class cPhysic_manager{
         void PM_set_x_velocity(phys_cont* cont, int x);
         void PM_set_y_velocity(phys_cont* cont, int y);
         void PM_set_accel(phys_cont*, int accel);
+
+        int PM_correct_x(int x);
+        int PM_correct_y(int y);
+
+        void PM_print_grid();
 };
 
 #endif // PHYSICS_H_INCLUDED

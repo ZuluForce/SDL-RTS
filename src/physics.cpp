@@ -1,7 +1,7 @@
 #include "physics.h"
 
 #define VECTOR_GRID_INIT_SIZE 10
-#define GRID_LOC cont->grid_loc
+#define GRID_LOC(x) cont->grid_locations->at(x)
 
 extern cActor_manager* pAM;
 extern cScreen_manager* pSM;
@@ -35,12 +35,12 @@ void phys_cont::init(int _contType, int _level, int _actorType) {
 }
 
 cPhysic_manager::cPhysic_manager(int grid_width, int grid_height, int screen_width, int screen_height) {
-    collision_zone_grid = (list<phys_cont*>***) malloc(grid_height * sizeof(list<phys_cont*>**));
+    collision_zone_grid = (list<collision_zone*>***) malloc(grid_height * sizeof(list<collision_zone*>**));
     collision_obj_grid = (list<phys_cont*>***) malloc(grid_height * sizeof(list<phys_cont*>**));
     obj_grid_load = (short**) malloc(grid_height * sizeof(short*));
 
     for (int i = 0; i < grid_height; ++i) {
-        collision_zone_grid[i] = (list<phys_cont*>**) malloc( grid_width * sizeof(list<phys_cont*>*));
+        collision_zone_grid[i] = (list<collision_zone*>**) malloc( grid_width * sizeof(list<collision_zone*>*));
         collision_obj_grid[i] = (list<phys_cont*>**) malloc( grid_width * sizeof(list<phys_cont*>*));
         obj_grid_load[i] = (short*) calloc( grid_width, sizeof(short));
     }
@@ -64,33 +64,36 @@ void cPhysic_manager::PM_init_grid(int width, int height) {
     for (int i = 0; i < width; ++i) {
         for (int j = 0; j < height; ++j) {
             collision_obj_grid[i][j] = new list<phys_cont*>;
-            collision_zone_grid[i][j] = new list<phys_cont*>;
+            collision_zone_grid[i][j] = new list<collision_zone*>;
         }
     }
 }
 
-void cPhysic_manager::PM_set_collide_zone(int x, int y, params parameters, int type, int level) {
-    phys_cont* new_cont = new phys_cont;
-    new_cont->x = x;
-    new_cont->y = y;
-    new_cont->param = parameters;
-    new_cont->level = level;
-    new_cont->contType = type;
-    collision_zone_grid[x / grid_w][y / grid_h]->push_back(new_cont);
+void cPhysic_manager::PM_set_collide_zone(int x, int y, params* _params, int _type) {
+    collision_zone* new_zone = new collision_zone;
+    new_zone->x = x;
+    new_zone->y = y;
+    new_zone->param = *_params;
+    new_zone->contType = _type;
+    new_zone->PM_ID = obj_id_manage.ID_getid();
+    /* Incase coordinates are off the screen */
+    x = PM_correct_x(x);
+    y = PM_correct_y(y);
+    collision_zone_grid[x / (screen_w / grid_w)][y / (screen_h / grid_h)]->push_back(new_zone);
 }
 
 void cPhysic_manager::PM_register_collision_obj(phys_cont* obj) {
 
     int grid_x, grid_y;
-    //obj->grid_locations = new vector< pair<int,int> >;
     obj->PM_ID = obj_id_manage.ID_getid();
 
     //Grid index
-    grid_x = obj->x / (screen_w / grid_w);
-    grid_y = obj->y / (screen_h / grid_h);
+    grid_x = PM_correct_x(obj->x) / (screen_w / grid_w);
+    grid_y = PM_correct_y(obj->y) / (screen_h / grid_h);
 
-    obj->grid_loc.first = grid_x;
-    obj->grid_loc.second = grid_y;
+    //obj->grid_loc.first = grid_x;
+    //obj->grid_loc.second = grid_y;
+    obj->grid_locations->push_back(coordinates(grid_x,grid_y));
 
     printf("\nPM registered a phys_rect with ID: %d\n",obj->PM_ID);
     printf("Screen Location: <%d,%d>\n",obj->x,obj->y);
@@ -130,6 +133,7 @@ void cPhysic_manager::PM_check_collision(phys_cont* obj, bool shift) {
 
         obj->obj_info->x = obj->coor_buffer->first;
         obj->obj_info->y = obj->coor_buffer->second;
+        PM_reset_grid_loc(obj);
     }
     return;
 }
@@ -141,12 +145,17 @@ void cPhysic_manager::PM_check_rect_(phys_cont* obj) {
     vector< pair<int,int> >::iterator coor_it;
     vector< pair<int,int> >* grid_vector = obj->grid_locations;
     list< phys_cont*>::iterator actor_it;
+    list< collision_zone*>::iterator zone_it;
+
     list< phys_cont*>* cont_list;
+    list< collision_zone*>* zone_list;
+
     coordinates index;
 
     for (coor_it = grid_vector->begin(); coor_it != grid_vector->end(); ++coor_it) {
         index = *coor_it;
         cont_list = collision_obj_grid[index.first][index.second];
+        printf("There are %d containers in grid <%d,%d>\n",cont_list->size(),index.first,index.second);
         for (actor_it = cont_list->begin(); actor_it != cont_list->end(); ++cont_list) {
             switch ( (*actor_it)->contType ) {
                 case 0:
@@ -160,13 +169,13 @@ void cPhysic_manager::PM_check_rect_(phys_cont* obj) {
             }
         }
 
-        cont_list = collision_zone_grid[index.first][index.second];
-
+        zone_list = collision_zone_grid[index.first][index.second];
+        printf("There are %d zones in grid <%d,%d>\n",zone_list->size(),index.first,index.second);
         //Checking the collision "zones"
-        for (actor_it = cont_list->begin(); actor_it != cont_list->end(); ++cont_list) {
-            switch ( (*actor_it)->contType ) {
+        for (zone_it = zone_list->begin(); zone_it != zone_list->end(); ++zone_list) {
+            switch ( (*zone_it)->contType ) {
                 case 0:
-                    PM_check_rect_rect(obj, *actor_it);
+                    PM_check_rect_zone(obj, *zone_it);
                     //saved_collision = PM_resolve_collision(saved_collision, temp_collision);
                     break;
                 case 1:
@@ -197,12 +206,33 @@ void cPhysic_manager::PM_check_rect_rect(phys_cont* obj1, phys_cont* obj2) {
                 obj1->coor_buffer->first = obj2->x - obj1->tx;
                 obj2->coor_buffer->second = obj2->y - obj1->ty;
                 obj1->x_vel = obj1->y_vel = obj1->x_accel = obj1->y_accel = 0;
+                printf("There is a collision between rects\n");
                 return;
         }
     }
     //obj1->coor_buffer = NULL;
     obj1->coor_buffer->first = obj1->tx;
     obj1->coor_buffer->second = obj1->ty;
+    return;
+}
+
+void cPhysic_manager::PM_check_rect_zone(phys_cont* cont, collision_zone* zone) {
+    if ( ((cont->tx <= zone->x) && (zone->x <= (cont->tx + cont->param.w_h->first))) ||
+        ((zone->x <= cont->tx) && (cont->tx <= (zone->x + zone->param.w_h->first))) ) {
+
+        //If so, check if any of the y-coordinates overlap
+        if ( ((cont->ty <= zone->y) && (zone->y <= (cont->ty + cont->param.w_h->second))) ||
+            ((zone->y <= cont->ty) && (cont->ty <= (zone->y + zone->param.w_h->second))) ) {
+                cont->coor_buffer->first = zone->x - cont->tx;
+                cont->coor_buffer->second = zone->y - cont->ty;
+                cont->x_vel = cont->y_vel = cont->x_accel = cont->y_accel = 0;
+                printf("There is a collsion between zone(%d) and obj(%d)\n",zone->PM_ID, cont->PM_ID);
+                return;
+        }
+    }
+
+    cont->coor_buffer->first = cont->tx;
+    cont->coor_buffer->second = cont->ty;
     return;
 }
 
@@ -247,89 +277,50 @@ void cPhysic_manager::PM_init_grid_loc_0(phys_cont* cont) {
 }
 
 void cPhysic_manager::PM_reset_grid_loc(phys_cont* cont) {
+    int i,j;
     int grid_x = cont->x / (screen_w / grid_w);
     int grid_y = cont->y / (screen_h / grid_h);
+    int x_span,y_span;
+    //Hasn't moved
+    //if (grid_x == cont->grid_loc.first &&
+    //    grid_y == cont->grid_loc.second) return;
 
-    //Check if cont has gone off the screen
-    grid_x = grid_x < 0 ? 0 : grid_x;
-    grid_y = grid_y < 0 ? 0 : grid_y;
-    grid_x = grid_x >= grid_w ? grid_w : grid_x;
-    grid_y = grid_y >= grid_h ? grid_h : grid_y;
-
-    int grid_x_diff,grid_y_diff;
-    grid_x_diff = grid_y_diff = 0;
-    //Set to 1 when cont lands right on the x/y boundary on the grid
-    int x_boundary,y_boundary;
-    x_boundary = y_boundary = 0;
-
-    if ( grid_x != GRID_LOC.first ) {
-        if ( (cont->x % (screen_w / grid_w)) == 0) {
-            grid_x_diff = (GRID_LOC.first - grid_x);
-            //grid_x_diff += grid_x_diff < 0 ? 0 : 1;
-            x_boundary = grid_x_diff < 0 ? 0 : 1;
-        }
-        grid_x_diff = GRID_LOC.first - grid_x;
-    } else {
-        if ( cont->new_x && (cont->x % (screen_w / grid_w)) == 0 ) {
-            grid_x_diff = 1;
+    if ( cont->grid_locations->size() > 0) {
+        for (i = 0; i < cont->grid_locations->size(); ++i) {
+            //printf("Removing cont from <%d,%d>\n",coor_vec->at(i).first,coor_vec->at(i).second);
+            PM_remove_from_grid(cont, GRID_LOC(i).first, GRID_LOC(i).second);
         }
     }
 
-    if ( grid_y != GRID_LOC.second ) {
-        if ( (cont->y % (screen_h / grid_h)) == 0) {
-        grid_y_diff = (GRID_LOC.second - grid_y);
-        //grid_y_diff += grid_y_diff < 0 ? 0 : 1;
-        y_boundary = grid_y_diff < 0 ? 0 : 1;
-        }
-        grid_y_diff = GRID_LOC.second - grid_y;
-    } else {
-        if ( cont->new_y && (cont->y % (screen_h / grid_h)) == 0) {
-            grid_y_diff = 1;
-        }
+    switch ( cont->contType) {
+        case 0:
+            x_span = (cont->param.w_h->first + (cont->x % (screen_w / grid_w))) / (screen_w / grid_w);
+            y_span = (cont->param.w_h->second + (cont->y % (screen_h / grid_h))) / (screen_h / grid_h);
+            break;
+        default:
+            x_span = 0;
+            y_span = 0;
+            break;
     }
 
-    if ( grid_x_diff == 0 && grid_y_diff == 0) return;
-
-    int x_span = cont->param.w_h->first / (screen_w / grid_w);
-    int y_span = cont->param.w_h->second / (screen_h / grid_h);
-
-    /* Remove "cont" from old grid positions */
-    int i,j = 0;
-    for (i = 0; i < grid_x_diff + x_boundary; ++i) {
-        for (j = 0; j < y_span; ++j) {
-            //Removes all no longer occupied columns
-            PM_remove_from_grid(cont, grid_x + x_span + i, grid_y + j);
-        }
-    }
-
-    for (j = 0; j < grid_y_diff + y_boundary; ++j) {
-        for (i = 0; i < x_span; ++i) { //Might need to start at int i = 1;
-            //Removes all no longer occupied rows
-            PM_remove_from_grid(cont, grid_x + i, grid_y + y_span + j);
-        }
-    }
     cont->grid_locations->clear();
-    /* Adding "cont" to new grid positions */
-    for (i = 0; i < grid_x_diff; ++i) {
-        for (j = 0; j < y_span; ++j) {
-            PM_add_to_grid(cont, grid_x + i, grid_y + j);
-            cont->grid_locations->push_back( coordinates(grid_x + i, grid_y + j) );
+
+    for (i = grid_x; i <= grid_x + x_span; ++i) {
+        for (j = grid_y; j <= grid_y + y_span; ++j) {
+            cont->grid_locations->push_back(coordinates(i,j));
+            //printf("Grid_location size (after add) = %d\n",cont->grid_locations->size());
+            PM_add_to_grid(cont,i,j);
+            PM_print_grid();
         }
     }
-
-    for (j = 0; i < grid_y_diff; ++ j) {
-        for (i = 1; i < x_span; ++i) {
-            PM_add_to_grid(cont, grid_x + i, grid_y + j);
-            cont->grid_locations->push_back( coordinates(grid_x + i, grid_y + j) );
-        }
-    }
-
     return;
 }
 
 void cPhysic_manager::PM_set_pos(phys_cont* cont, int x, int y) {
     cont->new_x = cont->x != x ? true : false;
     cont->new_y = cont->y != y ? true : false;
+
+    if (!cont->new_x && !cont->new_y) return;
 
     cont->x = x;
     cont->y = y;
@@ -372,4 +363,35 @@ void cPhysic_manager::PM_add_to_grid(phys_cont* cont, int x, int y) {
         }
     collision_obj_grid[x][y]->push_back(cont);
     return;
+}
+
+int cPhysic_manager::PM_correct_x(int x) {
+    x = x < 0 ? 0 : x;
+    return x > screen_w ? screen_w : x;
+}
+
+int cPhysic_manager::PM_correct_y(int y) {
+    y = y < 0 ? 0 : y;
+    return y > screen_h ? screen_h : y;
+}
+
+void cPhysic_manager::PM_print_grid() {
+    int i,j;
+    for (j = 0; j < grid_h; ++j) {
+        //Print top of row
+        printf("---");
+        for (i = 1; i < grid_w; ++i) {
+            printf("--");
+        }
+        printf("\n");
+        for (i = 0; i < grid_w; ++i) {
+            printf("|%d",collision_obj_grid[i][j]->size());
+        }
+        printf("|\n");
+    }
+    printf("---");
+    for (int i = 1; i < grid_w; ++i) {
+        printf("--");
+    }
+    printf("\n\n");
 }

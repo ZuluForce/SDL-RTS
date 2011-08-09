@@ -6,6 +6,7 @@ extern cActor_manager* pAM;
 Dot::Dot(int _typeID) {
     typeID = _typeID;
     update = true;
+    wasd = false;
 
     //sDisplay_info curr_info;
     curr_info = new sDisplay_info;
@@ -36,104 +37,139 @@ bool Dot::check() {
 }
 
 void Dot::check_events(event_vector** events, int* load, Uint8* key_states) {
-    /* Check if the Dot is already moving */
-    /*
-    for (int i = 0; i < 2; ++i) {
-        switch ( pressed_key[i] ) {
-            case SDLK_UP:
-                if ( key_states[SDLK_UP] ) {
-                    pPM->PM_set_y_velocity(p_container,0);
-                    update = true;
-                    break;
-                }
-            case SDLK_DOWN:
-                if ( key_states[SDLK_DOWN] ) {
-                    pPM->PM_set_y_velocity(p_container,0);
-                    update = true;
-                    break;
-                }
-            case SDLK_LEFT:
-                if ( key_states[SDLK_LEFT] ) {
-                    pPM->PM_set_x_velocity(p_container,0);
-                    update = true;
-                    break;
-                }
-            case SDLK_RIGHT:
-                if ( key_states[SDLK_RIGHT] ) {
-                    pPM->PM_set_x_velocity(p_container,0);
-                    update = true;
-                    break;
-                }
-                default:
-                    break;
-        }
-    } */
-
     event_vector* key_events = events[SDL_KEYDOWN];
     int i;
     SDL_Event key_event;
-    for (i = 0; i < load[SDL_KEYDOWN]; ++i) {
-        key_event = key_events->at(i);
-        switch( key_event.key.keysym.sym) {
-            case SDLK_UP:
-                pPM->PM_set_y_velocity(p_container,-move_speed);
-                update = true;
-                pressed_key[0] = SDLK_UP;
-                break;
-            case SDLK_DOWN:
-                pPM->PM_set_y_velocity(p_container,move_speed);
-                update = true;
-                pressed_key[0] = SDLK_DOWN;
-                break;
-            case SDLK_LEFT:
-                pPM->PM_set_x_velocity(p_container,-move_speed);
-                update = true;
-                pressed_key[1] = SDLK_LEFT;
-                break;
-            case SDLK_RIGHT:
-                pPM->PM_set_x_velocity(p_container,move_speed);
-                update = true;
-                pressed_key[1] = SDLK_RIGHT;
-                break;
-            default:
-                break;
-        }
-    }
 
-    key_events = events[SDL_KEYUP];
-    for (i = 0; i < load[SDL_KEYUP]; ++i) {
-        key_event = key_events->at(i);
-        switch( key_event.key.keysym.sym) {
-            case SDLK_UP:
-                if (pressed_key[0] == SDLK_UP) {
-                    pPM->PM_set_y_velocity(p_container,0);
+    if (wasd) {
+        for (i = 0; i < load[SDL_KEYDOWN]; ++i) {
+            key_event = key_events->at(i);
+            switch( key_event.key.keysym.sym) {
+                case SDLK_w:
+                    pPM->PM_set_y_velocity(p_container,-move_speed);
                     update = true;
-                    pressed_key[0] = -1;
-                }
-                break;
-            case SDLK_DOWN:
-                if (pressed_key[0] == SDLK_DOWN) {
-                    pPM->PM_set_y_velocity(p_container,0);
+                    pressed_key[0] = SDLK_UP;
+                    break;
+                case SDLK_s:
+                    pPM->PM_set_y_velocity(p_container,move_speed);
                     update = true;
-                    pressed_key[0] = -1;
-                }
-                break;
-            case SDLK_LEFT:
-                if (pressed_key[1] == SDLK_LEFT) {
-                    pPM->PM_set_x_velocity(p_container,0);
+                    pressed_key[0] = SDLK_DOWN;
+                    break;
+                case SDLK_a:
+                    pPM->PM_set_x_velocity(p_container,-move_speed);
                     update = true;
-                    pressed_key[1] = -1;
-                }
-                break;
-            case SDLK_RIGHT:
-                if (pressed_key[1] == SDLK_RIGHT) {
-                    pPM->PM_set_x_velocity(p_container,0);
+                    pressed_key[1] = SDLK_LEFT;
+                    break;
+                case SDLK_d:
+                    pPM->PM_set_x_velocity(p_container,move_speed);
                     update = true;
-                    pressed_key[1] = -1;
-                }
-                break;
-            default:
-                break;
+                    pressed_key[1] = SDLK_RIGHT;
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        key_events = events[SDL_KEYUP];
+        for (i = 0; i < load[SDL_KEYUP]; ++i) {
+            key_event = key_events->at(i);
+            switch( key_event.key.keysym.sym) {
+                case SDLK_w:
+                    if (pressed_key[0] == SDLK_UP) {
+                        pPM->PM_set_y_velocity(p_container,0);
+                        update = true;
+                        pressed_key[0] = -1;
+                    }
+                    break;
+                case SDLK_s:
+                    if (pressed_key[0] == SDLK_DOWN) {
+                        pPM->PM_set_y_velocity(p_container,0);
+                        update = true;
+                        pressed_key[0] = -1;
+                    }
+                    break;
+                case SDLK_a:
+                    if (pressed_key[1] == SDLK_LEFT) {
+                        pPM->PM_set_x_velocity(p_container,0);
+                        update = true;
+                        pressed_key[1] = -1;
+                    }
+                    break;
+                case SDLK_d:
+                    if (pressed_key[1] == SDLK_RIGHT) {
+                        pPM->PM_set_x_velocity(p_container,0);
+                        update = true;
+                        pressed_key[1] = -1;
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+    } else {
+        for (i = 0; i < load[SDL_KEYDOWN]; ++i) {
+            key_event = key_events->at(i);
+            switch( key_event.key.keysym.sym) {
+                case SDLK_UP:
+                    pPM->PM_set_y_velocity(p_container,-move_speed);
+                    update = true;
+                    pressed_key[0] = SDLK_UP;
+                    break;
+                case SDLK_DOWN:
+                    pPM->PM_set_y_velocity(p_container,move_speed);
+                    update = true;
+                    pressed_key[0] = SDLK_DOWN;
+                    break;
+                case SDLK_LEFT:
+                    pPM->PM_set_x_velocity(p_container,-move_speed);
+                    update = true;
+                    pressed_key[1] = SDLK_LEFT;
+                    break;
+                case SDLK_RIGHT:
+                    pPM->PM_set_x_velocity(p_container,move_speed);
+                    update = true;
+                    pressed_key[1] = SDLK_RIGHT;
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        key_events = events[SDL_KEYUP];
+        for (i = 0; i < load[SDL_KEYUP]; ++i) {
+            key_event = key_events->at(i);
+            switch( key_event.key.keysym.sym) {
+                case SDLK_UP:
+                    if (pressed_key[0] == SDLK_UP) {
+                        pPM->PM_set_y_velocity(p_container,0);
+                        update = true;
+                        pressed_key[0] = -1;
+                    }
+                    break;
+                case SDLK_DOWN:
+                    if (pressed_key[0] == SDLK_DOWN) {
+                        pPM->PM_set_y_velocity(p_container,0);
+                        update = true;
+                        pressed_key[0] = -1;
+                    }
+                    break;
+                case SDLK_LEFT:
+                    if (pressed_key[1] == SDLK_LEFT) {
+                        pPM->PM_set_x_velocity(p_container,0);
+                        update = true;
+                        pressed_key[1] = -1;
+                    }
+                    break;
+                case SDLK_RIGHT:
+                    if (pressed_key[1] == SDLK_RIGHT) {
+                        pPM->PM_set_x_velocity(p_container,0);
+                        update = true;
+                        pressed_key[1] = -1;
+                    }
+                    break;
+                default:
+                    break;
+            }
         }
     }
     /* Make sure all collisions are checked and the obj is moved */
@@ -180,4 +216,9 @@ sDisplay_info* Dot::get_display() {
 
 SDL_Rect* Dot::get_clip() {
     return curr_info->clip;
+}
+
+void Dot::change_control() {
+    wasd = wasd ? false : true;
+    return;
 }
