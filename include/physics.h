@@ -62,6 +62,10 @@ typedef struct phys_cont {
 
         coordinates* coor_buffer;
 
+        //coll_buffer[0] is x_bounds on a collision
+        //coll_buffer[1] is y_bounds on a collision
+        coordinates coll_buffer[2];
+
         short gravity;
 
 } phys_cont;
@@ -139,6 +143,7 @@ class cPhysic_manager{
         void PM_set_x_velocity(phys_cont* cont, int x);
         void PM_set_y_velocity(phys_cont* cont, int y);
         void PM_set_accel(phys_cont*, int accel);
+        void PM_set_gravity(phys_cont*,short);
 
         int PM_correct_x(int x);
         int PM_correct_y(int y);

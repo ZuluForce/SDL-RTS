@@ -136,6 +136,9 @@ void cPhysic_manager::PM_check_collision(phys_cont* obj, bool shift) {
 }
 
 void cPhysic_manager::PM_check_rect_(phys_cont* obj) {
+    obj->coor_buffer->first = obj->tx;
+    obj->coor_buffer->second = obj->ty;
+
     vector< pair<int,int> >::iterator coor_it;
     vector< pair<int,int> >* grid_vector = obj->grid_locations;
     list< phys_cont*>::iterator actor_it;
@@ -177,8 +180,6 @@ void cPhysic_manager::PM_check_rect_(phys_cont* obj) {
             }
         }
     }
-    obj->coor_buffer->first = obj->tx;
-    obj->coor_buffer->second = obj->ty;
     return;
 }
 
@@ -210,22 +211,64 @@ void cPhysic_manager::PM_check_rect_rect(phys_cont* obj1, phys_cont* obj2) {
 }
 
 void cPhysic_manager::PM_check_rect_zone(phys_cont* cont, collision_zone* zone) {
-    if ( ((cont->tx <= zone->x) && (zone->x <= (cont->tx + cont->param.w_h->first))) ||
-        ((zone->x <= cont->tx) && (cont->tx <= (zone->x + zone->param.w_h->first))) ) {
+    bool x_coll,y_coll;
+    //Moving Right
+    if ( cont->tx > cont->x ) {
+        cont->coll_buffer[0].first = cont->x;
+        cont->coll_buffer[0].second = cont->tx + cont->param.w_h->first;
 
-        //If so, check if any of the y-coordinates overlap
-        if ( ((cont->ty <= zone->y) && (zone->y <= (cont->ty + cont->param.w_h->second))) ||
-            ((zone->y <= cont->ty) && (cont->ty <= (zone->y + zone->param.w_h->second))) ) {
-                cont->coor_buffer->first = zone->x - cont->tx;
-                cont->coor_buffer->second = zone->y - cont->ty;
-                cont->x_vel = cont->y_vel = cont->x_accel = cont->y_accel = 0;
-                //printf("There is a collsion between zone(%d) and obj(%d)\n",zone->PM_ID, cont->PM_ID);
-                return;
+        if ( cont->coll_buffer[0].first <= zone->x &&
+            zone->x < cont->coll_buffer[0].second) {
+            x_coll = true;
+            cont->coll_buffer[0].first = zone->x;
+        } else {
+            x_coll = false;
+            cont->coll_buffer[0].first = cont->coll_buffer[0].second;
+        }
+    } else {
+        cont->coll_buffer[0].first = cont->x + cont->param.w_h->first;
+        cont->coll_buffer[0].second = cont->tx;
+
+        if ( cont->coll_buffer[0].first < (zone->x + zone->param.w_h->first) &&
+            (zone->x + zone->param.w_h->first) <= cont->coll_buffer[0].second) {
+            x_coll = true;
+            cont->coll_buffer[0].first = zone->x + zone->param.w_h->first;
+        } else {
+            x_coll = false;
         }
     }
 
-    cont->coor_buffer->first = cont->tx;
-    cont->coor_buffer->second = cont->ty;
+    //Moving Down
+    if ( cont->ty > cont-> y ) {
+        cont->coll_buffer[1].first = cont->y;
+        cont->coll_buffer[1].second = cont->ty + cont->param.w_h->second;
+
+        if ( cont->param.w_h->first <= zone->y &&
+            zone->y < cont->param.w_h->second) {
+            y_coll = true;
+            cont->coll_buffer[1].first = zone->y;
+        } else {
+            y_coll = false;
+            cont->coll_buffer[1].first = cont->coll_buffer[1].second;
+        }
+    } else {
+        cont->coll_buffer[1].first = cont->y + cont->param.w_h->second;
+        cont->coll_buffer[1].second = cont->ty;
+
+        if ( cont->coll_buffer[1].second < (zone->y + cont->param.w_h->second) &&
+            (zone->y + cont->param.w_h->second ) <= cont->coll_buffer[1].first ) {
+            y_coll = true;
+            cont->coll_buffer[1].first = zone->y + cont->param.w_h->second;
+        } else {
+            y_coll = false;
+            /* Leave coll_buffer as is */
+        }
+    }
+    /* In the case of a collision, the collision x-coordinate
+       is saved in cont->coll_buffer[0].first and the
+       y-coordinate is saved in cont->coll_buffer[1].first */
+    cont->coor_buffer->first = cont->coll_buffer[0].first;
+    cont->coor_buffer->second = cont->coll_buffer[1].first;
     return;
 }
 
@@ -271,8 +314,8 @@ void cPhysic_manager::PM_init_grid_loc_0(phys_cont* cont) {
 
 void cPhysic_manager::PM_reset_grid_loc(phys_cont* cont) {
     int i,j;
-    int grid_x = cont->x / (screen_w / grid_w);
-    int grid_y = cont->y / (screen_h / grid_h);
+    int grid_x = PM_correct_x(cont->x) / (screen_w / grid_w);
+    int grid_y = PM_correct_y(cont->y) / (screen_h / grid_h);
     int x_span,y_span;
     //Hasn't moved
     //if (grid_x == cont->grid_loc.first &&
@@ -335,6 +378,11 @@ void cPhysic_manager::PM_set_x_velocity(phys_cont* cont, int x) {
 
 void cPhysic_manager::PM_set_y_velocity(phys_cont* cont, int y) {
     cont->y_vel = y;
+    return;
+}
+
+void cPhysic_manager::PM_set_gravity(phys_cont* cont, short gravity) {
+    cont->gravity = gravity;
     return;
 }
 
