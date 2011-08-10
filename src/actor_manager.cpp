@@ -74,19 +74,24 @@ void cActor_manager::AM_register(cActor* obj) {
     return;
 }
 
-void cActor_manager::AM_set_bg(SDL_Color* fill_color, SDL_Surface* fill_surf) {
+void cActor_manager::AM_set_bg(SDL_Color* fill_color) {
     if ( fill_color != NULL ) {
         back_type = 1;
         Back_Color = clr_to_uint(fill_color);
         return;
     }
-    if ( fill_surf != NULL) {
+    back_type = 0;
+    fprintf(stderr, "AM_set_bg (color) was called with no result\n");
+}
+
+void cActor_manager::AM_set_bg(SDL_Surface* fill_surf) {
+    if (fill_surf != NULL) {
         back_type = 2;
-        *Background = *fill_surf;
+        Background = fill_surf;
         return;
     }
     back_type = 0;
-    fprintf(stderr, "AM_set_bg was called with no resulting action\n");
+    fprintf(stderr, "AM_set_bg (Surface) was called with no result\n");
 }
 
 void cActor_manager::AM_blit_buffer(int x, int y, SDL_Surface* src, SDL_Rect* clip) {

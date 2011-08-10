@@ -13,7 +13,7 @@ void init_game_screen(cActor_manager* AM) {
     obj1->set_pos(0,0);
     obj1->priority = 0;
     AM->AM_register(obj1);
-    pPM->PM_print_grid();
+
 /*
     for (int i = 0; i < 100; ++i) {
         obj1 = new Dot( type_ids.ID_getid() );
@@ -33,8 +33,8 @@ void init_game_screen(cActor_manager* AM) {
 
     params left_out;
     left_out.w_h = new coordinates;
-    left_out.w_h->first = 50;
-    left_out.w_h->second = 50;
+    left_out.w_h->first = 100;
+    left_out.w_h->second = 100;
     pPM->PM_set_collide_zone(200,200,&left_out);
     return;
 }

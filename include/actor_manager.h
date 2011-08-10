@@ -106,7 +106,8 @@ class cActor_manager {
     public:
         cActor_manager(cScreen_manager*);
         void AM_register(cActor* obj);
-        void AM_set_bg(SDL_Color* fill_color = NULL, SDL_Surface* fill_surf = NULL);
+        void AM_set_bg(SDL_Color* fill_color = NULL);
+        void AM_set_bg(SDL_Surface* fill_surf = NULL);
         void AM_blit_buffer(int x, int y, SDL_Surface* src, SDL_Rect* clip = NULL);
         void AM_blit_buffer(sDisplay_info*);
         void AM_blit_buffer(Uint32);

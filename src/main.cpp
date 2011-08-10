@@ -117,8 +117,10 @@ int main(int argc, char** argv) {
 
     /* Initializes the Actor Objects */
     init_game_screen(&AM);
-    SDL_Color white = {255,255,255};
-    AM.AM_set_bg(&white);
+    SDL_Surface* background = load_image("back.bmp");
+    AM.AM_set_bg(background);
+    //SDL_Color white = {255,255,255};
+    //AM.AM_set_bg(&white);
 
     while( true && !quit_threads) {
         EM.ED_manage_events(250);

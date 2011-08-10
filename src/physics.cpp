@@ -37,12 +37,10 @@ void phys_cont::init(int _contType, int _level, int _actorType) {
 cPhysic_manager::cPhysic_manager(int grid_width, int grid_height, int screen_width, int screen_height) {
     collision_zone_grid = (list<collision_zone*>***) malloc(grid_height * sizeof(list<collision_zone*>**));
     collision_obj_grid = (list<phys_cont*>***) malloc(grid_height * sizeof(list<phys_cont*>**));
-    obj_grid_load = (short**) malloc(grid_height * sizeof(short*));
 
     for (int i = 0; i < grid_height; ++i) {
         collision_zone_grid[i] = (list<collision_zone*>**) malloc( grid_width * sizeof(list<collision_zone*>*));
         collision_obj_grid[i] = (list<phys_cont*>**) malloc( grid_width * sizeof(list<phys_cont*>*));
-        obj_grid_load[i] = (short*) calloc( grid_width, sizeof(short));
     }
     if ( screen_height == -1 || screen_width == -1) {
         screen_h = pSM->SM_get_h();
@@ -93,7 +91,7 @@ void cPhysic_manager::PM_register_collision_obj(phys_cont* obj) {
 
     //obj->grid_loc.first = grid_x;
     //obj->grid_loc.second = grid_y;
-    obj->grid_locations->push_back(coordinates(grid_x,grid_y));
+    //obj->grid_locations->push_back(coordinates(grid_x,grid_y));
 
     printf("\nPM registered a phys_rect with ID: %d\n",obj->PM_ID);
     printf("Screen Location: <%d,%d>\n",obj->x,obj->y);
@@ -105,14 +103,13 @@ void cPhysic_manager::PM_register_collision_obj(phys_cont* obj) {
     switch ( obj->contType ) {
         //Rectangle
         case 0:
-            PM_init_grid_loc_0(obj);
             PM_reset_grid_loc(obj);
             break;
         default:
             break;
     }
-
-    collision_obj_grid[grid_x][grid_y]->push_back(obj);
+    //Not needed if using PM_reset_grid_loc
+    //collision_obj_grid[grid_x][grid_y]->push_back(obj);
     return;
 }
 
@@ -139,9 +136,6 @@ void cPhysic_manager::PM_check_collision(phys_cont* obj, bool shift) {
 }
 
 void cPhysic_manager::PM_check_rect_(phys_cont* obj) {
-    coordinates* saved_collision = new coordinates(0,0);
-    coordinates* temp_collision = new coordinates(0,0);
-
     vector< pair<int,int> >::iterator coor_it;
     vector< pair<int,int> >* grid_vector = obj->grid_locations;
     list< phys_cont*>::iterator actor_it;
@@ -155,7 +149,6 @@ void cPhysic_manager::PM_check_rect_(phys_cont* obj) {
     for (coor_it = grid_vector->begin(); coor_it != grid_vector->end(); ++coor_it) {
         index = *coor_it;
         cont_list = collision_obj_grid[index.first][index.second];
-        printf("There are %d containers in grid <%d,%d>\n",cont_list->size(),index.first,index.second);
         for (actor_it = cont_list->begin(); actor_it != cont_list->end(); ++cont_list) {
             switch ( (*actor_it)->contType ) {
                 case 0:
@@ -170,7 +163,6 @@ void cPhysic_manager::PM_check_rect_(phys_cont* obj) {
         }
 
         zone_list = collision_zone_grid[index.first][index.second];
-        printf("There are %d zones in grid <%d,%d>\n",zone_list->size(),index.first,index.second);
         //Checking the collision "zones"
         for (zone_it = zone_list->begin(); zone_it != zone_list->end(); ++zone_list) {
             switch ( (*zone_it)->contType ) {
@@ -196,6 +188,7 @@ coordinates* cPhysic_manager::PM_check_circle_(phys_cont* obj) {
 }*/
 
 void cPhysic_manager::PM_check_rect_rect(phys_cont* obj1, phys_cont* obj2) {
+    /*
     //Check if any of the x-coordinates overlap
     if ( ((obj1->tx <= obj2->x) && (obj2->x <= (obj1->tx + obj1->param.w_h->first))) ||
         ((obj2->x <= obj1->tx) && (obj1->tx <= (obj2->x + obj2->param.w_h->first))) ) {
@@ -206,10 +199,10 @@ void cPhysic_manager::PM_check_rect_rect(phys_cont* obj1, phys_cont* obj2) {
                 obj1->coor_buffer->first = obj2->x - obj1->tx;
                 obj2->coor_buffer->second = obj2->y - obj1->ty;
                 obj1->x_vel = obj1->y_vel = obj1->x_accel = obj1->y_accel = 0;
-                printf("There is a collision between rects\n");
+                //printf("There is a collision between rects\n");
                 return;
         }
-    }
+    } */
     //obj1->coor_buffer = NULL;
     obj1->coor_buffer->first = obj1->tx;
     obj1->coor_buffer->second = obj1->ty;
@@ -226,7 +219,7 @@ void cPhysic_manager::PM_check_rect_zone(phys_cont* cont, collision_zone* zone) 
                 cont->coor_buffer->first = zone->x - cont->tx;
                 cont->coor_buffer->second = zone->y - cont->ty;
                 cont->x_vel = cont->y_vel = cont->x_accel = cont->y_accel = 0;
-                printf("There is a collsion between zone(%d) and obj(%d)\n",zone->PM_ID, cont->PM_ID);
+                //printf("There is a collsion between zone(%d) and obj(%d)\n",zone->PM_ID, cont->PM_ID);
                 return;
         }
     }
@@ -287,7 +280,6 @@ void cPhysic_manager::PM_reset_grid_loc(phys_cont* cont) {
 
     if ( cont->grid_locations->size() > 0) {
         for (i = 0; i < cont->grid_locations->size(); ++i) {
-            //printf("Removing cont from <%d,%d>\n",coor_vec->at(i).first,coor_vec->at(i).second);
             PM_remove_from_grid(cont, GRID_LOC(i).first, GRID_LOC(i).second);
         }
     }
@@ -308,11 +300,10 @@ void cPhysic_manager::PM_reset_grid_loc(phys_cont* cont) {
     for (i = grid_x; i <= grid_x + x_span; ++i) {
         for (j = grid_y; j <= grid_y + y_span; ++j) {
             cont->grid_locations->push_back(coordinates(i,j));
-            //printf("Grid_location size (after add) = %d\n",cont->grid_locations->size());
             PM_add_to_grid(cont,i,j);
-            PM_print_grid();
         }
     }
+    //PM_print_grid();
     return;
 }
 

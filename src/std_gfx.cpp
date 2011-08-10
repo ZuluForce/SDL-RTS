@@ -1,7 +1,7 @@
 #include "SDL/SDL.h"
 #include "std_gfx.h"
 
-SDL_Surface *load_image(const char* filename ) {
+SDL_Surface* load_image(const char* filename ) {
     printf("Loading Image: %s\n",filename);
     SDL_Surface* loadedImage = NULL;
 

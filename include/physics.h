@@ -95,9 +95,6 @@ class cPhysic_manager{
         list<collision_zone*>*** collision_zone_grid;
         list<phys_cont*>*** collision_obj_grid;
 
-        //short** obj_grid_load;
-        short** obj_grid_load;
-
         cID_dispatch obj_id_manage;
 
         void PM_init_grid(int,int);
