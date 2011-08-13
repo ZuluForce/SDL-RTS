@@ -2,6 +2,8 @@
 
 #define VECTOR_GRID_INIT_SIZE 10
 #define GRID_LOC(x) cont->grid_locations->at(x)
+#define CONT_W cont->param.w_h->first
+#define CONT_H cont->param.w_h->second
 
 extern cActor_manager* pAM;
 extern cScreen_manager* pSM;
@@ -77,7 +79,15 @@ void cPhysic_manager::PM_set_collide_zone(int x, int y, params* _params, int _ty
     /* Incase coordinates are off the screen */
     x = PM_correct_x(x);
     y = PM_correct_y(y);
+
+    new_zone->sides[0] = {x,y, x+ _params->w_h->first, y};
+    new_zone->sides[1] = {x + _params->w_h->first, y, x + _params->w_h->first, y + _params->w_h->second};
+    new_zone->sides[2] = {x, y + _params->w_h->second, x + _params->w_h->first, y + _params->w_h->second};
+    new_zone->sides[3] = (x, y, x, y + _params->w_h->second);
+
     collision_zone_grid[x / (screen_w / grid_w)][y / (screen_h / grid_h)]->push_back(new_zone);
+    printf("Collision zone created with coordinates: <%d,%d>\n",new_zone->x,new_zone->y);
+    printf("\tCollision zone w/h: <%d,%d>\n",new_zone->param.w_h->first, new_zone->param.w_h->second);
 }
 
 void cPhysic_manager::PM_register_collision_obj(phys_cont* obj) {
@@ -211,64 +221,72 @@ void cPhysic_manager::PM_check_rect_rect(phys_cont* obj1, phys_cont* obj2) {
 }
 
 void cPhysic_manager::PM_check_rect_zone(phys_cont* cont, collision_zone* zone) {
-    bool x_coll,y_coll;
-    //Moving Right
-    if ( cont->tx > cont->x ) {
-        cont->coll_buffer[0].first = cont->x;
-        cont->coll_buffer[0].second = cont->tx + cont->param.w_h->first;
-
-        if ( cont->coll_buffer[0].first <= zone->x &&
-            zone->x < cont->coll_buffer[0].second) {
-            x_coll = true;
-            cont->coll_buffer[0].first = zone->x;
-        } else {
-            x_coll = false;
-            cont->coll_buffer[0].first = cont->coll_buffer[0].second;
-        }
-    } else {
-        cont->coll_buffer[0].first = cont->x + cont->param.w_h->first;
-        cont->coll_buffer[0].second = cont->tx;
-
-        if ( cont->coll_buffer[0].first < (zone->x + zone->param.w_h->first) &&
-            (zone->x + zone->param.w_h->first) <= cont->coll_buffer[0].second) {
-            x_coll = true;
-            cont->coll_buffer[0].first = zone->x + zone->param.w_h->first;
-        } else {
-            x_coll = false;
-        }
-    }
+    line coll_line;
+    int coll_side = -1;
 
     //Moving Down
-    if ( cont->ty > cont-> y ) {
-        cont->coll_buffer[1].first = cont->y;
-        cont->coll_buffer[1].second = cont->ty + cont->param.w_h->second;
+    if ( cont->ty > cont->y) {
+        //Moving Down-Right
+        if (cont->tx > cont->x) {
+            //Top-right corner
+            /* Could use a for loop but then I would
+                have to unneededly check all 4 sides */
+                /*
+            coll_line = {cont->x + CONT_W, cont->y, cont->tx + CONT_W, cont->ty};
+            if ( PM_check_lines(&coll_line, &zone->sides[0]) ) {
+                int coll_side = 0;
+            } else {
+                if ( PM_check_lines(&coll_line, &zone->sides[4]) ) {
+                    int coll_side = 4;
+                }
+            }
 
-        if ( cont->param.w_h->first <= zone->y &&
-            zone->y < cont->param.w_h->second) {
-            y_coll = true;
-            cont->coll_buffer[1].first = zone->y;
+            //Bottom-Left corner
+            coll_line = {cont->x, cont->y + CONT_H, cont->tx, cont->tx + CONT_H};
+            if ( PM_check_lines(&coll_line, &zone->sides[0]) ) {
+                int coll_side = 0;
+            } else {
+                if ( PM_check_lines(&coll_line, &zone->sides[4]) ) {
+                    int coll_side = 4;
+                }
+            } */
+
+            //Key corner
+            coll_line = {cont->x + CONT_W, cont->y + CONT_H, cont->tx + CONT_W, cont->ty + CONT_H};
+            if ( PM_check_lines(&coll_line, &zone->sides[0]) ) {
+                coll_side = 0;
+                cont->coor_buffer->first = cont->tx;
+                cont->coor_buffer->second = zone->y - CONT_H;
+                return;
+            } else {
+                if ( PM_check_lines(&coll_line, &zone->sides[4]) ) {
+                    coll_side = 4;
+                    cont->coor_buffer->first = zone->x - CONT_W;
+                    cont->coor_buffer->second = cont->ty;
+                    return;
+                }
+            }
         } else {
-            y_coll = false;
-            cont->coll_buffer[1].first = cont->coll_buffer[1].second;
+        //Moving Down-Left
+
         }
     } else {
-        cont->coll_buffer[1].first = cont->y + cont->param.w_h->second;
-        cont->coll_buffer[1].second = cont->ty;
+    //Moving Up
+        //Moving Up-Right
+        if (cont->tx > cont->x) {
 
-        if ( cont->coll_buffer[1].second < (zone->y + cont->param.w_h->second) &&
-            (zone->y + cont->param.w_h->second ) <= cont->coll_buffer[1].first ) {
-            y_coll = true;
-            cont->coll_buffer[1].first = zone->y + cont->param.w_h->second;
         } else {
-            y_coll = false;
-            /* Leave coll_buffer as is */
+        //Moving Up-Left
+
         }
     }
+
     /* In the case of a collision, the collision x-coordinate
        is saved in cont->coll_buffer[0].first and the
        y-coordinate is saved in cont->coll_buffer[1].first */
-    cont->coor_buffer->first = cont->coll_buffer[0].first;
-    cont->coor_buffer->second = cont->coll_buffer[1].first;
+    sort_collisions:
+    cont->coor_buffer->first = cont->coll_buffer.first;
+    cont->coor_buffer->second = cont->coll_buffer.second;
     return;
 }
 
@@ -280,6 +298,12 @@ void cPhysic_manager::PM_check_rect_circle(phys_cont* obj, phys_cont* obj2) {
 void cPhysic_manager::PM_check_circle_circle(phys_cont* obj, phys_cont* obj2) {
     return;
 }*/
+
+bool cPhysic_manager::PM_check_lines(line* line1, line* line2) {
+
+
+return false;
+}
 
 coordinates* cPhysic_manager::PM_resolve_collision(coordinates* coor1, coordinates* coor2) {
     if ( coor1 == NULL ) return coor2;

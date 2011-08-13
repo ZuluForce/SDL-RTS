@@ -12,6 +12,7 @@ struct sDisplay_info;
 #include "SDL/SDL.h"
 
 typedef pair<int,int> coordinates;
+typedef int[4] line;
 
 union params {
     //Type 0
@@ -62,10 +63,6 @@ typedef struct phys_cont {
 
         coordinates* coor_buffer;
 
-        //coll_buffer[0] is x_bounds on a collision
-        //coll_buffer[1] is y_bounds on a collision
-        coordinates coll_buffer[2];
-
         short gravity;
 
 } phys_cont;
@@ -75,6 +72,10 @@ struct collision_zone {
     int contType;
     int PM_ID;
     params param;
+
+    //Holds the coordinates that create a line for each side
+    //Order: Top,Left,Bottom,Right
+    line sides[4];
 };
 
 typedef class Particle {
@@ -120,6 +121,7 @@ class cPhysic_manager{
         void PM_check_rect_zone(phys_cont*,collision_zone*);
         //void PM_check_rect_circle(phys_cont*,phys_cont*);
         //void PM_check_circle_circle(phys_cont*,phys_cont*);
+        bool PM_check_lines(line* line1, line* line2)
 
         coordinates* PM_resolve_collision(coordinates*,coordinates*);
 

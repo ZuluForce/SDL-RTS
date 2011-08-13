@@ -126,7 +126,7 @@ int main(int argc, char** argv) {
         EM.ED_manage_events(250);
         AM.AM_update();
         //PM.PM_print_grid();
-        std_sleep(2);
+        std_sleep(3);
     }
 
     SM.cleanup(DEFAULT_TIMEOUT);

@@ -26,7 +26,7 @@ void init_game_screen(cActor_manager* AM) {
 
     obj1 = new Dot( type_ids.ID_getid() );
     obj1->set_image(dot_image);
-    obj1->set_pos(100, 100);
+    obj1->set_pos(175, 180);
     obj1->priority = 1;
     obj1->change_control();
     AM->AM_register(obj1);
