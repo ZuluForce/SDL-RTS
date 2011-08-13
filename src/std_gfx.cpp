@@ -1,7 +1,7 @@
 #include "SDL/SDL.h"
 #include "std_gfx.h"
 
-SDL_Surface *load_image(const char* filename ) {
+SDL_Surface* load_image(const char* filename ) {
     printf("Loading Image: %s\n",filename);
     SDL_Surface* loadedImage = NULL;
 
@@ -17,6 +17,7 @@ SDL_Surface *load_image(const char* filename ) {
         fprintf(stderr,"Failed to load image: \"%s\" : %s on line %d\n",filename,__FILE__,__LINE__);
         fprintf(stderr,"\tFail Reason: %s\n",SDL_GetError());
     }
+    printf("\tImage Address: %p\n",optimizedImage);
     return optimizedImage;
 }
 

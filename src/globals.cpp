@@ -1,0 +1,1 @@
+/* Definition of Global variables */

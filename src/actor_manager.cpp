@@ -31,6 +31,8 @@ cActor_manager::cActor_manager(cScreen_manager* _SM) {
     Draw_Buffer = SDL_CreateRGBSurface(_SM->SM_get_flags(),_SM->SM_get_w(), _SM->SM_get_h(), _SM->SM_get_depth(),
                                        0,0,0,0);
 
+    printf("The draw buffer address is: %p\n", Draw_Buffer);
+
     if (Draw_Buffer == NULL) {
         fprintf(stderr,"Failed to create the Draw Buffer: %s on line %d\n",__FILE__,__LINE__);
         fprintf(stderr,"\tError: %s\n",SDL_GetError());
@@ -72,19 +74,24 @@ void cActor_manager::AM_register(cActor* obj) {
     return;
 }
 
-void cActor_manager::AM_set_bg(SDL_Color* fill_color, SDL_Surface* fill_surf) {
+void cActor_manager::AM_set_bg(SDL_Color* fill_color) {
     if ( fill_color != NULL ) {
         back_type = 1;
         Back_Color = clr_to_uint(fill_color);
         return;
     }
-    if ( fill_surf != NULL) {
+    back_type = 0;
+    fprintf(stderr, "AM_set_bg (color) was called with no result\n");
+}
+
+void cActor_manager::AM_set_bg(SDL_Surface* fill_surf) {
+    if (fill_surf != NULL) {
         back_type = 2;
-        *Background = *fill_surf;
+        Background = fill_surf;
         return;
     }
     back_type = 0;
-    fprintf(stderr, "AM_set_bg was called with no resulting action\n");
+    fprintf(stderr, "AM_set_bg (Surface) was called with no result\n");
 }
 
 void cActor_manager::AM_blit_buffer(int x, int y, SDL_Surface* src, SDL_Rect* clip) {
@@ -131,7 +138,6 @@ void cActor_manager::AM_update() {
     Uint8* key_states = SDL_GetKeyState(NULL);
 
     /* Send out Event Updates */
-    //actor_update = actor_objs.walk();
     while ( (actor_update = actor_objs.walk()) != NULL ) {
         actor_update->check_events(Event_Buffer, event_buf_load, key_states);
     }

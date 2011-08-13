@@ -40,6 +40,15 @@ bool quit_threads = false;
 //If only planning on pausing don't set to true
 bool cleanup_threads = false;
 
+/* Global Pointers */
+//--These need to be defined for other managers to work--//
+cEvent_dispatch* pEM;
+cActor_manager* pAM;
+cScreen_manager* pSM;
+cPhysic_manager* pPM;
+
+//------------------------------------------------------//
+
 typedef class {
     private:
         typedef struct {
@@ -89,26 +98,37 @@ int main(int argc, char** argv) {
     SM.SM_set_caption("Planeman-RTS");
     SM.SM_maxFPS(2);
     SM_start(&SM);
+    pSM = &SM;
 
     /* Setting up the Actor Manager */
     cActor_manager AM = cActor_manager(&SM);
+    pAM = &AM;
 
     /* Setting up the event manager */
     cEvent_dispatch EM = cEvent_dispatch();
     EM.ED_reg_callback(SDL_QUIT,onQuit);
     EM.ED_reg_callback(ALL_EVENTS,AM_input_events);
     EM.ED_reg_callback(SDL_KEYDOWN,onKeyDown);
+    pEM = &EM;
+
+    /* Setting up the Physics Manager */
+    cPhysic_manager PM = cPhysic_manager(3,3);
+    pPM = &PM;
 
     /* Initializes the Actor Objects */
     init_game_screen(&AM);
-    SDL_Color white = {255,255,255};
-    AM.AM_set_bg(&white);
+    SDL_Surface* background = load_image("back.bmp");
+    AM.AM_set_bg(background);
+    //SDL_Color white = {255,255,255};
+    //AM.AM_set_bg(&white);
 
     while( true && !quit_threads) {
         EM.ED_manage_events(250);
         AM.AM_update();
-        SDL_Delay(2);
+        //PM.PM_print_grid();
+        std_sleep(3);
     }
+
     SM.cleanup(DEFAULT_TIMEOUT);
     SDL_Quit();
     return 0;
