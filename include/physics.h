@@ -12,7 +12,7 @@ struct sDisplay_info;
 #include "SDL/SDL.h"
 
 typedef pair<int,int> coordinates;
-typedef int[4] line;
+typedef int line[4];
 
 union params {
     //Type 0
@@ -121,7 +121,7 @@ class cPhysic_manager{
         void PM_check_rect_zone(phys_cont*,collision_zone*);
         //void PM_check_rect_circle(phys_cont*,phys_cont*);
         //void PM_check_circle_circle(phys_cont*,phys_cont*);
-        bool PM_check_lines(line* line1, line* line2)
+        bool PM_check_lines(line line1, line line2);
 
         coordinates* PM_resolve_collision(coordinates*,coordinates*);
 

@@ -222,71 +222,52 @@ void cPhysic_manager::PM_check_rect_rect(phys_cont* obj1, phys_cont* obj2) {
 
 void cPhysic_manager::PM_check_rect_zone(phys_cont* cont, collision_zone* zone) {
     line coll_line;
-    int coll_side = -1;
 
     //Moving Down
     if ( cont->ty > cont->y) {
         //Moving Down-Right
         if (cont->tx > cont->x) {
-            //Top-right corner
-            /* Could use a for loop but then I would
-                have to unneededly check all 4 sides */
-                /*
-            coll_line = {cont->x + CONT_W, cont->y, cont->tx + CONT_W, cont->ty};
-            if ( PM_check_lines(&coll_line, &zone->sides[0]) ) {
-                int coll_side = 0;
-            } else {
-                if ( PM_check_lines(&coll_line, &zone->sides[4]) ) {
-                    int coll_side = 4;
-                }
-            }
-
-            //Bottom-Left corner
-            coll_line = {cont->x, cont->y + CONT_H, cont->tx, cont->tx + CONT_H};
-            if ( PM_check_lines(&coll_line, &zone->sides[0]) ) {
-                int coll_side = 0;
-            } else {
-                if ( PM_check_lines(&coll_line, &zone->sides[4]) ) {
-                    int coll_side = 4;
-                }
-            } */
-
             //Key corner
             coll_line = {cont->x + CONT_W, cont->y + CONT_H, cont->tx + CONT_W, cont->ty + CONT_H};
-            if ( PM_check_lines(&coll_line, &zone->sides[0]) ) {
-                coll_side = 0;
+            if ( PM_check_lines(coll_line, zone->sides[0]) ) {
                 cont->coor_buffer->first = cont->tx;
                 cont->coor_buffer->second = zone->y - CONT_H;
                 return;
             } else {
-                if ( PM_check_lines(&coll_line, &zone->sides[4]) ) {
-                    coll_side = 4;
+                if ( PM_check_lines(coll_line, zone->sides[4]) ) {
                     cont->coor_buffer->first = zone->x - CONT_W;
                     cont->coor_buffer->second = cont->ty;
                     return;
                 }
             }
+            //Top-right corner
+            coll_line = {cont->x + CONT_W, cont->y, cont->tx + CONT_W, cont->ty};
+            if ( PM_check_lines(coll_line, zone->sides[4]) ) {
+                    cont->coor_buffer->first = zone->x - CONT_W;
+                    cont->coor_buffer->second = cont->ty;
+            }
+
+            //Bottom-Left corner
+            coll_line = {cont->x, cont->y + CONT_H, cont->tx, cont->tx + CONT_H};
+            if ( PM_check_lines(coll_line, zone->sides[0]) ) {
+                cont->coor_buffer->first = cont->tx;
+                cont->coor_buffer->second = zone->y - CONT_H;
+                return;
+            }
         } else {
         //Moving Down-Left
-
+            return;
         }
     } else {
     //Moving Up
         //Moving Up-Right
         if (cont->tx > cont->x) {
-
+            return;
         } else {
         //Moving Up-Left
-
+            return;
         }
     }
-
-    /* In the case of a collision, the collision x-coordinate
-       is saved in cont->coll_buffer[0].first and the
-       y-coordinate is saved in cont->coll_buffer[1].first */
-    sort_collisions:
-    cont->coor_buffer->first = cont->coll_buffer.first;
-    cont->coor_buffer->second = cont->coll_buffer.second;
     return;
 }
 
@@ -299,8 +280,14 @@ void cPhysic_manager::PM_check_circle_circle(phys_cont* obj, phys_cont* obj2) {
     return;
 }*/
 
-bool cPhysic_manager::PM_check_lines(line* line1, line* line2) {
-
+bool cPhysic_manager::PM_check_lines(line line1, line line2) {
+    int slope1,slope2;
+    slope1 = line1[2] - line1[0];
+    slope2 = line2[2] - line2[0];
+    //Checking for verticals
+    if ( slope1 == 0 || slope2 == 0) {
+        slope1 = line1
+    }
 
 return false;
 }
