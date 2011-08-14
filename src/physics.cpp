@@ -83,7 +83,7 @@ void cPhysic_manager::PM_set_collide_zone(int x, int y, params* _params, int _ty
     new_zone->sides[0] = {x,y, x+ _params->w_h->first, y};
     new_zone->sides[1] = {x + _params->w_h->first, y, x + _params->w_h->first, y + _params->w_h->second};
     new_zone->sides[2] = {x, y + _params->w_h->second, x + _params->w_h->first, y + _params->w_h->second};
-    new_zone->sides[3] = (x, y, x, y + _params->w_h->second);
+    new_zone->sides[3] = {x, y, x, y + _params->w_h->second};
 
     collision_zone_grid[x / (screen_w / grid_w)][y / (screen_h / grid_h)]->push_back(new_zone);
     printf("Collision zone created with coordinates: <%d,%d>\n",new_zone->x,new_zone->y);
@@ -280,13 +280,57 @@ void cPhysic_manager::PM_check_circle_circle(phys_cont* obj, phys_cont* obj2) {
     return;
 }*/
 
+/* For this function to work, line1[0] > line1[2] and
+   line2[0] > line2[0] */
 bool cPhysic_manager::PM_check_lines(line line1, line line2) {
     int slope1,slope2;
     slope1 = line1[2] - line1[0];
     slope2 = line2[2] - line2[0];
+
+    //Right-Hand-Side
+    int rhs;
     //Checking for verticals
-    if ( slope1 == 0 || slope2 == 0) {
-        slope1 = line1
+    if ( slope1 == 0 ) {
+        if ( slope2 == 0) {
+            //I am adhering to the idea that if two lines are overlapping
+            //but not crossing, they are not intersecting.
+            return false;
+        } else {
+            //line1 is vertical but not line2
+            //Find line 2 slope
+            slope2 = (line2[3] - line2[1]) / slope2;
+            rhs = (slope2 * line2[0]) - (slope2 * -line2[0]) + line2[1];
+            if ( line1[1] < rhs && rhs < line1[3] ) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+    } else {
+        //Line2 is vertical but not line1
+        //Find line1 slope
+        if ( slope2 == 0) {
+            slope1 = (line1[3] - line1[1]) / slope1;
+            rhs = (slope1 * line1[0]) - (slope1 * -line1[0]) + line1[1];
+            if ( line2[1] < rhs && rhs < line2[3] ) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+        slope1 = (line1[3] - line1[1]) / slope1;
+        slope2 = (line2[3] - line2[1]) / slope2;
+        if (slope1 == slope2) {
+            //Parallel lines
+            return false;
+        }
+        //m1(x - x1) + y1 = m2(x - x2) + y2
+        //Solving for x from two point-slope equations
+        rhs = (line2[3] - (slope1 * -line1[0]) + (slope2 * -line2[0])) / (slope1 - slope2);
+        if ( line1[0] < rhs  && rhs < line1[2] &&
+            line2[0] < rhs  && rhs < line2[2] ) {
+                return true;
+            }
     }
 
 return false;
