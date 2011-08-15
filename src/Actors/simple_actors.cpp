@@ -28,6 +28,7 @@ Dot::Dot(int _typeID) {
     p_container->actorType = _typeID;
     p_container->param.w_h->first = 20;
     p_container->param.w_h->second = 20;
+    p_container->gravity = 1;
     pPM->PM_register_collision_obj(p_container);
     return;
 }

@@ -4,7 +4,7 @@ extern cScreen_manager* pSM;
 extern cPhysic_manager* pPM;
 
 void init_game_screen(cActor_manager* AM) {
-    SDL_Surface* dot_image = load_image("dot.bmp");
+    SDL_Surface* dot_image = load_image("imgs\\dot.bmp");
     SDL_SetColorKey(dot_image, SDL_SRCCOLORKEY | SDL_RLEACCEL,0);
 
     cID_dispatch type_ids = cID_dispatch();
@@ -36,6 +36,12 @@ void init_game_screen(cActor_manager* AM) {
     left_out.w_h->first = 100;
     left_out.w_h->second = 100;
     pPM->PM_set_collide_zone(200,200,&left_out);
+
+    /*
+    left_out.w_h->first = pSM->SM_get_w();
+    left_out.w_h->second = 0;
+    pPM->PM_set_collide_zone(0,pSM->SM_get_h(),&left_out);
+    */
 
     /* Test of line collision algorithm */
     line line1,line2;

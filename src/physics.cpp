@@ -565,7 +565,7 @@ void cPhysic_manager::PM_move(phys_cont* cont, int x, int y) {
 
 void cPhysic_manager::PM_update(phys_cont* cont) {
     cont->tx = cont->x + cont->x_vel;
-    cont->ty = cont->y + cont->y_vel;
+    cont->ty = cont->y + cont->y_vel + cont->gravity;
 
     PM_check_collision(cont, true);
     return;
