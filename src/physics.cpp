@@ -5,6 +5,11 @@
 #define CONT_W cont->param.w_h->first
 #define CONT_H cont->param.w_h->second
 
+//For controlling debugging output
+//#define _DEBUG 1
+#define D_ZONE 1
+#define D_LINE 1
+
 extern cActor_manager* pAM;
 extern cScreen_manager* pSM;
 
@@ -69,7 +74,7 @@ void cPhysic_manager::PM_init_grid(int width, int height) {
     }
 }
 
-void cPhysic_manager::PM_set_collide_zone(int x, int y, params* _params, int _type) {
+int cPhysic_manager::PM_set_collide_zone(int x, int y, params* _params, int _type) {
     collision_zone* new_zone = new collision_zone;
     new_zone->x = x;
     new_zone->y = y;
@@ -85,9 +90,23 @@ void cPhysic_manager::PM_set_collide_zone(int x, int y, params* _params, int _ty
     new_zone->sides[2] = {x, y + _params->w_h->second, x + _params->w_h->first, y + _params->w_h->second};
     new_zone->sides[3] = {x, y, x, y + _params->w_h->second};
 
-    collision_zone_grid[x / (screen_w / grid_w)][y / (screen_h / grid_h)]->push_back(new_zone);
+    int grid_x,grid_y;
+    grid_x = x / (screen_w / grid_w);
+    grid_y = y / (screen_h / grid_h);
+
+    int x_span,y_span,i,j;
+    x_span = (new_zone->param.w_h->first + (new_zone->x % (screen_w / grid_w))) / (screen_w / grid_w);
+    y_span = (new_zone->param.w_h->second + (new_zone->y % (screen_h / grid_h))) / (screen_h / grid_h);
+
+    for (i = grid_x; i <= grid_x + x_span; ++i) {
+        for (j = grid_y; j <= grid_y + y_span; ++j) {
+            collision_zone_grid[i][j]->push_back(new_zone);
+        }
+    }
+    //collision_zone_grid[x / (screen_w / grid_w)][y / (screen_h / grid_h)]->push_back(new_zone);
     printf("Collision zone created with coordinates: <%d,%d>\n",new_zone->x,new_zone->y);
-    printf("\tCollision zone w/h: <%d,%d>\n",new_zone->param.w_h->first, new_zone->param.w_h->second);
+    printf("\tCollision zone w/h: <%d,%d>\n\n",new_zone->param.w_h->first, new_zone->param.w_h->second);
+    return new_zone->PM_ID;
 }
 
 void cPhysic_manager::PM_register_collision_obj(phys_cont* obj) {
@@ -134,7 +153,9 @@ void cPhysic_manager::PM_check_collision(phys_cont* obj, bool shift) {
             break;
     }
     if ( shift ) {
+        #ifdef _DEBUG
         //printf("Moving object to <%d,%d>\n",obj->coor_buffer->first,obj->coor_buffer->second);
+        #endif
         obj->x = obj->coor_buffer->first;
         obj->y = obj->coor_buffer->second;
 
@@ -158,7 +179,7 @@ void cPhysic_manager::PM_check_rect_(phys_cont* obj) {
     list< collision_zone*>* zone_list;
 
     coordinates index;
-
+    int most_recent = -1;
     for (coor_it = grid_vector->begin(); coor_it != grid_vector->end(); ++coor_it) {
         index = *coor_it;
         cont_list = collision_obj_grid[index.first][index.second];
@@ -177,10 +198,12 @@ void cPhysic_manager::PM_check_rect_(phys_cont* obj) {
 
         zone_list = collision_zone_grid[index.first][index.second];
         //Checking the collision "zones"
-        for (zone_it = zone_list->begin(); zone_it != zone_list->end(); ++zone_list) {
+        for (zone_it = zone_list->begin(); zone_it != zone_list->end(); ++zone_it) {
             switch ( (*zone_it)->contType ) {
                 case 0:
+                    if ((*zone_it)->PM_ID == most_recent) continue;
                     PM_check_rect_zone(obj, *zone_it);
+                    most_recent = (*zone_it)->PM_ID;
                     //saved_collision = PM_resolve_collision(saved_collision, temp_collision);
                     break;
                 case 1:
@@ -215,8 +238,6 @@ void cPhysic_manager::PM_check_rect_rect(phys_cont* obj1, phys_cont* obj2) {
         }
     } */
     //obj1->coor_buffer = NULL;
-    obj1->coor_buffer->first = obj1->tx;
-    obj1->coor_buffer->second = obj1->ty;
     return;
 }
 
@@ -224,47 +245,197 @@ void cPhysic_manager::PM_check_rect_zone(phys_cont* cont, collision_zone* zone) 
     line coll_line;
 
     //Moving Down
-    if ( cont->ty > cont->y) {
+    if ( cont->ty > cont->y ) {
         //Moving Down-Right
         if (cont->tx > cont->x) {
+            //printf("Zone Check (Down-Right)\n");
             //Key corner
             coll_line = {cont->x + CONT_W, cont->y + CONT_H, cont->tx + CONT_W, cont->ty + CONT_H};
+
+            #ifdef _DEBUG
+            #ifdef D_ZONE
+            printf("Down-Right:\n");
+            printf("\tLine1 = ");
+            PM_print_line(coll_line);
+            printf("\tLine2 = ");
+            PM_print_line(zone->sides[3]);
+            printf("\n");
+            printf("\tResult: %s\n\n",PM_check_lines(coll_line, zone->sides[3]) ? "True" : "False");
+            #endif
+            #endif
+
             if ( PM_check_lines(coll_line, zone->sides[0]) ) {
+
+                #ifdef _DEBUG
+                #ifdef D_ZONE
+                printf("Zone Check (Down-Right) collides on side 0\n");
+                printf("\tNew Pos = (%d,%d)\n",cont->tx,zone->y - CONT_H - 1);
+                #endif
+                #endif
+
                 cont->coor_buffer->first = cont->tx;
-                cont->coor_buffer->second = zone->y - CONT_H;
+                cont->coor_buffer->second = zone->y - CONT_H - 1;
                 return;
             } else {
-                if ( PM_check_lines(coll_line, zone->sides[4]) ) {
-                    cont->coor_buffer->first = zone->x - CONT_W;
+                if ( PM_check_lines(coll_line, zone->sides[3]) ) {
+                    #ifdef _DEBUG
+                    #ifdef D_ZONE
+                    printf("Zone Check (Down-Right collides on side 4\n");
+                    printf("\tNew Pos = (%d,%d)\n",zone->x - CONT_W - 1,cont->ty);
+                    #endif
+                    #endif
+                    cont->coor_buffer->first = zone->x - CONT_W - 1;
                     cont->coor_buffer->second = cont->ty;
                     return;
                 }
             }
             //Top-right corner
             coll_line = {cont->x + CONT_W, cont->y, cont->tx + CONT_W, cont->ty};
-            if ( PM_check_lines(coll_line, zone->sides[4]) ) {
-                    cont->coor_buffer->first = zone->x - CONT_W;
+            if ( PM_check_lines(coll_line, zone->sides[3]) ) {
+                    cont->coor_buffer->first = zone->x - CONT_W - 1;
                     cont->coor_buffer->second = cont->ty;
+                    return;
             }
 
             //Bottom-Left corner
-            coll_line = {cont->x, cont->y + CONT_H, cont->tx, cont->tx + CONT_H};
+            coll_line = {cont->x, cont->y + CONT_H, cont->tx, cont->ty + CONT_H};
             if ( PM_check_lines(coll_line, zone->sides[0]) ) {
                 cont->coor_buffer->first = cont->tx;
-                cont->coor_buffer->second = zone->y - CONT_H;
+                cont->coor_buffer->second = zone->y - CONT_H - 1;
                 return;
             }
         } else {
         //Moving Down-Left
+            //Key Corner
+            coll_line = {cont->x, cont->y + CONT_H, cont->tx, cont->ty + CONT_H};
+
+            #ifdef _DEBUG
+            #ifdef D_ZONE
+            printf("Down-Left:\n");
+            printf("\tLine1 = ");
+            PM_print_line(coll_line);
+            printf("\tLine2 = ");
+            PM_print_line(zone->sides[0]);
+            printf("\n");
+            printf("\tResult: %s\n\n",PM_check_lines(coll_line, zone->sides[0]) ? "True" : "False");
+            #endif
+            #endif
+
+            if ( PM_check_lines(coll_line, zone->sides[0]) ) {
+                cont->coor_buffer->first = cont->tx;
+                cont->coor_buffer->second = zone->y - CONT_H - 1;
+                return;
+            } else {
+                if ( PM_check_lines(coll_line, zone->sides[1]) ) {
+                    cont->coor_buffer->first = zone->x + zone->param.w_h->first + 1;
+                    cont->coor_buffer->second = cont->ty;
+                    return;
+                }
+            }
+            //Top-Left corner
+            coll_line = {cont->x, cont->y, cont->tx, cont->ty};
+            if ( PM_check_lines(coll_line, zone->sides[1]) ) {
+                    cont->coor_buffer->first = zone->x + zone->param.w_h->first + 1;
+                    cont->coor_buffer->second = cont->ty;
+                    return;
+            }
+
+            //Bottom-Right corner
+            coll_line = {cont->x + CONT_H, cont->y + CONT_H, cont->tx + CONT_H, cont->ty + CONT_H};
+            if ( PM_check_lines(coll_line, zone->sides[0]) ) {
+                cont->coor_buffer->first = cont->tx;
+                cont->coor_buffer->second = zone->y - CONT_H - 1;
+                return;
+            }
             return;
         }
     } else {
     //Moving Up
         //Moving Up-Right
         if (cont->tx > cont->x) {
+            coll_line = {cont->x + CONT_H, cont->y, cont->tx + CONT_H, cont->ty};
+
+            #ifdef _DEBUG
+            #ifdef D_ZONE
+            printf("Up-Right:\n");
+            printf("\tLine1 = ");
+            PM_print_line(coll_line);
+            printf("\tLine2 = ");
+            PM_print_line(zone->sides[3]);
+            printf("\n");
+            printf("\tResult: %s\n\n",PM_check_lines(coll_line, zone->sides[3]) ? "True" : "False");
+            #endif
+            #endif
+
+            if ( PM_check_lines(coll_line, zone->sides[2]) ) {
+                cont->coor_buffer->first = cont->tx;
+                cont->coor_buffer->second = zone->y + zone->param.w_h->second + 1;
+                return;
+            } else {
+                if ( PM_check_lines(coll_line, zone->sides[3]) ) {
+                    cont->coor_buffer->first = zone->x - CONT_W - 1;
+                    cont->coor_buffer->second = cont->ty;
+                    return;
+                }
+            }
+            //Top-Left corner
+            coll_line = {cont->x, cont->y, cont->tx, cont->ty};
+            if ( PM_check_lines(coll_line, zone->sides[2]) ) {
+                    cont->coor_buffer->first = cont->tx;
+                    cont->coor_buffer->second = zone->y + zone->param.w_h->second + 1;
+                    return;
+            }
+
+            //Bottom-Right corner
+            coll_line = {cont->x + CONT_H, cont->y + CONT_H, cont->tx + CONT_H, cont->ty + CONT_H};
+            if ( PM_check_lines(coll_line, zone->sides[3]) ) {
+                cont->coor_buffer->first = zone->x - CONT_W - 1;
+                cont->coor_buffer->second = cont->ty;
+                return;
+            }
             return;
         } else {
         //Moving Up-Left
+            coll_line = {cont->x, cont->y, cont->tx, cont->ty};
+
+            #ifdef _DEBUG
+            #ifdef D_ZONE
+            printf("Up-Left:\n");
+            printf("\tLine1 = ");
+            PM_print_line(coll_line);
+            printf("\tLine2 = ");
+            PM_print_line(zone->sides[1]);
+            printf("\n");
+            printf("\tResult: %s\n\n",PM_check_lines(coll_line, zone->sides[1]) ? "True" : "False");
+            #endif
+            #endif
+
+            if ( PM_check_lines(coll_line, zone->sides[1]) ) {
+                cont->coor_buffer->first = zone->y + zone->param.w_h->first + 1;
+                cont->coor_buffer->second = cont->ty;
+                return;
+            } else {
+                if ( PM_check_lines(coll_line, zone->sides[2]) ) {
+                    cont->coor_buffer->first = cont->tx;
+                    cont->coor_buffer->second = zone->y + zone->param.w_h->second + 1;
+                    return;
+                }
+            }
+            //Top-Right corner
+            coll_line = {cont->x + CONT_W, cont->y, cont->tx + CONT_W, cont->ty};
+            if ( PM_check_lines(coll_line, zone->sides[2]) ) {
+                    cont->coor_buffer->first = cont->tx;
+                    cont->coor_buffer->second = zone->y + zone->param.w_h->second + 1;
+                    return;
+            }
+
+            //Bottom-Left corner
+            coll_line = {cont->x, cont->y + CONT_H, cont->tx, cont->ty + CONT_H};
+            if ( PM_check_lines(coll_line, zone->sides[1]) ) {
+                cont->coor_buffer->first = zone->x + zone->param.w_h->first + 1;
+                cont->coor_buffer->second = cont->ty;
+                return;
+            }
             return;
         }
     }
@@ -280,27 +451,39 @@ void cPhysic_manager::PM_check_circle_circle(phys_cont* obj, phys_cont* obj2) {
     return;
 }*/
 
-/* For this function to work, line1[0] > line1[2] and
-   line2[0] > line2[0] */
 bool cPhysic_manager::PM_check_lines(line line1, line line2) {
-    int slope1,slope2;
+    float slope1,slope2;
     slope1 = line1[2] - line1[0];
     slope2 = line2[2] - line2[0];
 
     //Right-Hand-Side
-    int rhs;
+    //int rhs;
+    float rhs;
     //Checking for verticals
     if ( slope1 == 0 ) {
+        //printf("\tLine1 is vertical\n");
         if ( slope2 == 0) {
-            //I am adhering to the idea that if two lines are overlapping
-            //but not crossing, they are not intersecting.
+            if ( line1[0] == line2[0]) {
+                return true;
+            }
             return false;
         } else {
+            //printf("\tLine2 is not vertical\n");
             //line1 is vertical but not line2
             //Find line 2 slope
             slope2 = (line2[3] - line2[1]) / slope2;
-            rhs = (slope2 * line2[0]) - (slope2 * -line2[0]) + line2[1];
-            if ( line1[1] < rhs && rhs < line1[3] ) {
+            rhs = slope2 * (line1[0] - line2[0]) + line2[1];
+
+            #ifdef _DEBUG
+            #ifdef D_LINE
+            printf("\tSlope2 = %d\n",slope2);
+            printf("\tLines would intersect at x = %f\n",rhs);
+            #endif
+            #endif
+
+            if ( ((line1[1] <= rhs && rhs <= line1[3]) ||
+                (line1[3] <= rhs && rhs <= line1[1])) &&
+                (line2[0] <= line1[0] && line1[0] <= line2[2]) ) {
                 return true;
             } else {
                 return false;
@@ -311,8 +494,23 @@ bool cPhysic_manager::PM_check_lines(line line1, line line2) {
         //Find line1 slope
         if ( slope2 == 0) {
             slope1 = (line1[3] - line1[1]) / slope1;
-            rhs = (slope1 * line1[0]) - (slope1 * -line1[0]) + line1[1];
-            if ( line2[1] < rhs && rhs < line2[3] ) {
+            rhs = slope1 * (line2[0] - line1[0]) + line1[1];
+            #ifdef _DEBUG
+            #ifdef D_LINE
+            printf("Line1 = ");
+            PM_print_line(line1);
+            printf("Line2 = ");
+            PM_print_line(line2);
+            printf("\n");
+
+            printf("\tChecking if %d <= %.2f <= %d\n",line2[1],rhs,line2[3]);
+            printf("\tAnd that %d <= %d <= %d\n",line1[0],line2[0],line1[2]);
+            #endif
+            #endif
+            if ( line2[1] <= rhs && rhs <= line2[3] &&
+                ((line1[0] <= line2[0] && line2[0] <= line1[2]) ||
+                (line1[2] <= line2[0] && line2[0] <= line1[0]))) {
+                    // The || is in-case line1[0] !< line1[2] which will often happen
                 return true;
             } else {
                 return false;
@@ -324,11 +522,21 @@ bool cPhysic_manager::PM_check_lines(line line1, line line2) {
             //Parallel lines
             return false;
         }
+        //Neither line is vertical
         //m1(x - x1) + y1 = m2(x - x2) + y2
         //Solving for x from two point-slope equations
-        rhs = (line2[3] - (slope1 * -line1[0]) + (slope2 * -line2[0])) / (slope1 - slope2);
-        if ( line1[0] < rhs  && rhs < line1[2] &&
-            line2[0] < rhs  && rhs < line2[2] ) {
+        rhs = ( line2[1] - line1[1] + (slope2 * -line2[0]) - (slope1 * -line1[0]) ) / (slope1 - slope2);
+        #ifdef _DEBUG
+        #ifdef D_LINE
+        printf("\tNeither line is vertical\n");
+        printf("\tSlopes  slope1 = %.4f  slope2 = %.4f\n",slope1,slope2);
+        printf("\tThe lines would intersect at x-coordinate : %.4f\n",rhs);
+        #endif
+        #endif
+        if ( ((line1[0] <= rhs  && rhs <= line1[2]) ||
+              (line1[2] <= rhs && rhs <= line1[0])) &&
+            ((line2[0] <= rhs  && rhs <= line2[2]) ||
+             (line2[2] <= rhs && rhs <= line2[0])) ) {
                 return true;
             }
     }
@@ -488,4 +696,13 @@ void cPhysic_manager::PM_print_grid() {
         printf("--");
     }
     printf("\n\n");
+}
+
+void cPhysic_manager::PM_print_line(line l) {
+    printf("(%d,%d)->(%d,%d)\n",l[0],l[1],l[2],l[3]);
+    return;
+}
+
+bool cPhysic_manager::PM_call_check(line l, line l2) {
+    return PM_check_lines(l,l2);
 }

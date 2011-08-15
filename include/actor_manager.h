@@ -169,7 +169,7 @@ void priority_stack<T>::insert(T obj) {
     low_lvl = priority < low_lvl ? priority : low_lvl;
     top_lvl = priority > top_lvl ? priority : top_lvl;
     end_walk = false;
-    printf("Priority Stack inserted object with address %p at lvl (%d)\n",obj,priority);
+    printf("Priority Stack inserted object with address %p at lvl (%d)\n\n",obj,priority);
     return;
 }
 
