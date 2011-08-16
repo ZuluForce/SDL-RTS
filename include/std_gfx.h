@@ -2,6 +2,7 @@
 #define STD_GFX_H_INCLUDED
 
 #include "SDL/SDL.h"
+#include "SDL/SDL_image.h"
 
 #ifdef __MINGW32__
 

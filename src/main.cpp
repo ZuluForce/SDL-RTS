@@ -13,6 +13,7 @@
 #include "event_manager.h"
 #include "ID.h"
 #include "run_game.h"
+#include "UI\menu.h"
 
 #ifdef __MINGW32__
 
@@ -117,14 +118,15 @@ int main(int argc, char** argv) {
 
     /* Initializes the Actor Objects */
     init_game_screen(&AM);
-    SDL_Surface* background = load_image("imgs\\back.bmp");
-    AM.AM_set_bg(background);
+    //SDL_Surface* background = load_image("imgs\\back.bmp");
+    //AM.AM_set_bg(background);
+
+    SDL_CreateThread(actor_thread_check,NULL);
 
     while( true && !quit_threads) {
         EM.ED_manage_events(250);
         AM.AM_update();
-        //PM.PM_print_grid();
-        std_sleep(3);
+        std_sleep(2);
     }
 
     SM.cleanup(DEFAULT_TIMEOUT);
