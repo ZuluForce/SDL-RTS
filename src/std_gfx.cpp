@@ -36,7 +36,11 @@ void apply_surface( int x, int y, SDL_Surface* source, SDL_Surface* destination,
 
 void std_sleep(Uint32 timeout) {
     /* Sleep for *timeout* milliseconds */
+    #ifdef __MINGW32__
     Sleep(timeout);
+    #elif __linux__
+    SDL_Delay(timeout);
+    #endif
     return;
 }
 

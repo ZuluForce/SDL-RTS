@@ -12,7 +12,7 @@ struct sDisplay_info;
 #include "SDL/SDL.h"
 
 typedef pair<int,int> coordinates;
-typedef int[4] line;
+typedef int line[4];
 
 union params {
     //Type 0
@@ -121,7 +121,7 @@ class cPhysic_manager{
         void PM_check_rect_zone(phys_cont*,collision_zone*);
         //void PM_check_rect_circle(phys_cont*,phys_cont*);
         //void PM_check_circle_circle(phys_cont*,phys_cont*);
-        bool PM_check_lines(line* line1, line* line2)
+        bool PM_check_lines(line line1, line line2);
 
         coordinates* PM_resolve_collision(coordinates*,coordinates*);
 
@@ -130,7 +130,7 @@ class cPhysic_manager{
                         int screen_width = -1, int screen_height = -1);
         /* Sets up a collision zone so any colision objects cannot pass through it */
         /* If nothing is passed for level it will collide with objects across all levels */
-        void PM_set_collide_zone(int x, int y, params* _param, int _type = 0);
+        int PM_set_collide_zone(int x, int y, params* _param, int _type = 0);
         void PM_register_collision_obj(phys_cont*);
         void PM_check_collision(phys_cont*,bool);
         /* Use this for objects with discrete movements (non-continual).
@@ -151,6 +151,8 @@ class cPhysic_manager{
         int PM_correct_y(int y);
 
         void PM_print_grid();
+        void PM_print_line(line);
+        bool PM_call_check(line,line);
 };
 
 #endif // PHYSICS_H_INCLUDED

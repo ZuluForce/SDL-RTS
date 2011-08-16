@@ -28,6 +28,7 @@ Dot::Dot(int _typeID) {
     p_container->actorType = _typeID;
     p_container->param.w_h->first = 20;
     p_container->param.w_h->second = 20;
+    p_container->gravity = 1;
     pPM->PM_register_collision_obj(p_container);
     return;
 }
@@ -76,30 +77,50 @@ void Dot::check_events(event_vector** events, int* load, Uint8* key_states) {
             switch( key_event.key.keysym.sym) {
                 case SDLK_w:
                     if (pressed_key[0] == SDLK_UP) {
-                        pPM->PM_set_y_velocity(p_container,0);
+                        if ( key_states[SDLK_s] ) {
+                            pPM->PM_set_y_velocity(p_container,move_speed);
+                            pressed_key[0] = SDLK_DOWN;
+                        } else {
+                            pPM->PM_set_y_velocity(p_container,0);
+                            pressed_key[0] = -1;
+                        }
                         update = true;
-                        pressed_key[0] = -1;
                     }
                     break;
                 case SDLK_s:
                     if (pressed_key[0] == SDLK_DOWN) {
-                        pPM->PM_set_y_velocity(p_container,0);
+                        if ( key_states[SDLK_w] ) {
+                            pPM->PM_set_y_velocity(p_container,-move_speed);
+                            pressed_key[0] = SDLK_UP;
+                        } else {
+                            pPM->PM_set_y_velocity(p_container,0);
+                            pressed_key[0] = -1;
+                        }
                         update = true;
-                        pressed_key[0] = -1;
                     }
                     break;
                 case SDLK_a:
                     if (pressed_key[1] == SDLK_LEFT) {
-                        pPM->PM_set_x_velocity(p_container,0);
+                        if ( key_states[SDLK_d] ) {
+                            pPM->PM_set_x_velocity(p_container,move_speed);
+                            pressed_key[1] = SDLK_RIGHT;
+                        } else {
+                            pPM->PM_set_x_velocity(p_container,0);
+                            pressed_key[1] = -1;
+                        }
                         update = true;
-                        pressed_key[1] = -1;
                     }
                     break;
                 case SDLK_d:
                     if (pressed_key[1] == SDLK_RIGHT) {
-                        pPM->PM_set_x_velocity(p_container,0);
+                        if ( key_states[SDLK_a] ) {
+                            pPM->PM_set_x_velocity(p_container,-move_speed);
+                            pressed_key[1] = SDLK_LEFT;
+                        } else {
+                            pPM->PM_set_x_velocity(p_container,0);
+                            pressed_key[1] = -1;
+                        }
                         update = true;
-                        pressed_key[1] = -1;
                     }
                     break;
                 default:
