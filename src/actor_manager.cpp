@@ -62,6 +62,7 @@ void cActor_manager::AM_register(cActor* obj) {
     actor_objs.insert(obj);
 
     vector<Uint8>* events = obj->event_binds();
+    if ( !events ) return;
     Uint16 i;
     for (i = 0; i < events->size(); ++i) {
         if ( event_buf_load[events->at(i)] == -1) {

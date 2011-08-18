@@ -9,6 +9,6 @@
 
 void init_game_screen(cActor_manager* AM);
 
-void init_menu();
+void start_menu();
 
 #endif // RUN_GAME_H_INCLUDED

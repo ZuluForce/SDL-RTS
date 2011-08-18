@@ -5,7 +5,9 @@ extern cPhysic_manager* pPM;
 
 void init_game_screen(cActor_manager* AM) {
     SDL_Surface* dot_image = load_image("imgs\\dot.bmp");
+    SDL_Surface* back = load_image("imgs\\back.bmp");
     SDL_SetColorKey(dot_image, SDL_SRCCOLORKEY | SDL_RLEACCEL,0);
+    AM->AM_set_bg(back);
 
     cID_dispatch type_ids = cID_dispatch();
     Dot* obj1 = new Dot( type_ids.ID_getid() );
@@ -26,7 +28,7 @@ void init_game_screen(cActor_manager* AM) {
 
     obj1 = new Dot( type_ids.ID_getid() );
     obj1->set_image(dot_image);
-    obj1->set_pos(0,0);
+    obj1->set_pos(200,0);
     obj1->priority = 1;
     obj1->change_control();
     AM->AM_register(obj1);
@@ -77,6 +79,10 @@ void init_game_screen(cActor_manager* AM) {
     return;
 }
 
-void init_menu() {
+void start_menu() {
+    std_menu* menu_sys = new std_menu();
+    int mainID = menu_sys->new_menu();
+    SDL_Surface* quit_button = load_image("imgs\\quit_button.png")
+    menu_sys->new_menu_button(mainID,0,0);
     return;
 }
