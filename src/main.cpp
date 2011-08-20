@@ -50,16 +50,6 @@ cPhysic_manager* pPM;
 
 //------------------------------------------------------//
 
-typedef class {
-    private:
-        typedef struct {
-            int maxFPS;
-        } sSettings;
-
-        string get_next_setting(string* filename);
-
-} cSettings;
-
 void onQuit(SDL_Event* event) {
     printf("Quit has been pressed!\n");
     quit_threads = true;
@@ -118,9 +108,8 @@ int main(int argc, char** argv) {
 
     /* Initializes the Actor Objects */
     //init_game_screen(&AM);
-    start_menu(NULL);
-    //SDL_Surface* background = load_image("imgs\\back.bmp");
-    //AM.AM_set_bg(background);
+    cGame game_manager = cGame();
+    SDL_CreateThread(start_menu,&game_manager);
 
     while( true && !quit_threads) {
         EM.ED_manage_events(250);
@@ -129,6 +118,7 @@ int main(int argc, char** argv) {
     }
 
     SM.cleanup(DEFAULT_TIMEOUT);
+    game_manager.cleanup(DEFAULT_TIMEOUT);
     SDL_Quit();
     return 0;
 }

@@ -124,7 +124,7 @@ class cPhysic_manager{
         //void PM_check_rect_circle(phys_cont*,phys_cont*);
         //void PM_check_circle_circle(phys_cont*,phys_cont*);
         bool PM_check_lines(line line1, line line2);
-        void PM_create_line(phys_cont*,int,line*);
+        void PM_create_line(phys_cont*,int,line);
 
         //Used for the check point functions
         line temp_line;

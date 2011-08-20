@@ -27,14 +27,13 @@ class std_menu {
     public:
         std_menu();
         ~std_menu();
-        int new_menu_button(int x, int y);
+        int new_menu_button(int x, int y, int* callback);
         void set_background(SDL_Surface*);
         void set_button_image(SDL_Surface*);
         void set_b_image_active(SDL_Surface*);
         void set_b_image_clicked(SDL_Surface*);
         void set_vert_pad(int);
         void set_horiz_pad(int);
-        void reg_callback(int button, void (*fn) (void*));
         void show_menu();
         friend void menu_input_events(SDL_Event*);
 };
@@ -45,13 +44,15 @@ class menu_button: public cActor {
         vector<Uint8> _event_binds;
 
         SDL_Surface* std;
-        SDL_Surface* active;
+        SDL_Surface* hover;
         SDL_Surface* clicked;
 
         collision_zone click_box;
 
-        void (*callback) (void*);
+        int* callback;
 
+        bool click_state;
+        bool hover_state;
     public:
         menu_button(int,int,SDL_Surface*,SDL_Surface*,SDL_Surface*);
         ~menu_button();
@@ -59,7 +60,7 @@ class menu_button: public cActor {
         int set_priority(int);
         void set_ID(int);
         void set_typeID(int);
-        void reg_callback(void (*fn) (void*));
+        void reg_callback(int*);
 
         vector<Uint8>* event_binds();
 

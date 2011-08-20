@@ -8,7 +8,27 @@
 #include "physics.h"
 #include "UI/menu.h"
 
-void init_game_screen(cActor_manager* AM);
+class cGame {
+    private:
+        SDL_Surface* G_dot_img;
+        SDL_Surface* G_back;
+        SDL_Surface* G_quit_button;
+        SDL_Surface* G_quit_clicked;
+
+        std_menu* main_menu;
+
+        int menu_callback;
+
+        bool game_thread_active;
+        SDL_Thread* game_thread_ptr;
+    public:
+        cGame();
+        ~cGame();
+        void cleanup(int);
+        void init_resources();
+        void spawn_actor(void*);
+        friend int start_menu(void*);
+};
 
 int start_menu(void*);
 
