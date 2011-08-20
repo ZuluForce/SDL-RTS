@@ -2,6 +2,7 @@
 
 extern cActor_manager* pAM;
 extern cPhysic_manager* pPM;
+extern cScreen_manager* pSM;
 
 extern bool quit_threads;
 
@@ -20,38 +21,46 @@ std_menu::std_menu() {
 }
 
 std_menu::~std_menu() {
-    free(this.menus);
+    ;
 }
 
-int std_menu::new_menu() {
-    menus.push_back();
-    return menu_ID.ID_getid();
-}
-int std_menu::new_menu_button(int menuID, int x, int y) {
+int std_menu::new_menu_button(int x, int y) {
     menu_button* new_button = new menu_button(x,y,default_static,default_active,NULL);
     new_button->set_ID(option_ID.ID_getid());
-    menus[menuID].push_back(new_button);
+    new_button->set_priority(1);
+    menu.push_back(new_button);
+    pAM->AM_register(new_button);
     return option_ID.ID_recall();
 }
+
 void std_menu::set_background(SDL_Surface* img) {
     pAM->AM_set_bg(img);
     return;
 }
 
 void std_menu::set_button_image(SDL_Surface* img) {
-    *default_static = *img;
+    default_static = img;
     return;
 }
 
 void std_menu::set_b_image_active(SDL_Surface* img) {
-    *default_active = *img;
+    default_active = img;
     return;
 }
 
-void std_menu::show_menu(int meuID) {
+void std_menu::set_b_image_clicked(SDL_Surface* img) {
+    default_clicked = img;
+    return;
+}
+
+void std_menu::reg_callback(int button, void (*fn) (void*)) {
+    menu[button]->reg_callback(fn);
+}
+
+void std_menu::show_menu() {
     vector< menu_button* >::iterator button_it;
 
-    for (button_it = menus[menuID].begin(); button_it != menus[menuID].end(); ++button_it) {
+    for (button_it = menu.begin(); button_it != menu.end(); ++button_it) {
         (*button_it)->show();
     }
 
@@ -71,14 +80,30 @@ menu_button::menu_button(int x, int y, SDL_Surface* std, SDL_Surface* active, SD
     curr_info.surf = std;
     curr_info.clip = NULL;
 
-    this.std = std;
-    this.active = active;
-    this.clicked = clicked;
+    std = std;
+    active = active;
+    clicked = clicked;
 
     _event_binds.push_back(SDL_MOUSEBUTTONDOWN);
     _event_binds.push_back(SDL_MOUSEMOTION);
 
-    update = true;
+    click_box.x = x;
+    click_box.y = y;
+    click_box.param.w_h = new coordinates;
+    if ( std != NULL ) {
+        click_box.param.w_h->first = std->w;
+        click_box.param.w_h->second = std->h;
+
+        click_box.sides[0] = {x, y, x + std->w, y};
+        click_box.sides[1] = {x + std->w, y, x + std->w, y + std->h};
+        click_box.sides[2] = {x, y + std->h, x + std->w, y + std->h};
+        click_box.sides[3] = {x, y, x, y + std->h};
+    } else {
+        click_box.param.w_h->first = 0;
+        click_box.param.w_h->second = 0;
+    }
+
+    update = false;
 }
 
 bool menu_button::check() {
@@ -86,19 +111,34 @@ bool menu_button::check() {
 }
 
 void menu_button::check_events(event_vector** events, int* load, Uint8* key_states) {
-    ;
+    SDL_Event mouse_event;
+    for (int i = 0; i < load[SDL_MOUSEBUTTONDOWN]; ++i) {
+        mouse_event = events[SDL_MOUSEBUTTONDOWN]->at(i);
+        coordinates click_xy;
+        click_xy.first = mouse_event.button.x;
+        click_xy.second = mouse_event.button.y;
+        printf("MouseButtonDown event at location <%d,%d>\n",click_xy.first,click_xy.second);
+        if ( mouse_event.button.button == SDL_BUTTON_LEFT &&
+            pPM->PM_check_point1(&click_box, &click_xy) ) {
+            printf("Button (%d) was left-clicked\n",ID);
+        }
+    }
 }
 
-int set_priority(int i) {
+int menu_button::set_priority(int i) {
     priority = i;
     return 0;
+}
+
+void menu_button::reg_callback(void (*fn) (void*)) {
+    this->callback = fn;
 }
 
 vector<Uint8>* menu_button::event_binds() {
     return &_event_binds;
 }
 
-sDisplay_info* menu_button::get_display()() {
+sDisplay_info* menu_button::get_display() {
     return &curr_info;
 }
 
@@ -111,5 +151,9 @@ void menu_button::set_typeID(int id) {
 }
 
 void menu_button::show() {
+    update = true;
+}
 
+void menu_button::hide() {
+    update = false;
 }

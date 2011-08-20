@@ -2,6 +2,11 @@
 
 extern cScreen_manager* pSM;
 extern cPhysic_manager* pPM;
+extern cEvent_dispatch* pEM;
+extern cActor_manager* pAM;
+
+extern bool quit_threads;
+extern void (*onQuit) (SDL_Event*);
 
 void init_game_screen(cActor_manager* AM) {
     SDL_Surface* dot_image = load_image("imgs\\dot.bmp");
@@ -79,10 +84,20 @@ void init_game_screen(cActor_manager* AM) {
     return;
 }
 
-void start_menu() {
+int start_menu(void* args) {
     std_menu* menu_sys = new std_menu();
-    int mainID = menu_sys->new_menu();
-    SDL_Surface* quit_button = load_image("imgs\\quit_button.png")
-    menu_sys->new_menu_button(mainID,0,0);
-    return;
+    SDL_Surface* quit_button = load_image("imgs\\quit_button.bmp");
+    SDL_Surface* background = load_image("imgs\\back.bmp");
+    menu_sys->set_button_image(quit_button);
+    menu_sys->set_background(background);
+    int quit;
+    quit = menu_sys->new_menu_button(0,0);
+    menu_sys->show_menu();
+
+    while ( !quit_threads ) {
+        pEM->ED_manage_events(250);
+        pAM->AM_update();
+        std_sleep(3);
+    }
+    return 0;
 }

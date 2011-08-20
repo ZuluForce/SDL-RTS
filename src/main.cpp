@@ -117,11 +117,10 @@ int main(int argc, char** argv) {
     pPM = &PM;
 
     /* Initializes the Actor Objects */
-    init_game_screen(&AM);
+    //init_game_screen(&AM);
+    start_menu(NULL);
     //SDL_Surface* background = load_image("imgs\\back.bmp");
     //AM.AM_set_bg(background);
-
-    SDL_CreateThread(actor_thread_check,NULL);
 
     while( true && !quit_threads) {
         EM.ED_manage_events(250);

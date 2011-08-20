@@ -17,7 +17,7 @@ node::node(int id, node* next_node) {
 cID_dispatch::cID_dispatch() {
     ID_counter = 0;
     ID_limit = INT_MAX;
-    recent_ID = -1
+    recent_ID = -1;
 
     /* free_buffer is a singly-linked list of free ID's */
     free_buffer = NULL;
