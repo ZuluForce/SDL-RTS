@@ -46,6 +46,7 @@ void cGame::init_resources() {
     G_back = load_image("imgs\\back.bmp");
     G_quit_button = load_image("imgs\\quit_button.bmp");
     G_quit_clicked = load_image("imgs\\quit_button_clicked.bmp");
+    G_quit_hover = load_image("imgs\\quit_button_hover.bmp");
 }
 
 void cGame::spawn_actor(void*) {
@@ -56,6 +57,11 @@ void cGame::spawn_actor(void*) {
     pAM->AM_register(obj1);
 }
 
+void cGame::game_quit(int& button) {
+    quit_threads = true;
+    return;
+}
+
 int start_menu(void* args) {
     cGame* game = (cGame*) args;
     game->game_thread_active = true;
@@ -63,9 +69,10 @@ int start_menu(void* args) {
     std_menu* main_menu = new std_menu();
     main_menu->set_button_image(game->G_quit_button);
     main_menu->set_b_image_clicked(game->G_quit_clicked);
+    main_menu->set_b_image_hover(game->G_quit_hover);
     main_menu->set_background(game->G_back);
     int quit;
-    quit = main_menu->new_menu_button(0,0,&game->menu_callback);
+    quit = main_menu->new_menu_button(0,0, MakeDelegate(game, &cGame::game_quit));
     main_menu->show_menu();
 
     while ( !quit_threads ) {

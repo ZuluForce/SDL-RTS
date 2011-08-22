@@ -14,6 +14,7 @@ class cGame {
         SDL_Surface* G_back;
         SDL_Surface* G_quit_button;
         SDL_Surface* G_quit_clicked;
+        SDL_Surface* G_quit_hover;
 
         std_menu* main_menu;
 
@@ -27,6 +28,7 @@ class cGame {
         void cleanup(int);
         void init_resources();
         void spawn_actor(void*);
+        void game_quit(int&);
         friend int start_menu(void*);
 };
 

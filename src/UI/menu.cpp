@@ -8,24 +8,14 @@ extern bool quit_threads;
 
 std_menu::std_menu() {
     option_ID = cID_dispatch();
-
-    default_w = default_h = -1;
-
-    screen_w = pSM->SM_get_w();
-    screen_h = pSM->SM_get_h();
-
-    w_center = screen_w / 2;
-    h_center = screen_h / 2;
-
-    vertical_pad = horiz_pad = 0;
 }
 
 std_menu::~std_menu() {
     ;
 }
 
-int std_menu::new_menu_button(int x, int y, int* callback) {
-    menu_button* new_button = new menu_button(x,y,default_static,default_active,default_clicked);
+int std_menu::new_menu_button(int x, int y, std_clbck callback) {
+    menu_button* new_button = new menu_button(x,y,default_static,default_hover,default_clicked);
     new_button->set_ID(option_ID.ID_getid());
     new_button->set_priority(1);
     new_button->reg_callback(callback);
@@ -44,14 +34,18 @@ void std_menu::set_button_image(SDL_Surface* img) {
     return;
 }
 
-void std_menu::set_b_image_active(SDL_Surface* img) {
-    default_active = img;
+void std_menu::set_b_image_hover(SDL_Surface* img) {
+    default_hover = img;
     return;
 }
 
 void std_menu::set_b_image_clicked(SDL_Surface* img) {
     default_clicked = img;
     return;
+}
+
+void std_menu::set_callback(int& button, std_clbck func) {
+    menu[button]->reg_callback(func);
 }
 
 void std_menu::show_menu() {
@@ -61,14 +55,6 @@ void std_menu::show_menu() {
         (*button_it)->show();
     }
 
-}
-
-void std_menu::set_vert_pad(int pixels) {
-    vertical_pad = pixels;
-}
-
-void std_menu::set_horiz_pad(int pixels) {
-    horiz_pad = pixels;
 }
 
 menu_button::menu_button(int x, int y, SDL_Surface* std, SDL_Surface* hover, SDL_Surface* clicked) {
@@ -126,7 +112,7 @@ void menu_button::check_events(event_vector** events, int* load, Uint8* key_stat
         printf("MouseButtonDown event at location <%d,%d>\n",xy.first,xy.second);
         if ( mouse_event.button.button == SDL_BUTTON_LEFT &&
             pPM->PM_check_point1(&click_box, &xy) ) {
-            *callback = ID;
+            callback(ID);
             curr_info.surf = clicked;
             click_state = true;
         }
@@ -135,7 +121,11 @@ void menu_button::check_events(event_vector** events, int* load, Uint8* key_stat
     for (int i = 0; i < load[SDL_MOUSEBUTTONUP]; ++i) {
         mouse_event = events[SDL_MOUSEBUTTONUP]->at(i);
         if ( mouse_event.button.button == SDL_BUTTON_LEFT && click_state) {
-            curr_info.surf = std;
+            if ( hover_state ) {
+                curr_info.surf = hover;
+            } else {
+                curr_info.surf = std;
+            }
             click_state = false;
         }
     }
@@ -160,8 +150,8 @@ int menu_button::set_priority(int i) {
     return 0;
 }
 
-void menu_button::reg_callback(int* cb) {
-    callback = cb;
+void menu_button::reg_callback(std_clbck func) {
+    callback = func;
 }
 
 vector<Uint8>* menu_button::event_binds() {

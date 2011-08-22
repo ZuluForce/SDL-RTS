@@ -7,18 +7,19 @@
 #include "screen_manager.h"
 #include "std_gfx.h"
 #include "event_manager.h"
+#include "FastDelegate.h"
+#include "FastDelegateBind.h"
+
+using namespace fastdelegate;
 
 class menu_button;
+typedef FastDelegate<void (int&)> std_clbck;
 
 class std_menu {
     private:
         SDL_Surface* default_static;
-        SDL_Surface* default_active;
+        SDL_Surface* default_hover;
         SDL_Surface* default_clicked;
-
-        int default_w,default_h;
-        int screen_w,screen_h, w_center, h_center;
-        int vertical_pad,horiz_pad;
 
         cID_dispatch option_ID;
 
@@ -27,13 +28,12 @@ class std_menu {
     public:
         std_menu();
         ~std_menu();
-        int new_menu_button(int x, int y, int* callback);
+        int new_menu_button(int x, int y, std_clbck callback);
         void set_background(SDL_Surface*);
         void set_button_image(SDL_Surface*);
-        void set_b_image_active(SDL_Surface*);
+        void set_b_image_hover(SDL_Surface*);
         void set_b_image_clicked(SDL_Surface*);
-        void set_vert_pad(int);
-        void set_horiz_pad(int);
+        void set_callback(int& button, std_clbck);
         void show_menu();
         friend void menu_input_events(SDL_Event*);
 };
@@ -49,7 +49,7 @@ class menu_button: public cActor {
 
         collision_zone click_box;
 
-        int* callback;
+        std_clbck callback;
 
         bool click_state;
         bool hover_state;
@@ -60,7 +60,7 @@ class menu_button: public cActor {
         int set_priority(int);
         void set_ID(int);
         void set_typeID(int);
-        void reg_callback(int*);
+        void reg_callback(std_clbck);
 
         vector<Uint8>* event_binds();
 
