@@ -86,7 +86,7 @@ int main(int argc, char** argv) {
 
     /* Setting up the screen */
     cScreen_manager SM = cScreen_manager(640, 480, 32, SDL_SWSURFACE, true);
-    SM.SM_set_caption("Planeman-RTS");
+    SM.SM_set_caption("Planeman-Engine");
     SM.SM_maxFPS(2);
     SM_start(&SM);
     pSM = &SM;

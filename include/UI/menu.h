@@ -13,7 +13,7 @@
 using namespace fastdelegate;
 
 class menu_button;
-typedef FastDelegate<void (int&)> std_clbck;
+typedef FastDelegate1<int&,void> std_clbck;
 
 class std_menu {
     private:
@@ -35,6 +35,9 @@ class std_menu {
         void set_b_image_clicked(SDL_Surface*);
         void set_callback(int& button, std_clbck);
         void show_menu();
+        void show_menu(int,int);
+        void hide_menu();
+        void hide_menu(int,int);
         friend void menu_input_events(SDL_Event*);
 };
 
@@ -50,6 +53,7 @@ class menu_button: public cActor {
         collision_zone click_box;
 
         std_clbck callback;
+        std_fuse click_delay;
 
         bool click_state;
         bool hover_state;

@@ -54,7 +54,26 @@ void std_menu::show_menu() {
     for (button_it = menu.begin(); button_it != menu.end(); ++button_it) {
         (*button_it)->show();
     }
+}
 
+void std_menu::show_menu(int start, int end) {
+    for (int i = start; i <= end; ++i) {
+        menu[i]->show();
+    }
+}
+
+void std_menu::hide_menu() {
+    vector< menu_button* >::iterator button_it;
+
+    for (button_it = menu.begin(); button_it != menu.end(); ++button_it) {
+        (*button_it)->hide();
+    }
+}
+
+void std_menu::hide_menu(int start, int end) {
+    for (int i = start; i <= end; ++i) {
+        menu[i]->hide();
+    }
 }
 
 menu_button::menu_button(int x, int y, SDL_Surface* std, SDL_Surface* hover, SDL_Surface* clicked) {
@@ -103,6 +122,16 @@ bool menu_button::check() {
 }
 
 void menu_button::check_events(event_vector** events, int* load, Uint8* key_states) {
+    if ( !update ) {
+        return;
+    }
+
+    if (click_state && !click_delay.check()) {
+        //curr_info.surf = clicked;
+        click_state = false;
+        callback(ID);
+        return;
+    }
     SDL_Event mouse_event;
     coordinates xy;
     for (int i = 0; i < load[SDL_MOUSEBUTTONDOWN]; ++i) {
@@ -112,15 +141,18 @@ void menu_button::check_events(event_vector** events, int* load, Uint8* key_stat
         printf("MouseButtonDown event at location <%d,%d>\n",xy.first,xy.second);
         if ( mouse_event.button.button == SDL_BUTTON_LEFT &&
             pPM->PM_check_point1(&click_box, &xy) ) {
-            callback(ID);
+                click_delay.start(100);
+            //callback(ID);
             curr_info.surf = clicked;
+
             click_state = true;
         }
     }
 
     for (int i = 0; i < load[SDL_MOUSEBUTTONUP]; ++i) {
         mouse_event = events[SDL_MOUSEBUTTONUP]->at(i);
-        if ( mouse_event.button.button == SDL_BUTTON_LEFT && click_state) {
+        if ( mouse_event.button.button == SDL_BUTTON_LEFT && click_state &&
+            !click_delay.check()) {
             if ( hover_state ) {
                 curr_info.surf = hover;
             } else {
@@ -159,6 +191,7 @@ vector<Uint8>* menu_button::event_binds() {
 }
 
 sDisplay_info* menu_button::get_display() {
+    if ( !update ) return NULL;
     return &curr_info;
 }
 

@@ -101,6 +101,7 @@ void cActor_manager::AM_blit_buffer(int x, int y, SDL_Surface* src, SDL_Rect* cl
 }
 
 void cActor_manager::AM_blit_buffer(sDisplay_info* sdi) {
+    if ( sdi == NULL) return;
     apply_surface(sdi->x, sdi->y, sdi->surf, Draw_Buffer, sdi->clip);
     return;
 }

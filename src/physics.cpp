@@ -6,7 +6,7 @@
 #define CONT_H cont->param.w_h->second
 
 //For controlling debugging output
-#define _DEBUG 1
+//#define _DEBUG 1
 #define D_ZONE 1
 #define D_LINE 1
 
