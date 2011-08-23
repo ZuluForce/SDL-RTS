@@ -73,6 +73,8 @@ struct collision_zone {
     int PM_ID;
     params param;
 
+    bool cont_clone;
+
     //Holds the coordinates that create a line for each side
     //Order: Top,Left,Bottom,Right
     line sides[4];
@@ -122,6 +124,10 @@ class cPhysic_manager{
         //void PM_check_rect_circle(phys_cont*,phys_cont*);
         //void PM_check_circle_circle(phys_cont*,phys_cont*);
         bool PM_check_lines(line line1, line line2);
+        void PM_create_line(phys_cont*,int,line);
+
+        //Used for the check point functions
+        line temp_line;
 
         coordinates* PM_resolve_collision(coordinates*,coordinates*);
 
@@ -153,6 +159,10 @@ class cPhysic_manager{
         void PM_print_grid();
         void PM_print_line(line);
         bool PM_call_check(line,line);
+        //Checks if a point intersects a zone
+        bool PM_check_point1(collision_zone*,coordinates*);
+        //Checks if a point intersects an actor
+        bool PM_check_point2(phys_cont*,coordinates*);
 };
 
 #endif // PHYSICS_H_INCLUDED

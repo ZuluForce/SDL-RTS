@@ -18,7 +18,7 @@ SDL_Surface* load_image(const char* filename ) {
         fprintf(stderr,"Failed to load image: \"%s\" : %s on line %d\n",filename,__FILE__,__LINE__);
         fprintf(stderr,"\tFail Reason: %s\n",SDL_GetError());
     }
-    printf("\tImage Address: %p\n",optimizedImage);
+    printf("\tImage Address: %p\n\n",optimizedImage);
     return optimizedImage;
 }
 

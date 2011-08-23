@@ -476,7 +476,7 @@ bool cPhysic_manager::PM_check_lines(line line1, line line2) {
 
             #ifdef _DEBUG
             #ifdef D_LINE
-            printf("\tSlope2 = %d\n",slope2);
+            printf("\tSlope2 = %f\n",slope2);
             printf("\tLines would intersect at x = %f\n",rhs);
             #endif
             #endif
@@ -705,4 +705,50 @@ void cPhysic_manager::PM_print_line(line l) {
 
 bool cPhysic_manager::PM_call_check(line l, line l2) {
     return PM_check_lines(l,l2);
+}
+
+bool cPhysic_manager::PM_check_point1(collision_zone* zone, coordinates* pt) {
+    if ( ((zone->sides[0][0] <= pt->first) && (pt->first <= zone->sides[0][2])) &&
+        ((zone->sides[1][1] <= pt->second) && (pt->second <= zone->sides[1][3])) ) {
+            return true;
+    }
+    return false;
+}
+
+bool cPhysic_manager::PM_check_point2(phys_cont* cont, coordinates* point) {
+    temp_line[0] = temp_line[2] = point->first;
+    temp_line[1] = temp_line[3] = point->second;
+    line cont_line;
+
+    for (int i = 0; i < 4; ++i) {
+        PM_create_line(cont,i,cont_line);
+        if ( PM_check_lines( temp_line, cont_line) ) {
+            return true;
+        }
+    }
+    return false;
+}
+
+void cPhysic_manager::PM_create_line(phys_cont* cont, int side, line line_ptr) {
+    switch( side ) {
+        case 0:
+            line_ptr[0] = cont->x;
+            line_ptr[1] = line_ptr[3] = cont->y;
+            line_ptr[2] = cont->x + CONT_W;
+
+        case 1:
+            line_ptr[0] = line_ptr[2] = cont->x + CONT_W;
+            line_ptr[1] = cont->y;
+            line_ptr[3] = cont->y + CONT_H;
+
+        case 2:
+            line_ptr[0] = cont->x;
+            line_ptr[1] = line_ptr[3] = cont->y + CONT_H;
+            line_ptr[2] = cont->x + CONT_W;
+
+        case 3:
+            line_ptr[0] = line_ptr[2] = cont->x;
+            line_ptr[1] = cont->y;
+            line_ptr[3] = cont->y + CONT_H;
+    }
 }

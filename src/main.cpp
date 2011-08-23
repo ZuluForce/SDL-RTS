@@ -50,16 +50,6 @@ cPhysic_manager* pPM;
 
 //------------------------------------------------------//
 
-typedef class {
-    private:
-        typedef struct {
-            int maxFPS;
-        } sSettings;
-
-        string get_next_setting(string* filename);
-
-} cSettings;
-
 void onQuit(SDL_Event* event) {
     printf("Quit has been pressed!\n");
     quit_threads = true;
@@ -96,7 +86,7 @@ int main(int argc, char** argv) {
 
     /* Setting up the screen */
     cScreen_manager SM = cScreen_manager(640, 480, 32, SDL_SWSURFACE, true);
-    SM.SM_set_caption("Planeman-RTS");
+    SM.SM_set_caption("Planeman-Engine");
     SM.SM_maxFPS(2);
     SM_start(&SM);
     pSM = &SM;
@@ -117,11 +107,9 @@ int main(int argc, char** argv) {
     pPM = &PM;
 
     /* Initializes the Actor Objects */
-    init_game_screen(&AM);
-    //SDL_Surface* background = load_image("imgs\\back.bmp");
-    //AM.AM_set_bg(background);
-
-    SDL_CreateThread(actor_thread_check,NULL);
+    //init_game_screen(&AM);
+    cGame game_manager = cGame();
+    SDL_CreateThread(start_menu,&game_manager);
 
     while( true && !quit_threads) {
         EM.ED_manage_events(250);
@@ -130,6 +118,7 @@ int main(int argc, char** argv) {
     }
 
     SM.cleanup(DEFAULT_TIMEOUT);
+    game_manager.cleanup(DEFAULT_TIMEOUT);
     SDL_Quit();
     return 0;
 }

@@ -1,6 +1,7 @@
 #ifndef STD_GFX_H_INCLUDED
 #define STD_GFX_H_INCLUDED
 
+#include <ctime>
 #include "SDL/SDL.h"
 #include "SDL/SDL_image.h"
 
@@ -58,5 +59,14 @@ typedef class std_fuse {
         bool check();
         void wait_out();
 } std_fuse;
+
+typedef class std_scale {
+    private:
+        clock_t start_tick;
+    public:
+        void set_scale(int msec);
+        void start();
+        float measure();
+} std_scale;
 
 #endif //STD_GFX_H_INCLUDED
