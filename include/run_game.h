@@ -7,6 +7,7 @@
 #include "Actors/simple_actors.h"
 #include "physics.h"
 #include "UI/menu.h"
+#include "Audio/audio_manager.h"
 
 class cGame {
     private:

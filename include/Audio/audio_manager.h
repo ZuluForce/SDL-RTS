@@ -1,0 +1,21 @@
+#ifndef AUDIO_MANAGER_H_INCLUDED
+#define AUDIO_MANAGER_H_INCLUDED
+
+#include <string>
+#include "SDL/SDL.h"
+#include "SDL/SDL_mixer.h"
+
+/* Abreviated AMM for future refernece.
+   Stands for Audio/Music manager.
+   Trying to avoid conflict with Actor Manager */
+class cAudio_manager {
+    Mix_music* music;
+
+    public:
+        cAudio_manager();
+        ~cAudio_manager();
+        bool AMM_set_music(string);
+        void AMM_play_music();
+};
+
+#endif //AUDIO_MANAGER_H_INCLUDED

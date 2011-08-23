@@ -138,7 +138,7 @@ void menu_button::check_events(event_vector** events, int* load, Uint8* key_stat
         mouse_event = events[SDL_MOUSEBUTTONDOWN]->at(i);
         xy.first = mouse_event.button.x;
         xy.second = mouse_event.button.y;
-        printf("MouseButtonDown event at location <%d,%d>\n",xy.first,xy.second);
+        //printf("MouseButtonDown event at location <%d,%d>\n",xy.first,xy.second);
         if ( mouse_event.button.button == SDL_BUTTON_LEFT &&
             pPM->PM_check_point1(&click_box, &xy) ) {
                 click_delay.start(100);

@@ -79,12 +79,17 @@ void cGame::start_game(int& button) {
     main_menu->hide_menu();
     pAM->AM_set_bg(G_game_back);
 
+    /* Currently there is a problem with a xcb_io library in
+       Ubuntu 11.04 that is not allowing the game to work if
+       a Dot actor is created */
+    #ifdef __MINGW32__
     Dot* new_dot = new Dot(0);
     new_dot->set_pos(0,0);
     new_dot->set_image(G_dot_img);
     new_dot->set_priority(1);
     pAM->AM_register(new_dot);
     this->active_objs.push_back(new_dot);
+    #endif
 
     params* temp_param = new params;
     temp_param->w_h = new coordinates;
@@ -106,16 +111,6 @@ int start_menu(void* args) {
     std_menu* main_menu = new std_menu();
     game->main_menu = main_menu;
     game->start_menu();
-
-    /*
-    main_menu->set_button_image(game->G_quit_button);
-    main_menu->set_b_image_clicked(game->G_quit_clicked);
-    main_menu->set_b_image_hover(game->G_quit_hover);
-    main_menu->set_background(game->G_back);
-    int quit;
-    quit = main_menu->new_menu_button(300,220, MakeDelegate(game, &cGame::game_quit));
-    main_menu->show_menu();
-    */
 
     while ( !quit_threads ) {
         game->update();
