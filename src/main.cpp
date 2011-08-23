@@ -13,7 +13,7 @@
 #include "event_manager.h"
 #include "ID.h"
 #include "run_game.h"
-#include "UI\menu.h"
+#include "UI/menu.h"
 
 #ifdef __MINGW32__
 

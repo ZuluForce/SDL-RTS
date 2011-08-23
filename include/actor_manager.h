@@ -29,11 +29,19 @@ class cActor {
         int ID,typeID;
         int priority, priorityID;
 
+        #ifdef __MINGW32__
         virtual bool check();
         virtual void check_events(event_vector**, int* load, Uint8* key_states);
         virtual sDisplay_info* get_display();
         virtual int set_priority(int);
         virtual vector<Uint8>* event_binds();
+        #elif __GNUC__
+        virtual bool check() {};
+        virtual void check_events(event_vector**, int* load, Uint8* key_states) {};
+        virtual sDisplay_info* get_display() {};
+        virtual int set_priority(int) {};
+        virtual vector<Uint8>* event_binds() {};
+        #endif
 };
 
 /* Functions for mantaining order in the priority queue */

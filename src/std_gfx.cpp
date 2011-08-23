@@ -1,4 +1,3 @@
-//#include "SDL/SDL.h"
 #include "std_gfx.h"
 
 SDL_Surface* load_image(const char* filename ) {
@@ -7,7 +6,6 @@ SDL_Surface* load_image(const char* filename ) {
 
     SDL_Surface* optimizedImage = NULL;
 
-    //loadedImage = SDL_LoadBMP( filename );
     loadedImage = IMG_Load( filename );
     if( loadedImage != NULL )
     {

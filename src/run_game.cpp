@@ -44,15 +44,15 @@ void cGame::cleanup(int timeout) {
 }
 
 void cGame::init_resources() {
-    G_dot_img = load_image("imgs\\dot.bmp");
+    G_dot_img = load_image("imgs/dot.bmp");
     SDL_SetColorKey(G_dot_img, SDL_SRCCOLORKEY | SDL_RLEACCEL,0);
 
-    G_menu_back = load_image("imgs\\menu_back.png");
-    G_game_back = load_image("imgs\\back.bmp");
-    G_start_button = load_image("imgs\\start_button.png");
-    G_quit_button = load_image("imgs\\quit_button.png");
-    G_quit_clicked = load_image("imgs\\quit_button_clicked.png");
-    G_quit_hover = load_image("imgs\\quit_button_hover.png");
+    G_menu_back = load_image("imgs/menu_back.png");
+    G_game_back = load_image("imgs/back.bmp");
+    G_start_button = load_image("imgs/start_button.png");
+    G_quit_button = load_image("imgs/quit_button.png");
+    G_quit_clicked = load_image("imgs/quit_button_clicked.png");
+    G_quit_hover = load_image("imgs/quit_button_hover.png");
 }
 
 void cGame::spawn_actor(void*) {

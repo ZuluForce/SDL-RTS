@@ -735,20 +735,25 @@ void cPhysic_manager::PM_create_line(phys_cont* cont, int side, line line_ptr) {
             line_ptr[0] = cont->x;
             line_ptr[1] = line_ptr[3] = cont->y;
             line_ptr[2] = cont->x + CONT_W;
-
+            break;
         case 1:
             line_ptr[0] = line_ptr[2] = cont->x + CONT_W;
             line_ptr[1] = cont->y;
             line_ptr[3] = cont->y + CONT_H;
-
+            break;
         case 2:
             line_ptr[0] = cont->x;
             line_ptr[1] = line_ptr[3] = cont->y + CONT_H;
             line_ptr[2] = cont->x + CONT_W;
-
+            break;
         case 3:
             line_ptr[0] = line_ptr[2] = cont->x;
             line_ptr[1] = cont->y;
             line_ptr[3] = cont->y + CONT_H;
+            break;
+        default:
+            line_ptr[0] = line_ptr[2] = cont->x;
+            line_ptr[1] = line_ptr[3] = cont->y;
+            break;
     }
 }
