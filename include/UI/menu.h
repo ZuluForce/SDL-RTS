@@ -2,6 +2,7 @@
 #define MENU_H_INCLUDED
 
 #include <vector>
+#include "menu_items.h"
 #include "physics.h"
 #include "actor_manager.h"
 #include "screen_manager.h"
@@ -23,12 +24,13 @@ class std_menu {
 
         cID_dispatch option_ID;
 
-        vector< menu_button* > menu;
+        //vector< menu_button* > menu;
+        vector< menu_obj* > menu;
 
     public:
         std_menu();
         ~std_menu();
-        int new_menu_button(int x, int y, std_clbck callback);
+        int reg_menu_obj(menu_obj* new_obj, std_clbck callback);
         void set_background(SDL_Surface*);
         void set_button_image(SDL_Surface*);
         void set_b_image_hover(SDL_Surface*);
@@ -39,40 +41,6 @@ class std_menu {
         void hide_menu();
         void hide_menu(int,int);
         friend void menu_input_events(SDL_Event*);
-};
-
-class menu_button: public cActor {
-    private:
-        sDisplay_info curr_info;
-        vector<Uint8> _event_binds;
-
-        SDL_Surface* std;
-        SDL_Surface* hover;
-        SDL_Surface* clicked;
-
-        collision_zone click_box;
-
-        std_clbck callback;
-        std_fuse click_delay;
-
-        bool click_state;
-        bool hover_state;
-    public:
-        menu_button(int,int,SDL_Surface*,SDL_Surface*,SDL_Surface*);
-        ~menu_button();
-
-        int set_priority(int);
-        void set_ID(int);
-        void set_typeID(int);
-        void reg_callback(std_clbck);
-
-        vector<Uint8>* event_binds();
-
-        bool check();
-        void check_events(event_vector** events, int* load, Uint8* key_states);
-        sDisplay_info* get_display();
-        void show();
-        void hide();
 };
 
 #endif // MENU_H_INCLUDED

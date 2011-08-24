@@ -22,7 +22,7 @@ struct sDisplay_info {
 
 class cActor {
     protected:
-        sDisplay_info* curr_info;
+        sDisplay_info curr_info;
         bool update;
 
     public:

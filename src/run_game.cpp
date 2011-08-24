@@ -8,6 +8,8 @@ extern cActor_manager* pAM;
 extern bool quit_threads;
 extern void (*onQuit) (SDL_Event*);
 
+cAudio_manager* pAMM;
+
 cGame::cGame() {
     init_resources();
     game_thread_active = false;
@@ -48,11 +50,17 @@ void cGame::init_resources() {
     SDL_SetColorKey(G_dot_img, SDL_SRCCOLORKEY | SDL_RLEACCEL,0);
 
     G_menu_back = load_image("imgs/menu_back.png");
-    G_game_back = load_image("imgs/back.bmp");
+    G_game_back = load_image("imgs/back.png");
     G_start_button = load_image("imgs/start_button.png");
+    G_start_hover = load_image("imgs/start_button_hover.png");
     G_quit_button = load_image("imgs/quit_button.png");
     G_quit_clicked = load_image("imgs/quit_button_clicked.png");
     G_quit_hover = load_image("imgs/quit_button_hover.png");
+    G_mute_button = load_image("imgs/mute.png");
+    G_muted = load_image("imgs/muted.png");
+    G_scale = load_image("imgs/scale.png");
+    G_scale_load = load_image("imgs/scale_load.png");
+    G_scale_slide = load_image("imgs/scale_slide.png");
 }
 
 void cGame::spawn_actor(void*) {
@@ -68,10 +76,25 @@ void cGame::start_menu() {
     main_menu->set_b_image_clicked(G_quit_clicked);
     main_menu->set_b_image_hover(G_quit_hover);
     main_menu->set_background(G_menu_back);
-    b_quit = main_menu->new_menu_button(270,220, MakeDelegate(this, &cGame::game_quit));
-    main_menu->set_button_image(G_start_button);
-    b_start = main_menu->new_menu_button(270,160, MakeDelegate(this, &cGame::start_game));
-    main_menu->show_menu();
+    /* Quit Button */
+    menu_button* new_button = new menu_button(270,220,G_quit_button,G_quit_hover,G_quit_clicked);
+    b_quit = main_menu->reg_menu_obj(new_button, MakeDelegate(this,&cGame::game_quit));
+
+    /* Start Button */
+    new_button = new menu_button(270,100,G_start_button,G_start_hover,G_quit_clicked);
+    b_start = main_menu->reg_menu_obj(new_button, MakeDelegate(this, &cGame::start_game));
+
+    /* Settings Button */
+    new_button = new menu_button(270,160,G_start_button,G_start_hover,G_quit_clicked);
+    b_settings = main_menu->reg_menu_obj((new_button, MakeDelegate(this, &cGame::load_settings));
+
+    /* Mute Button */
+    new_button = new mute_button(0,0,G_mute_button,G_mute_button,G_muted);
+    b_mute = main_menu->reg_menu_obj(new_button, MakeDelegate(AMM, &cAudio_manager::AMM_set_music_vol));
+    main_menu->show_menu(b_quit,b_mute);
+
+    menu_slider* new_slider = new menu_slider(270,220,G_scale,G_scale_load,G_scale_slide);
+    b_music_vol;
 }
 
 void cGame::start_game(int& button) {
@@ -82,7 +105,7 @@ void cGame::start_game(int& button) {
     /* Currently there is a problem with a xcb_io library in
        Ubuntu 11.04 that is not allowing the game to work if
        a Dot actor is created */
-    #ifdef __MINGW32__
+    #ifdef __MINGW32_
     Dot* new_dot = new Dot(0);
     new_dot->set_pos(0,0);
     new_dot->set_image(G_dot_img);
@@ -99,6 +122,11 @@ void cGame::start_game(int& button) {
     pPM->PM_set_collide_zone(200, 200, temp_param, 0);
 }
 
+void cGame::load_settings(int& button) {
+    main_menu->hide_menu(b_quit,b_settings);
+    main_menu->show_menu(b_music_vol,b_music_vol);
+}
+
 void cGame::game_quit(int& button) {
     quit_threads = true;
     return;
@@ -106,16 +134,23 @@ void cGame::game_quit(int& button) {
 
 int start_menu(void* args) {
     cGame* game = (cGame*) args;
+    cAudio_manager* AMM = new cAudio_manager();
+    game->AMM = AMM;
+    pAMM = AMM;
     game->game_thread_active = true;
 
     std_menu* main_menu = new std_menu();
     game->main_menu = main_menu;
     game->start_menu();
+    AMM->AMM_set_music("audio/menu_music.mp3");
+    //AMM->AMM_set_music("audio/Granite.flac");
+    AMM->AMM_play_music();
 
     while ( !quit_threads ) {
         game->update();
         std_sleep(3);
     }
+
     printf("Exiting the game thread\n");
     game->game_thread_active = false;
     return 0;

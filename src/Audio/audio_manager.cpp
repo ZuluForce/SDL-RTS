@@ -14,18 +14,27 @@ cAudio_manager::~cAudio_manager() {
     return;
 }
 
-bool cAudio_manager::AMM_set_music(string music) {
-    printf("Loading music file : %s\n",music);
+bool cAudio_manager::AMM_set_music(std::string music_file) {
+    printf("Loading music file : %s\n", music_file.c_str());
 
-    music = Mix_LoadMUS( music.c_str() );
+    music = Mix_LoadMUS( music_file.c_str() );
 
     if ( music == NULL) {
-        printf("/tFailed to load music file\n");
+        printf("\tFailed to load music file\n");
+        fprintf(stderr, "Failed to load music file : %s\n",music_file.c_str());
         return false;
     }
     return true;
 }
 
-void cAudio_manager::AM_play_music() {
+void cAudio_manager::AMM_play_music() {
     Mix_PlayMusic( music, -1);
+}
+
+void cAudio_manager::AMM_set_music_vol(int& vol) {
+    Mix_VolumeMusic(vol);
+}
+
+int cAudio_manager::AMM_get_music_vol() {
+    return Mix_VolumeMusic(-1);
 }

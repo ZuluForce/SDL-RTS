@@ -15,18 +15,26 @@ class cGame {
         SDL_Surface* G_menu_back;
         SDL_Surface* G_game_back;
         SDL_Surface* G_start_button;
+        SDL_Surface* G_start_hover;
         SDL_Surface* G_quit_button;
         SDL_Surface* G_quit_clicked;
         SDL_Surface* G_quit_hover;
+        SDL_Surface* G_mute_button;
+        SDL_Surface* G_muted;
+        SDL_Surface* G_scale;
+        SDL_Surface* G_scale_load;
+        SDL_Surface* G_scale_slide;
 
         std_menu* main_menu;
-        int b_start,b_quit;
+        int b_start,b_quit, b_mute, b_settings, b_music_vol;
 
         bool game_thread_active;
         SDL_Thread* game_thread_ptr;
 
         vector< cActor* > active_objs;
     public:
+        cAudio_manager* AMM;
+
         cGame();
         ~cGame();
         void update();
@@ -36,6 +44,7 @@ class cGame {
         void start_menu();
         /* Button Callbacks */
         void start_game(int&);
+        void load_settings(int&);
         void game_quit(int&);
         /*------------------*/
 
