@@ -98,10 +98,16 @@ class menu_slider : public menu_obj {
         surfp s_load;
         surfp slider;
 
+        bool horiz; /* true = horizontal orientation */
+        Uint8 style;
+
         static_obj slider_actor;
-        line slide_bound;
+        line slide_bound; /* {x_low,x_high,y_low,y_high} */
+        SDL_Rect load_clip; /* Used for blitting the load overlay onto the scale */
 
         bool click_state;
+
+        void blit_load_bar(int load_percent);
 
     public:
         menu_slider(int x, int y, int w, surfp scale, surfp s_load, surfp slider);

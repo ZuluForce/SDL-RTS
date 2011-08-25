@@ -251,7 +251,12 @@ menu_slider(int x, int y, surfp scale, surfp s_load, surfp slider) {
     click_box.x = x;
     click_box.y = y;
     click_box.param.w_h = new coordinates;
-    build_click_box(x,y,std,click_box);
+    build_click_box(x,y,scale,click_box);
+
+    load_clip.x = x;
+    load_clip.y = y;
+    load_clip.w = s_load->w;
+    load_clip.h = s_load->h;
 
     update = false;
     click_state = false;
@@ -261,10 +266,20 @@ void menu_slider::set_slider_bound(int x, int x_high, int y, int y_high) {
     slide_bound = {x, x_high, y, y_high};
 
     /* Check if current slider position is in bound */
+    /*
     curr_info.x = curr_info.x > x_high ? x_high : curr_info.x;
     curr_info.x = curr_info.x < x ? x : curr_info.x;
     curr_info.y = curr_info.y > y_high ? y_high : curr_info.y;
     curr_info.y = curr_info.y < y ? y : curr_info.y;
+    */
+    slider_actor.move_to(x,y);
+
+    build_click_box(x,y,slider,click_box);
+
+    load_clip.x = x;
+    load_clip.y = y;
+    load_clip.w = x_high - x;
+    load_clip.h = y_high - y;
 }
 
 void menu_slider::check_events(event_vector** events, int* load, Uint8* key_states) {
@@ -278,10 +293,26 @@ void menu_slider::check_events(event_vector** events, int* load, Uint8* key_stat
         if ( event.button.button == SDLK_LEFT &&
             pPM->PM_check_point1(&click_box, &xy) ) {
                 /* Move Slider to new position */
+                if ( horiz ) {
+                    /* This works assuming you assign the slide bound
+                    and rebuild the click_box for that bound */
+                    curr_info.x = xy.first;
+                } else {
+                    curr_info.y = xy.second;
+                }
         }
     }
 }
 
 void set_style(bool horiz, Uint8 style) {
-    ;
+    this->horiz = horiz;
+    this->style = style;
+}
+
+void blit_load_bar(int load_percent) {
+    if ( horiz ) {
+        load_clip.w = (slide_bound[1] - slide_bound[0]) * load_percent;
+    } else {
+        load_clip.h = (slide_bound[3] - slide_bound[2]) * load_percent;
+    }
 }
