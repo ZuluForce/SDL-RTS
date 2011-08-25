@@ -98,10 +98,20 @@ class menu_slider : public menu_obj {
         surfp s_load;
         surfp slider;
 
+        static_obj slider_actor;
+        line slide_bound;
+
         bool click_state;
 
     public:
         menu_slider(int x, int y, int w, surfp scale, surfp s_load, surfp slider);
+        void set_slider_bound(int x, int x_high, int y, int y_high);
+        /* If !horiz, default to vertical */
+        /* Style 1 : Adds ticks above the scale w/ values and places current pos under
+           Style 2 : Excludes displaying the current slider position under
+           Style 3 : Excludes the tick marks
+           */
+        void set_style(bool horiz, Uint8 style);
 
         int set_priority(int);
         void set_ID(int);
@@ -110,11 +120,12 @@ class menu_slider : public menu_obj {
 
         vector<Uint8>* event_binds();
 
-        bool check();
         void check_events(event_vector** events, int* load, Uint8* key_states);
-        sDisplay_info* get_display();
-        void show();
-        void hide();
+        /* Using defualt definitions */
+        //bool check();
+        //sDisplay_info* get_display();
+        //void show();
+        //void hide();
 };
 
 void build_click_box(int x, int y, SDL_Surface* std, collision_zone& click_box);

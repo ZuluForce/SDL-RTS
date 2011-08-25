@@ -31,5 +31,13 @@ class Dot: public cActor {
         SDL_Rect* get_clip();
 };
 
+/* Doesn't do anything but you can move it */
+class static_obj : public cActor {
+    public:
+        static_obj(int x, int y, SDL_Surface* surf);
+        void move_to(int x, int y);
+        void move_delta(int x, int y);
+}
+
 
 #endif // SIMPLE_ACTORS_H_INCLUDED

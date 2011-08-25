@@ -10,10 +10,10 @@ Dot::Dot(int _typeID) {
 
     //sDisplay_info curr_info;
     curr_info = new sDisplay_info;
-    curr_info->x = 0;
-    curr_info->y = 0;
-    curr_info->clip = NULL;
-    curr_info->surf = NULL;
+    curr_info.x = 0;
+    curr_info.y = 0;
+    curr_info.clip = NULL;
+    curr_info.surf = NULL;
 
     move_speed = 2;
     //pressed_key = {-1,-1};
@@ -199,8 +199,8 @@ void Dot::check_events(event_vector** events, int* load, Uint8* key_states) {
 }
 
 bool Dot::set_image(char* filename) {
-    curr_info->surf = load_image(filename);
-    if ( curr_info->surf == NULL ) {
+    curr_info.surf = load_image(filename);
+    if ( curr_info.surf == NULL ) {
         fprintf(stderr,"Failed to set Dot image\n");
         return false;
     }
@@ -208,13 +208,13 @@ bool Dot::set_image(char* filename) {
 }
 
 bool Dot::set_image(SDL_Surface* image) {
-    curr_info->surf = image;
+    curr_info.surf = image;
     return true;
 }
 
 void Dot::set_pos(int x, int y) {
-    curr_info->x = x;
-    curr_info->y = y;
+    curr_info.x = x;
+    curr_info.y = y;
 
     pPM->PM_set_pos(p_container,x,y);
     return;
@@ -231,8 +231,7 @@ vector<Uint8>* Dot::event_binds() {
 
 sDisplay_info* Dot::get_display() {
     update = false;
-    //curr_info->clip = NULL;
-    return curr_info;
+    return &curr_info;
 }
 
 SDL_Rect* Dot::get_clip() {
@@ -242,4 +241,21 @@ SDL_Rect* Dot::get_clip() {
 void Dot::change_control() {
     wasd = wasd ? false : true;
     return;
+}
+
+static_obj::static_obj(int x, int y, SDL_Surface* surf) {
+    curr_info.x = x;
+    curr_info.y = y;
+    curr_info.surf = surf;
+    curr_info.clip = NULL;
+}
+
+void static_obj::move_to(int x, int y) {
+    curr_info.x = x;
+    curr_info.y = y;
+}
+
+void static_obj::move_delta(int x, int y) {
+    curr_info.x += x;
+    curr_info.y += y;
 }

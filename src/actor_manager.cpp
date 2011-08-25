@@ -23,6 +23,31 @@ bool max_actor(void* actor1, void* actor2) {
     return false;
 }
 
+bool cActor::check() {
+    return update;
+}
+
+void cActor::check_events(event_vector*, int* load, Uint8* key_states) {
+    if ( !update ) return;
+    return;
+}
+
+sDisplay_info* cActor::get_display() {
+    if ( update ) {
+        return &curr_info;
+    }
+    return NULL;
+}
+
+int menu_obj::set_priority(int i) {
+    priority = i;
+    return i;
+}
+
+vector<Uint8>* cActor::event_binds() {
+    return &_event_binds;
+}
+
 /*-----------------------------------------------*/
 
 cActor_manager::cActor_manager(cScreen_manager* _SM) {

@@ -45,11 +45,6 @@ void menu_obj::change_img(surfp img) {
     curr_info.surf = img;
 }
 
-int menu_obj::set_priority(int i) {
-    priority = i;
-    return i;
-}
-
 void menu_obj::set_ID(int id) {
     ID = id;
 }
@@ -64,26 +59,6 @@ void menu_obj::show() {
 
 void menu_obj::hide() {
     update = false;
-}
-
-sDisplay_info* menu_obj::get_display() {
-    if ( update ) {
-        return &curr_info;
-    }
-    return NULL;
-}
-
-bool menu_obj::check() {
-    return update;
-}
-
-void menu_obj::check_events(event_vector*, int* load, Uint8* key_states) {
-    if ( !update ) return;
-    return;
-}
-
-vector<Uint8>* menu_obj::event_binds() {
-    return &_event_binds;
 }
 
 /*------------------------------*/
@@ -262,6 +237,8 @@ menu_slider(int x, int y, surfp scale, surfp s_load, surfp slider) {
     this->s_load = s_load;
     this->slider = slider;
 
+    slider_actor = static_obj(x,y,slider);
+
     curr_info.x = x;
     curr_info.y = y;
     curr_info.surf = slider;
@@ -280,6 +257,31 @@ menu_slider(int x, int y, surfp scale, surfp s_load, surfp slider) {
     click_state = false;
 }
 
-void menu_slider::set_typeID(int id) {
-    typeID = id
+void menu_slider::set_slider_bound(int x, int x_high, int y, int y_high) {
+    slide_bound = {x, x_high, y, y_high};
+
+    /* Check if current slider position is in bound */
+    curr_info.x = curr_info.x > x_high ? x_high : curr_info.x;
+    curr_info.x = curr_info.x < x ? x : curr_info.x;
+    curr_info.y = curr_info.y > y_high ? y_high : curr_info.y;
+    curr_info.y = curr_info.y < y ? y : curr_info.y;
+}
+
+void menu_slider::check_events(event_vector** events, int* load, Uint8* key_states) {
+    SDL_Event* event;
+    coordinates xy;
+    for (int i = 0; i < load[SDL_MOUSEBUTTONDOWN]; ++i) {
+        event = events[SDL_MOUSEBUTTONDOWN]->at(i);
+        xy.first = event.button.x;
+        xy.second = event.button.y;
+
+        if ( event.button.button == SDLK_LEFT &&
+            pPM->PM_check_point1(&click_box, &xy) ) {
+                /* Move Slider to new position */
+        }
+    }
+}
+
+void set_style(bool horiz, Uint8 style) {
+    ;
 }
