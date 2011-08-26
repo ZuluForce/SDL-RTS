@@ -14,11 +14,6 @@ typedef SDL_Surface* surfp;
 
 class menu_obj : public cActor {
     protected:
-        /*
-        surfp std;
-        surfp hover;
-        surfp clicked;
-        */
 
         collision_zone click_box;
         std_clbck callback;
@@ -36,13 +31,6 @@ class menu_obj : public cActor {
         virtual void reg_callback(std_clbck);
         virtual void show();
         virtual void hide();
-
-        /* Derived from cActor */
-        int set_priority(int);
-        sDisplay_info* get_display();
-        bool check();
-        void check_events(event_vector**, int* load, Uint8* key_states);
-        vector<Uint8>* event_binds();
 };
 
 class menu_button: public menu_obj {

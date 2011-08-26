@@ -126,7 +126,7 @@ void cActor_manager::AM_blit_buffer(int x, int y, SDL_Surface* src, SDL_Rect* cl
 }
 
 void cActor_manager::AM_blit_buffer(sDisplay_info* sdi) {
-    if ( sdi == NULL) return;
+    if ( sdi == NULL ) return;
     apply_surface(sdi->x, sdi->y, sdi->surf, Draw_Buffer, sdi->clip);
     return;
 }
@@ -186,10 +186,10 @@ void cActor_manager::AM_update() {
 
     /* Check which objects need re-blitting */
     while ( ( actor_update = actor_objs.walk() ) != NULL ) {
-        //if ( actor_update->check() ) {
+        if ( actor_update->check() ) {
             actor_info = actor_update->get_display();
             AM_blit_buffer(actor_info);
-        //}
+        }
     }
 
     AM_flip_buffer();
