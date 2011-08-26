@@ -9,7 +9,6 @@ Dot::Dot(int _typeID) {
     wasd = false;
 
     //sDisplay_info curr_info;
-    curr_info = new sDisplay_info;
     curr_info.x = 0;
     curr_info.y = 0;
     curr_info.clip = NULL;
@@ -22,7 +21,7 @@ Dot::Dot(int _typeID) {
     _event_binds.push_back(SDL_KEYUP);
 
     p_container = new phys_cont;
-    p_container->obj_info = curr_info;
+    p_container->obj_info = &curr_info;
     p_container->init();
 
     p_container->actorType = _typeID;
@@ -235,7 +234,7 @@ sDisplay_info* Dot::get_display() {
 }
 
 SDL_Rect* Dot::get_clip() {
-    return curr_info->clip;
+    return curr_info.clip;
 }
 
 void Dot::change_control() {

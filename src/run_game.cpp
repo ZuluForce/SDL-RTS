@@ -86,7 +86,7 @@ void cGame::start_menu() {
 
     /* Settings Button */
     new_button = new menu_button(270,160,G_start_button,G_start_hover,G_quit_clicked);
-    b_settings = main_menu->reg_menu_obj((new_button, MakeDelegate(this, &cGame::load_settings));
+    b_settings = main_menu->reg_menu_obj(new_button, MakeDelegate(this, &cGame::load_settings));
 
     /* Mute Button */
     new_button = new mute_button(0,0,G_mute_button,G_mute_button,G_muted);
@@ -94,7 +94,7 @@ void cGame::start_menu() {
     main_menu->show_menu(b_quit,b_mute);
 
     menu_slider* new_slider = new menu_slider(270,220,G_scale,G_scale_load,G_scale_slide);
-    b_music_vol;
+    b_music_vol = main_menu->reg_menu_obj(new_slider, MakeDelegate(AMM, &cAudio_manager::AMM_set_music_vol));
 }
 
 void cGame::start_game(int& button) {

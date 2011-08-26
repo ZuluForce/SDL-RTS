@@ -27,7 +27,7 @@ bool cActor::check() {
     return update;
 }
 
-void cActor::check_events(event_vector*, int* load, Uint8* key_states) {
+void cActor::check_events(event_vector**, int* load, Uint8* key_states) {
     if ( !update ) return;
     return;
 }
@@ -39,7 +39,7 @@ sDisplay_info* cActor::get_display() {
     return NULL;
 }
 
-int menu_obj::set_priority(int i) {
+int cActor::set_priority(int i) {
     priority = i;
     return i;
 }

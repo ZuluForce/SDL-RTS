@@ -3,6 +3,7 @@
 
 #include "physics.h"
 #include "Audio/audio_manager.h"
+#include "Actors/simple_actors.h"
 #include "FastDelegate.h"
 #include "FastDelegateBind.h"
 
@@ -37,11 +38,11 @@ class menu_obj : public cActor {
         virtual void hide();
 
         /* Derived from cActor */
-        virtual int set_priority(int);
-        virtual sDisplay_info* get_display();
-        virtual bool check();
-        virtual void check_events(event_vector**, int* load, Uint8* key_states);
-        virtual vector<Uint8>* event_binds();
+        int set_priority(int);
+        sDisplay_info* get_display();
+        bool check();
+        void check_events(event_vector**, int* load, Uint8* key_states);
+        vector<Uint8>* event_binds();
 };
 
 class menu_button: public menu_obj {
@@ -101,16 +102,18 @@ class menu_slider : public menu_obj {
         bool horiz; /* true = horizontal orientation */
         Uint8 style;
 
-        static_obj slider_actor;
-        line slide_bound; /* {x_low,x_high,y_low,y_high} */
+        static_obj* slider_actor;
+        static_obj* load_bar;
         SDL_Rect load_clip; /* Used for blitting the load overlay onto the scale */
+
+        line slide_bound; /* {x_low,x_high,y_low,y_high} */
 
         bool click_state;
 
         void blit_load_bar(int load_percent);
 
     public:
-        menu_slider(int x, int y, int w, surfp scale, surfp s_load, surfp slider);
+        menu_slider(int x, int y, surfp scale, surfp s_load, surfp slider);
         void set_slider_bound(int x, int x_high, int y, int y_high);
         /* If !horiz, default to vertical */
         /* Style 1 : Adds ticks above the scale w/ values and places current pos under
@@ -119,19 +122,9 @@ class menu_slider : public menu_obj {
            */
         void set_style(bool horiz, Uint8 style);
 
-        int set_priority(int);
-        void set_ID(int);
         void set_typeID(int);
-        void reg_callback(std_clbck);
-
-        vector<Uint8>* event_binds();
 
         void check_events(event_vector** events, int* load, Uint8* key_states);
-        /* Using defualt definitions */
-        //bool check();
-        //sDisplay_info* get_display();
-        //void show();
-        //void hide();
 };
 
 void build_click_box(int x, int y, SDL_Surface* std, collision_zone& click_box);

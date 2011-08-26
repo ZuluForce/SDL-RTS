@@ -23,6 +23,7 @@ struct sDisplay_info {
 class cActor {
     protected:
         sDisplay_info curr_info;
+        vector<Uint8> _event_binds;
         bool update;
 
     public:

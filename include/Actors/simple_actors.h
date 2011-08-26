@@ -7,7 +7,6 @@
 
 class Dot: public cActor {
     private:
-        sDisplay_info* curr_info;
         vector<Uint8> _event_binds;
 
         phys_cont* p_container;
@@ -37,7 +36,11 @@ class static_obj : public cActor {
         static_obj(int x, int y, SDL_Surface* surf);
         void move_to(int x, int y);
         void move_delta(int x, int y);
-}
+
+        void set_clip(SDL_Rect* clip) {
+            curr_info.clip = clip;
+        }
+};
 
 
 #endif // SIMPLE_ACTORS_H_INCLUDED

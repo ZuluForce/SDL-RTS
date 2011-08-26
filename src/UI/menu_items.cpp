@@ -232,12 +232,16 @@ int mute_button::music_vol() {
     return pAMM->AMM_get_music_vol();
 }
 
-menu_slider(int x, int y, surfp scale, surfp s_load, surfp slider) {
+menu_slider::menu_slider(int x, int y, surfp scale, surfp s_load, surfp slider) {
     this->scale = scale;
     this->s_load = s_load;
     this->slider = slider;
 
-    slider_actor = static_obj(x,y,slider);
+    slider_actor = new static_obj(x,y,slider);
+    load_bar = new static_obj(x,y,s_load);
+    load_bar->set_clip(&load_clip);
+    pAM->AM_register(slider_actor);
+    pAM->AM_register(load_bar);
 
     curr_info.x = x;
     curr_info.y = y;
@@ -272,7 +276,7 @@ void menu_slider::set_slider_bound(int x, int x_high, int y, int y_high) {
     curr_info.y = curr_info.y > y_high ? y_high : curr_info.y;
     curr_info.y = curr_info.y < y ? y : curr_info.y;
     */
-    slider_actor.move_to(x,y);
+    slider_actor->move_to(x,y);
 
     build_click_box(x,y,slider,click_box);
 
@@ -283,7 +287,7 @@ void menu_slider::set_slider_bound(int x, int x_high, int y, int y_high) {
 }
 
 void menu_slider::check_events(event_vector** events, int* load, Uint8* key_states) {
-    SDL_Event* event;
+    SDL_Event event;
     coordinates xy;
     for (int i = 0; i < load[SDL_MOUSEBUTTONDOWN]; ++i) {
         event = events[SDL_MOUSEBUTTONDOWN]->at(i);
@@ -296,23 +300,31 @@ void menu_slider::check_events(event_vector** events, int* load, Uint8* key_stat
                 if ( horiz ) {
                     /* This works assuming you assign the slide bound
                     and rebuild the click_box for that bound */
-                    curr_info.x = xy.first;
+                    slider_actor->move_to(xy.first,slide_bound[2]);
+                    blit_load_bar( (xy.first - slide_bound[0]) / (slide_bound[1] - slide_bound[0]) );
                 } else {
-                    curr_info.y = xy.second;
+                    slider_actor->move_to(slide_bound[0],xy.second);
+                    blit_load_bar( (xy.second - slide_bound[2]) / (slide_bound[3] - slide_bound[2]) );
                 }
         }
     }
 }
 
-void set_style(bool horiz, Uint8 style) {
+void menu_slider::set_style(bool horiz, Uint8 style) {
     this->horiz = horiz;
     this->style = style;
 }
 
-void blit_load_bar(int load_percent) {
+void menu_slider::blit_load_bar(int load_percent) {
     if ( horiz ) {
         load_clip.w = (slide_bound[1] - slide_bound[0]) * load_percent;
+        load_bar->set_clip(&load_clip);
     } else {
         load_clip.h = (slide_bound[3] - slide_bound[2]) * load_percent;
+        load_bar->set_clip(&load_clip);
     }
+}
+
+void menu_slider::set_typeID(int _typeID) {
+    typeID = _typeID;
 }
