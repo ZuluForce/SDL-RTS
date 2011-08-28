@@ -32,6 +32,10 @@ void cActor::check_events(event_vector**, int* load, Uint8* key_states) {
     return;
 }
 
+cActor::cActor() {
+    return;
+}
+
 sDisplay_info* cActor::get_display() {
     if ( update ) {
         return &curr_info;
@@ -48,6 +52,9 @@ vector<Uint8>* cActor::event_binds() {
     return &_event_binds;
 }
 
+cstr cActor::get_name() {
+    return "Generic cActor";
+}
 /*-----------------------------------------------*/
 
 cActor_manager::cActor_manager(cScreen_manager* _SM) {
@@ -76,6 +83,7 @@ cActor_manager::cActor_manager(cScreen_manager* _SM) {
     actor_objs.reg_accessor(Actor_Priority);
     actor_objs.reg_IDaccessor(Actor_PriorityID);
     actor_objs.reg_IDmodifier(Actor_modID);
+    actor_objs.reg_getname(Actor_name);
 
     event_listener = this;
 
@@ -210,4 +218,8 @@ int Actor_PriorityID(cActor* actor) {
 void Actor_modID(cActor* actor, int id) {
     actor->priorityID = id;
     return;
+}
+
+cstr Actor_name(cActor* actor) {
+    return actor->get_name();
 }

@@ -37,9 +37,14 @@ class static_obj : public cActor {
         void move_to(int x, int y);
         void move_delta(int x, int y);
 
+        void show();
+        void hide();
+
         void set_clip(SDL_Rect* clip) {
             curr_info.clip = clip;
         }
+
+        char* get_name();
 };
 
 

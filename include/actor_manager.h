@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <list>
+#include <string>
 #include <cstddef>
 #include "SDL/SDL.h"
 #include "screen_manager.h"
@@ -13,6 +14,7 @@
 using namespace std;
 
 typedef vector<SDL_Event> event_vector;
+typedef char* cstr;
 
 struct sDisplay_info {
     SDL_Surface* surf;
@@ -23,6 +25,7 @@ struct sDisplay_info {
 class cActor {
     protected:
         sDisplay_info curr_info;
+
         vector<Uint8> _event_binds;
         bool update;
 
@@ -30,12 +33,15 @@ class cActor {
         int ID,typeID;
         int priority, priorityID;
 
+        cActor();
+
         #ifdef __MINGW32__
         virtual bool check();
         virtual void check_events(event_vector**, int* load, Uint8* key_states);
         virtual sDisplay_info* get_display();
         virtual int set_priority(int);
         virtual vector<Uint8>* event_binds();
+        virtual cstr get_name();
         #elif __GNUC__
         virtual bool check() {};
         virtual void check_events(event_vector**, int* load, Uint8* key_states) {};
@@ -60,14 +66,16 @@ class priority_stack {
         /* Index of the list we are in */
         int lvl_index;
         /* Top Index in the array ocntaining the lists */
-        int top_lvl;
+        int top_lvl; /* Top level actually containing an object */
         int low_lvl;
+        int total_lvls;
         /* If the end of all lvls have been reached this will be true */
         bool end_walk;
 
         int (*get_priority) (T);
         int (*get_priorityID) (T);
         void (*mod_priorityID) (T,int);
+        cstr (*get_name_string) (T);
 
         cID_dispatch priority_id_manager;
 
@@ -78,6 +86,8 @@ class priority_stack {
         void reg_accessor(int (*foo) (T));
         void reg_IDaccessor(int (*foo) (T));
         void reg_IDmodifier(void (*foo) (T,int));
+        void reg_getname(cstr (*foo) (T));
+
         void insert(T obj);
         T remove(T obj);
         list<T>* get_level(int level);
@@ -130,6 +140,7 @@ void AM_input_events(SDL_Event* event);
 int Actor_Priority(cActor*);
 int Actor_PriorityID(cActor*);
 void Actor_modID(cActor*,int);
+cstr Actor_name(cActor*);
 
 /* Definitions of template functions */
 
@@ -148,7 +159,13 @@ priority_stack<T>::priority_stack(int init_size) {
     lvl_index = 0;
     top_lvl = 0;
     low_lvl = 0;
+    total_lvls = init_size;
     end_walk = true;
+    /* Initialize all the accessors and modifiers to null */
+    get_priority = NULL;
+    get_priorityID = NULL;
+    mod_priorityID = NULL;
+    get_name_string = NULL;
     return;
 }
 
@@ -171,8 +188,26 @@ void priority_stack<T>::reg_IDmodifier(void (*foo) (T,int)) {
 }
 
 template <class T>
+void priority_stack<T>::reg_getname(cstr (*foo) (T)) {
+    get_name_string = foo;
+    return;
+}
+
+template <class T>
 void priority_stack<T>::insert(T obj) {
     int priority = get_priority(obj);
+
+    if ( priority < 0 || priority > total_lvls) {
+        if ( get_name_string ) {
+            fprintf(stderr, "Failed to insert item : %s\n", get_name_string(obj));
+        } else {
+            fprintf(stderr, "Failed to insert item : Actor_Manager on line %d\n",__LINE__);
+        }
+        fprintf(stderr,"\tObj Address: %p\n",obj);
+        fprintf(stderr,"\tAttempted lvl: %d   Max lvl: %d\n",priority,total_lvls);
+        return;
+    }
+
     mod_priorityID(obj,priority_id_manager.ID_getid());
     levels[priority]->push_back(obj);
     low_lvl = priority < low_lvl ? priority : low_lvl;

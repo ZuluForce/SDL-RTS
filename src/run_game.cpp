@@ -56,11 +56,11 @@ void cGame::init_resources() {
     G_quit_button = load_image("imgs/quit_button.png");
     G_quit_clicked = load_image("imgs/quit_button_clicked.png");
     G_quit_hover = load_image("imgs/quit_button_hover.png");
-    G_mute_button = load_image("imgs/mute.png");
-    G_muted = load_image("imgs/muted.png");
-    G_scale = load_image("imgs/scale.png");
-    G_scale_load = load_image("imgs/scale_load.png");
-    G_scale_slide = load_image("imgs/scale_slide.png");
+    G_mute_button = load_png("imgs/mute.png");
+    G_muted = load_png("imgs/muted.png");
+    G_scale = load_png("imgs/scale.png");
+    G_scale_load = load_png("imgs/scale_load.png");
+    G_scale_slide = load_png("imgs/scale_slide.png");
 }
 
 void cGame::spawn_actor(void*) {
@@ -94,6 +94,8 @@ void cGame::start_menu() {
     main_menu->show_menu(b_quit,b_mute);
 
     menu_slider* new_slider = new menu_slider(270,220,G_scale,G_scale_load,G_scale_slide);
+    new_slider->set_slider_bound(273,273+G_scale_load->w,226,226+G_scale_load->h);
+    new_slider->set_style(true,0);
     b_music_vol = main_menu->reg_menu_obj(new_slider, MakeDelegate(AMM, &cAudio_manager::AMM_set_music_vol));
 }
 
@@ -148,7 +150,7 @@ int start_menu(void* args) {
 
     while ( !quit_threads ) {
         game->update();
-        std_sleep(3);
+        std_sleep(20);
     }
 
     printf("Exiting the game thread\n");

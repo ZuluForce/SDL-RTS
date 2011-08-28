@@ -247,9 +247,12 @@ static_obj::static_obj(int x, int y, SDL_Surface* surf) {
     curr_info.y = y;
     curr_info.surf = surf;
     curr_info.clip = NULL;
+
+    update = false;
 }
 
 void static_obj::move_to(int x, int y) {
+    printf("Moving static obj to <%d,%d>\n",x,y);
     curr_info.x = x;
     curr_info.y = y;
 }
@@ -257,4 +260,16 @@ void static_obj::move_to(int x, int y) {
 void static_obj::move_delta(int x, int y) {
     curr_info.x += x;
     curr_info.y += y;
+}
+
+void static_obj::show() {
+    update = true;
+}
+
+void static_obj::hide() {
+    update = false;
+}
+
+char* static_obj::get_name() {
+    return "Static Obj in \"Simple Actors\"";
 }

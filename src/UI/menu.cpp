@@ -65,6 +65,7 @@ void std_menu::show_menu() {
 
 void std_menu::show_menu(int start, int end) {
     for (int i = start; i <= end; ++i) {
+        //printf("Menu is now showing object %d\n",i);
         menu[i]->show();
     }
 }

@@ -1,6 +1,6 @@
 #include "std_gfx.h"
 
-SDL_Surface* load_image(const char* filename ) {
+SDL_Surface* load_image(const char* filename, bool alpha) {
     printf("Loading Image: %s\n",filename);
     SDL_Surface* loadedImage = NULL;
 
@@ -9,7 +9,11 @@ SDL_Surface* load_image(const char* filename ) {
     loadedImage = IMG_Load( filename );
     if( loadedImage != NULL )
     {
-        optimizedImage = SDL_DisplayFormat( loadedImage );
+        if ( alpha ) {
+            optimizedImage = SDL_DisplayFormatAlpha( loadedImage );
+        } else {
+            optimizedImage = SDL_DisplayFormat( loadedImage );
+        }
 
         SDL_FreeSurface( loadedImage );
     } else {

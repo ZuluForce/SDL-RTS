@@ -14,14 +14,27 @@ void build_click_box(int x, int y, SDL_Surface* std, collision_zone& click_box) 
         click_box.sides[2] = {x, y + std->h, x + std->w, y + std->h};
         click_box.sides[3] = {x, y, x, y + std->h};
     } else {
-        click_box.param.w_h->first = 0;
-        click_box.param.w_h->second = 0;
-
-        click_box.sides[0] = {0,0,0,0};
-        click_box.sides[1] = {0,0,0,0};
-        click_box.sides[2] = {0,0,0,0};
-        click_box.sides[3] = {0,0,0,0};
+        fprintf(stderr,"Could not build click box : surface was NULL\n");
     }
+}
+
+void build_click_box(int x, int y, int w, int h, collision_zone& click_box) {
+    if ( w != -1 ) {
+        click_box.param.w_h->first = w;
+    } else {
+        w = click_box.param.w_h->first;
+    }
+
+    if ( h != -1 ) {
+        click_box.param.w_h->second = h;
+    } else {
+        w = click_box.param.w_h->second;
+    }
+
+    click_box.sides[0] = {x, y, x + w, y};
+    click_box.sides[1] = {x + w, y, x + w, y + h};
+    click_box.sides[2] = {x, y + h, x + w, y + h};
+    click_box.sides[3] = {x, y, x, y + h};
 }
 
 void move_click_box(int dx, int dy, collision_zone& click_box) {
@@ -34,6 +47,25 @@ void move_click_box(int dx, int dy, collision_zone& click_box) {
     click_box.sides[1] = {x + w + dx, y + dy, x + w + dx, y + h + dy};
     click_box.sides[2] = {x + dx, y + h + dy, x + w + dx, y + h + dy};
     click_box.sides[3] = {x + dx, y + dy, x + dx, y + h + dy};
+}
+
+void print_click_box(collision_zone& click_box) {
+    #define SIDES side[0],side[1],side[2],side[3]
+    int* side = click_box.sides[0];
+    printf("Side 0:\n");
+    printf("\t <%d,%d> ---> <%d,%d>\n",SIDES);
+
+    side = click_box.sides[1];
+    printf("Side 1:\n");
+    printf("\t <%d,%d> ---> <%d,%d>\n",SIDES);
+
+    side = click_box.sides[2];
+    printf("Side 2:\n");
+    printf("\t <%d,%d> ---> <%d,%d>\n",SIDES);
+
+    side = click_box.sides[3];
+    printf("Side 3:\n");
+    printf("\t <%d,%d> ---> <%d,%d>\n\n",SIDES);
 }
 
 /* Default Declarations for menu_obj */
@@ -239,13 +271,10 @@ menu_slider::menu_slider(int x, int y, surfp scale, surfp s_load, surfp slider) 
 
     slider_actor = new static_obj(x,y,slider);
     load_bar = new static_obj(x,y,s_load);
-    load_bar->set_clip(&load_clip);
-    pAM->AM_register(slider_actor);
-    pAM->AM_register(load_bar);
 
     curr_info.x = x;
     curr_info.y = y;
-    curr_info.surf = slider;
+    curr_info.surf = scale;
     curr_info.clip = NULL;
 
     _event_binds.push_back(SDL_MOUSEBUTTONDOWN);
@@ -261,6 +290,7 @@ menu_slider::menu_slider(int x, int y, surfp scale, surfp s_load, surfp slider) 
     load_clip.y = y;
     load_clip.w = s_load->w;
     load_clip.h = s_load->h;
+    load_bar->set_clip(&load_clip);
 
     update = false;
     click_state = false;
@@ -269,16 +299,10 @@ menu_slider::menu_slider(int x, int y, surfp scale, surfp s_load, surfp slider) 
 void menu_slider::set_slider_bound(int x, int x_high, int y, int y_high) {
     slide_bound = {x, x_high, y, y_high};
 
-    /* Check if current slider position is in bound */
-    /*
-    curr_info.x = curr_info.x > x_high ? x_high : curr_info.x;
-    curr_info.x = curr_info.x < x ? x : curr_info.x;
-    curr_info.y = curr_info.y > y_high ? y_high : curr_info.y;
-    curr_info.y = curr_info.y < y ? y : curr_info.y;
-    */
     slider_actor->move_to(x,y);
 
-    build_click_box(x,y,slider,click_box);
+    build_click_box(x,y,-1,slider->h,click_box);
+    print_click_box(click_box);
 
     load_clip.x = x;
     load_clip.y = y;
@@ -286,26 +310,52 @@ void menu_slider::set_slider_bound(int x, int x_high, int y, int y_high) {
     load_clip.h = y_high - y;
 }
 
+void menu_slider::move_slider(int& x, int& y) {
+    if ( horiz ) {
+        slider_actor->move_to(x,slide_bound[2]);
+        printf("x - slide_bound[0] = %d\n",x-slide_bound[0]);
+        printf("slide_bound[1] - slide_bound[0] = %d\n",slide_bound[1] - slide_bound[0]);
+        blit_load_bar( ((float) (x - slide_bound[0])) / (slide_bound[1] - slide_bound[0]) );
+    } else {
+        slider_actor->move_to(slide_bound[0], y);
+        blit_load_bar( ((float) (y - slide_bound[2])) / (slide_bound[3] - slide_bound[2]) );
+    }
+}
+
 void menu_slider::check_events(event_vector** events, int* load, Uint8* key_states) {
-    SDL_Event event;
+    if ( !update ) {
+        return;
+    }
+
     coordinates xy;
+
+    if ( click_state && load[SDL_MOUSEMOTION] != 0) {
+        SDL_GetMouseState(&(xy.first),&(xy.second));
+
+        if ( pPM->PM_check_point1(&click_box, &xy) ) {
+            move_slider(xy.first,xy.second);
+        }
+    }
+
+    SDL_Event event;
     for (int i = 0; i < load[SDL_MOUSEBUTTONDOWN]; ++i) {
         event = events[SDL_MOUSEBUTTONDOWN]->at(i);
         xy.first = event.button.x;
         xy.second = event.button.y;
 
-        if ( event.button.button == SDLK_LEFT &&
+        if ( event.button.button == SDL_BUTTON_LEFT &&
             pPM->PM_check_point1(&click_box, &xy) ) {
                 /* Move Slider to new position */
-                if ( horiz ) {
-                    /* This works assuming you assign the slide bound
-                    and rebuild the click_box for that bound */
-                    slider_actor->move_to(xy.first,slide_bound[2]);
-                    blit_load_bar( (xy.first - slide_bound[0]) / (slide_bound[1] - slide_bound[0]) );
-                } else {
-                    slider_actor->move_to(slide_bound[0],xy.second);
-                    blit_load_bar( (xy.second - slide_bound[2]) / (slide_bound[3] - slide_bound[2]) );
-                }
+                click_state = true;
+                move_slider(xy.first,xy.second);
+        }
+    }
+
+    for (int i = 0; i < load[SDL_MOUSEBUTTONUP]; ++i) {
+        event = events[SDL_MOUSEBUTTONUP]->at(i);
+
+        if ( event.button.button == SDL_BUTTON_LEFT ) {
+            click_state = false;
         }
     }
 }
@@ -315,16 +365,46 @@ void menu_slider::set_style(bool horiz, Uint8 style) {
     this->style = style;
 }
 
-void menu_slider::blit_load_bar(int load_percent) {
+void menu_slider::blit_load_bar(float load_percent) {
+    printf("Setting load bar to %f \%\n",load_percent);
     if ( horiz ) {
         load_clip.w = (slide_bound[1] - slide_bound[0]) * load_percent;
-        load_bar->set_clip(&load_clip);
     } else {
         load_clip.h = (slide_bound[3] - slide_bound[2]) * load_percent;
-        load_bar->set_clip(&load_clip);
     }
 }
 
 void menu_slider::set_typeID(int _typeID) {
     typeID = _typeID;
 }
+
+/* Overridding functions for menu_slider */
+
+int menu_slider::set_priority(int i) {
+    priority = i;
+
+    slider_actor->set_priority(i + 2);
+    pAM->AM_register(slider_actor);
+    load_bar->set_priority(i + 1);
+    pAM->AM_register(load_bar);
+
+    return i;
+}
+
+char* menu_slider::get_name() {
+    return "Menu Scale";
+}
+
+void menu_slider::show() {
+    update = true;
+    slider_actor->show();
+    load_bar->show();
+}
+
+void menu_slider::hide() {
+    update = false;
+    slider_actor->hide();
+    load_bar->hide();
+}
+
+/* ------------------------------------- */

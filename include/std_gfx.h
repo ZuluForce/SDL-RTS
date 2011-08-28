@@ -18,7 +18,7 @@
 #endif
 
 void apply_surface( int x, int y, SDL_Surface* source, SDL_Surface* destination, SDL_Rect* clip = NULL );
-SDL_Surface *load_image(const char* filename );
+SDL_Surface *load_image(const char* filename, bool alpha = false);
 void std_sleep(Uint32 timeout);
 Uint32 clr_to_uint(SDL_Color* color);
 

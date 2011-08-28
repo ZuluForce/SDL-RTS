@@ -32,6 +32,11 @@ class cGame {
         SDL_Thread* game_thread_ptr;
 
         vector< cActor* > active_objs;
+
+        /* Loads an image with an alpha channel */
+        SDL_Surface* load_png(char* filename) {
+            return load_image(filename,true);
+        }
     public:
         cAudio_manager* AMM;
 

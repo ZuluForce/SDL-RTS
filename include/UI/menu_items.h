@@ -83,6 +83,9 @@ class mute_button : public menu_button {
 
 class menu_slider : public menu_obj {
     protected:
+        /* Things being overloaded from cActor or other base classes */
+
+        /* --------------------------------------------------------- */
         surfp scale;
         surfp s_load;
         surfp slider;
@@ -98,7 +101,8 @@ class menu_slider : public menu_obj {
 
         bool click_state;
 
-        void blit_load_bar(int load_percent);
+        void move_slider(int&,int&);
+        void blit_load_bar(float load_percent);
 
     public:
         menu_slider(int x, int y, surfp scale, surfp s_load, surfp slider);
@@ -113,8 +117,17 @@ class menu_slider : public menu_obj {
         void set_typeID(int);
 
         void check_events(event_vector** events, int* load, Uint8* key_states);
+        /* Functions being overridden */
+        int set_priority(int);
+        char* get_name();
+
+        void show();
+        void hide();
+        /* -------------------------- */
 };
 
 void build_click_box(int x, int y, SDL_Surface* std, collision_zone& click_box);
+void build_click_box(int x, int y, int w, int h, collision_zone& click_box);
 void move_click_box(int x, int y, collision_zone& click_box);
+void print_click_box(collision_zone&);
 #endif // MENU_ITEMS_H_INCLUDED
