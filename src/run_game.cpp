@@ -53,6 +53,8 @@ void cGame::init_resources() {
     G_game_back = load_image("imgs/back.png");
     G_start_button = load_image("imgs/start_button.png");
     G_start_hover = load_image("imgs/start_button_hover.png");
+    G_settings_button = load_image("imgs/settings_button.png");
+    G_settings_hover = load_image("imgs/settings_button_hover.png");
     G_quit_button = load_image("imgs/quit_button.png");
     G_quit_clicked = load_image("imgs/quit_button_clicked.png");
     G_quit_hover = load_image("imgs/quit_button_hover.png");
@@ -85,7 +87,7 @@ void cGame::start_menu() {
     b_start = main_menu->reg_menu_obj(new_button, MakeDelegate(this, &cGame::start_game));
 
     /* Settings Button */
-    new_button = new menu_button(270,160,G_start_button,G_start_hover,G_quit_clicked);
+    new_button = new menu_button(270,160,G_settings_button,G_settings_hover,G_quit_clicked);
     b_settings = main_menu->reg_menu_obj(new_button, MakeDelegate(this, &cGame::load_settings));
 
     /* Mute Button */
@@ -94,8 +96,9 @@ void cGame::start_menu() {
     main_menu->show_menu(b_quit,b_mute);
 
     menu_slider* new_slider = new menu_slider(270,220,G_scale,G_scale_load,G_scale_slide);
-    new_slider->set_slider_bound(273,273+G_scale_load->w,226,226+G_scale_load->h);
     new_slider->set_style(true,0);
+    new_slider->set_return_val(0,MIX_MAX_VOLUME);
+    new_slider->set_slider_pos(100);
     b_music_vol = main_menu->reg_menu_obj(new_slider, MakeDelegate(AMM, &cAudio_manager::AMM_set_music_vol));
 }
 
@@ -107,7 +110,7 @@ void cGame::start_game(int& button) {
     /* Currently there is a problem with a xcb_io library in
        Ubuntu 11.04 that is not allowing the game to work if
        a Dot actor is created */
-    #ifdef __MINGW32_
+    #ifdef __MINGW32__
     Dot* new_dot = new Dot(0);
     new_dot->set_pos(0,0);
     new_dot->set_image(G_dot_img);

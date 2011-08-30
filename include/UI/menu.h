@@ -24,7 +24,6 @@ class std_menu {
 
         cID_dispatch option_ID;
 
-        //vector< menu_button* > menu;
         vector< menu_obj* > menu;
 
     public:

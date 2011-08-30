@@ -16,6 +16,8 @@ class cGame {
         SDL_Surface* G_game_back;
         SDL_Surface* G_start_button;
         SDL_Surface* G_start_hover;
+        SDL_Surface* G_settings_button;
+        SDL_Surface* G_settings_hover;
         SDL_Surface* G_quit_button;
         SDL_Surface* G_quit_clicked;
         SDL_Surface* G_quit_hover;

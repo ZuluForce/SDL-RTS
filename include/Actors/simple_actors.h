@@ -32,8 +32,16 @@ class Dot: public cActor {
 
 /* Doesn't do anything but you can move it */
 class static_obj : public cActor {
+    private:
+        //Lock the objects position on a particular axis
+        bool x_lock,y_lock;
     public:
         static_obj(int x, int y, SDL_Surface* surf);
+
+        void lock_on_x();
+        void lock_on_y();
+        void lock_xy();
+
         void move_to(int x, int y);
         void move_delta(int x, int y);
 

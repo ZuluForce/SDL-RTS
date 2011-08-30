@@ -32,6 +32,7 @@ void cAudio_manager::AMM_play_music() {
 }
 
 void cAudio_manager::AMM_set_music_vol(int& vol) {
+    printf("Setting volume to: %d\n",vol);
     Mix_VolumeMusic(vol);
 }
 

@@ -95,6 +95,8 @@ void menu_obj::hide() {
 
 /*------------------------------*/
 
+/*----------- Menu Button -------------*/
+
 menu_button::menu_button(int x, int y, SDL_Surface* std, SDL_Surface* hover, SDL_Surface* clicked) {
     curr_info.x = x;
     curr_info.y = y;
@@ -269,7 +271,13 @@ menu_slider::menu_slider(int x, int y, surfp scale, surfp s_load, surfp slider) 
     this->s_load = s_load;
     this->slider = slider;
 
+    horiz = true;
+    s_bound = {x, x + scale->w};
+    ret_vals = {0,0};
+    ret_range = 0;
+
     slider_actor = new static_obj(x,y,slider);
+    slider_actor->lock_on_y();
     load_bar = new static_obj(x,y,s_load);
 
     curr_info.x = x;
@@ -296,30 +304,58 @@ menu_slider::menu_slider(int x, int y, surfp scale, surfp s_load, surfp slider) 
     click_state = false;
 }
 
-void menu_slider::set_slider_bound(int x, int x_high, int y, int y_high) {
-    slide_bound = {x, x_high, y, y_high};
+void menu_slider::set_slider_bound(int low, int high) {
+    s_bound = {low,high};
 
-    slider_actor->move_to(x,y);
-
-    build_click_box(x,y,-1,slider->h,click_box);
-    print_click_box(click_box);
-
-    load_clip.x = x;
-    load_clip.y = y;
-    load_clip.w = x_high - x;
-    load_clip.h = y_high - y;
+    slider_actor->move_to(low,low);
 }
 
-void menu_slider::move_slider(int& x, int& y) {
+void menu_slider::set_slider_pos(int percent) {
+    int new_pos = (s_bound[1] - s_bound[0]) * percent;
+    slider_actor->move_to(new_pos,new_pos);
+}
+
+void menu_slider::set_return_val(int low, int high) {
+    ret_vals = {low, high};
+    ret_range = high - low;
+}
+
+void menu_slider::move_slider(int& x, int& y, bool call_foo) {
     if ( horiz ) {
-        slider_actor->move_to(x,slide_bound[2]);
-        printf("x - slide_bound[0] = %d\n",x-slide_bound[0]);
-        printf("slide_bound[1] - slide_bound[0] = %d\n",slide_bound[1] - slide_bound[0]);
-        blit_load_bar( ((float) (x - slide_bound[0])) / (slide_bound[1] - slide_bound[0]) );
+        slider_actor->move_to(x,y);
+        move_load_horiz(x);
+
+        if ( call_foo ) {
+            //Difference between slider start and current position
+            int diff = x - s_bound[0];
+
+            float percent = ((float) diff) / (s_bound[1] - s_bound[0]);
+
+            diff = (ret_vals[0] + ret_range * percent);
+            callback( diff );
+        }
+
     } else {
-        slider_actor->move_to(slide_bound[0], y);
-        blit_load_bar( ((float) (y - slide_bound[2])) / (slide_bound[3] - slide_bound[2]) );
+        slider_actor->move_to(x,y);
+        move_load_vert(y);
+
+        if ( call_foo ) {
+            int diff = y - s_bound[0];
+
+            float percent = ((float) diff) / (s_bound[1] - s_bound[0]);
+
+            diff = ret_vals[0] + ret_range * percent;
+            callback( diff );
+        }
     }
+}
+
+void menu_slider::move_load_horiz(int x) {
+    load_clip.w = x - load_clip.x;
+}
+
+void menu_slider::move_load_vert(int y) {
+    load_clip.h = y - load_clip.y;
 }
 
 void menu_slider::check_events(event_vector** events, int* load, Uint8* key_states) {
@@ -360,18 +396,17 @@ void menu_slider::check_events(event_vector** events, int* load, Uint8* key_stat
     }
 }
 
-void menu_slider::set_style(bool horiz, Uint8 style) {
-    this->horiz = horiz;
-    this->style = style;
-}
-
-void menu_slider::blit_load_bar(float load_percent) {
-    printf("Setting load bar to %f \%\n",load_percent);
-    if ( horiz ) {
-        load_clip.w = (slide_bound[1] - slide_bound[0]) * load_percent;
+void menu_slider::set_style(bool orient, Uint8 style) {
+    //Horizontal
+    if ( orient ) {
+        slider_actor->lock_on_y();
+        horiz = true;
     } else {
-        load_clip.h = (slide_bound[3] - slide_bound[2]) * load_percent;
+    //Vertical
+        slider_actor->lock_on_x();
+        horiz = false;
     }
+    this->style = style;
 }
 
 void menu_slider::set_typeID(int _typeID) {

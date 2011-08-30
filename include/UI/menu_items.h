@@ -12,6 +12,29 @@ using namespace fastdelegate;
 typedef FastDelegate1<int&,void> std_clbck;
 typedef SDL_Surface* surfp;
 
+/* Warning:
+   Other than standard menu_buttons, these menu objects
+   have very flaky functionality. Rather than use a pre-existing
+   api like wxWidgets I wanted to build a menu system from the
+   ground up using parts of the engine I have already created.
+
+   There may be a way to use wxWidgets within the SDL window and if
+   so I would highly recommend using that for the time being.
+   */
+
+/* Future Intentions:
+
+   I intend to build a good set of menu objects that one would
+   normally use but using them straight from their implementation
+   is/will be very tedious where everything must be set manually.
+
+   I intend to build a wrapper around this that will automatically
+   set up the buttons for you or possibly another program all together
+   that will allow you to visually set up the menu how you wish and
+   it will build the code required for it.
+   */
+
+
 class menu_obj : public cActor {
     protected:
 
@@ -97,16 +120,23 @@ class menu_slider : public menu_obj {
         static_obj* load_bar;
         SDL_Rect load_clip; /* Used for blitting the load overlay onto the scale */
 
-        line slide_bound; /* {x_low,x_high,y_low,y_high} */
+        int s_bound[2]; /* {low, high} */
+        int ret_vals[2];
+        int ret_range;
 
         bool click_state;
 
-        void move_slider(int&,int&);
-        void blit_load_bar(float load_percent);
+        void move_slider(int&,int&,bool call_foo = true);
+
+        void move_load_horiz(int x);
+        void move_load_vert(int y);
 
     public:
         menu_slider(int x, int y, surfp scale, surfp s_load, surfp slider);
-        void set_slider_bound(int x, int x_high, int y, int y_high);
+        void set_slider_bound(int low, int high);
+        void set_slider_pos(int percent);
+
+        void set_return_val(int low, int high);
         /* If !horiz, default to vertical */
         /* Style 1 : Adds ticks above the scale w/ values and places current pos under
            Style 2 : Excludes displaying the current slider position under

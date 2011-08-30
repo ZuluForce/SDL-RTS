@@ -251,13 +251,43 @@ static_obj::static_obj(int x, int y, SDL_Surface* surf) {
     update = false;
 }
 
+void static_obj::lock_on_x() {
+    x_lock = true;
+    y_lock = false;
+}
+
+void static_obj::lock_on_y() {
+    y_lock = true;
+    x_lock = false;
+}
+
+void static_obj::lock_xy() {
+    x_lock = y_lock = true;
+}
+
 void static_obj::move_to(int x, int y) {
-    printf("Moving static obj to <%d,%d>\n",x,y);
+    if ( x_lock ) {
+        curr_info.y = y;
+        return;
+    }
+    if ( y_lock ) {
+        curr_info.x = x;
+        return;
+    }
+
     curr_info.x = x;
     curr_info.y = y;
 }
 
 void static_obj::move_delta(int x, int y) {
+    if ( x_lock ) {
+        x = 0;
+    }
+
+    if ( y_lock ) {
+        y = 0;
+    }
+
     curr_info.x += x;
     curr_info.y += y;
 }
