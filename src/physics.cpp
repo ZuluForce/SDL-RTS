@@ -16,11 +16,18 @@ extern cScreen_manager* pSM;
 void phys_cont::init(int _contType, int _level, int _actorType) {
     x = obj_info->x;
     y = obj_info->y;
+    tx = x;
+    ty = y;
+    x_vel = y_vel = 0;
+    x_accel = y_accel = 0;
+
     contType = _contType;
     level = _level;
     actorType = _actorType;
 
     coor_buffer = new coordinates;
+    coor_buffer->first = x;
+    coor_buffer->second = y;
     move_direction = new coordinates;
     grid_locations = new vector<coordinates>;
 
@@ -154,7 +161,7 @@ void cPhysic_manager::PM_check_collision(phys_cont* obj, bool shift) {
     }
     if ( shift ) {
         #ifdef _DEBUG
-        //printf("Moving object to <%d,%d>\n",obj->coor_buffer->first,obj->coor_buffer->second);
+        printf("Moving object to <%d,%d>\n",obj->coor_buffer->first,obj->coor_buffer->second);
         #endif
         obj->x = obj->coor_buffer->first;
         obj->y = obj->coor_buffer->second;
@@ -580,12 +587,14 @@ void cPhysic_manager::PM_reset_grid_loc(phys_cont* cont) {
     int grid_x = PM_correct_x(cont->x) / (screen_w / grid_w);
     int grid_y = PM_correct_y(cont->y) / (screen_h / grid_h);
     int x_span,y_span;
-    //Hasn't moved
-    //if (grid_x == cont->grid_loc.first &&
-    //    grid_y == cont->grid_loc.second) return;
 
     if ( cont->grid_locations->size() > 0) {
         for (i = 0; i < cont->grid_locations->size(); ++i) {
+            #ifdef _DEBUG
+            #ifdef D_ZONE
+            printf("Removing cont from grid <%d,%d>\n",GRID_LOC(i).first,GRID_LOC(i).second);
+            #endif
+            #endif
             PM_remove_from_grid(cont, GRID_LOC(i).first, GRID_LOC(i).second);
         }
     }
@@ -603,9 +612,15 @@ void cPhysic_manager::PM_reset_grid_loc(phys_cont* cont) {
 
     cont->grid_locations->clear();
 
-    for (i = grid_x; i <= grid_x + x_span; ++i) {
-        for (j = grid_y; j <= grid_y + y_span; ++j) {
+    for (i = grid_x; i <= grid_x + x_span /*&& i < grid_w */; ++i) {
+        for (j = grid_y; j <= grid_y + y_span /*&& j < grid_h */; ++j) {
             cont->grid_locations->push_back(coordinates(i,j));
+            #ifdef _DEBUG
+            #ifdef D_ZONE
+            printf("Adding cont to grid <%d,%d>\n",i,j);
+            #endif
+            #endif
+
             PM_add_to_grid(cont,i,j);
         }
     }

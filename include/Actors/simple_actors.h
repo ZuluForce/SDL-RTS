@@ -28,6 +28,7 @@ class Dot: public cActor {
         void change_control();
         vector<Uint8>* event_binds();
         SDL_Rect* get_clip();
+        char* get_name();
 };
 
 /* Doesn't do anything but you can move it */

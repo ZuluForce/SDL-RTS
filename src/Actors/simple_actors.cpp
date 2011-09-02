@@ -193,6 +193,10 @@ void Dot::check_events(event_vector** events, int* load, Uint8* key_states) {
         }
     }
     /* Make sure all collisions are checked and the obj is moved */
+    /*
+    printf("%s's position is <%d,%d>\n",get_name(), p_container->x, p_container->y);
+    printf("Updating %s in the physics manager\n", get_name());
+    */
     pPM->PM_update(p_container);
     return;
 }
@@ -229,12 +233,15 @@ vector<Uint8>* Dot::event_binds() {
 }
 
 sDisplay_info* Dot::get_display() {
-    update = false;
     return &curr_info;
 }
 
 SDL_Rect* Dot::get_clip() {
     return curr_info.clip;
+}
+
+char* Dot::get_name() {
+    return "Dot Actor";
 }
 
 void Dot::change_control() {
