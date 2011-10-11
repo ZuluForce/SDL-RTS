@@ -35,20 +35,14 @@ class cActor {
 
         cActor();
 
-        #ifdef __MINGW32__
+        //#ifdef __MINGW32__ || __GNUC__
         virtual bool check();
         virtual void check_events(event_vector**, int* load, Uint8* key_states);
         virtual sDisplay_info* get_display();
         virtual int set_priority(int);
         virtual vector<Uint8>* event_binds();
         virtual cstr get_name();
-        #elif __GNUC__
-        virtual bool check() {};
-        virtual void check_events(event_vector**, int* load, Uint8* key_states) {};
-        virtual sDisplay_info* get_display() {};
-        virtual int set_priority(int) {};
-        virtual vector<Uint8>* event_binds() {};
-        #endif
+        //#endif
 };
 
 /* Functions for mantaining order in the priority queue */

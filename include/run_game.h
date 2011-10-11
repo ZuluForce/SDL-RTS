@@ -28,7 +28,7 @@ class cGame {
         SDL_Surface* G_scale_slide;
 
         std_menu* main_menu;
-        int b_start,b_quit, b_mute, b_settings, b_music_vol;
+        int b_start,b_quit, b_mute, b_settings, b_music_vol, b_back;
 
         bool game_thread_active;
         SDL_Thread* game_thread_ptr;

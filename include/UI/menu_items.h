@@ -10,6 +10,7 @@
 using namespace fastdelegate;
 
 typedef FastDelegate1<int&,void> std_clbck;
+typedef FastDelegate1<int*,void> array_clbck;
 typedef SDL_Surface* surfp;
 
 /* Warning:
@@ -54,6 +55,7 @@ class menu_obj : public cActor {
         virtual void reg_callback(std_clbck);
         virtual void show();
         virtual void hide();
+        bool visible();
 };
 
 class menu_button: public menu_obj {
@@ -90,6 +92,19 @@ class menu_button: public menu_obj {
         sDisplay_info* get_display();
         void show();
         void hide();
+};
+
+class back_button : public menu_button {
+	private:
+		int *menu_list;
+
+		array_clbck callback;
+		void call_clbck();
+
+	public:
+		back_button(int x, int y, surfp std, surfp hover, surfp clicked);
+		void set_menu_list(int* list, bool clear);
+		void reg_callback(array_clbck);
 };
 
 class mute_button : public menu_button {

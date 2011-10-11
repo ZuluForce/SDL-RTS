@@ -16,6 +16,7 @@ using namespace fastdelegate;
 class menu_button;
 typedef FastDelegate1<int&,void> std_clbck;
 
+
 class std_menu {
     private:
         SDL_Surface* default_static;
@@ -37,8 +38,16 @@ class std_menu {
         void set_callback(int& button, std_clbck);
         void show_menu();
         void show_menu(int,int);
+        void show_menu(int[]);
         void hide_menu();
         void hide_menu(int,int);
+        void hide_menu(int[]);
+        void set_back(int[]);
+        int *get_menu_state();
+
+        void dummy_callback(int &x) {
+			return;
+		}
         friend void menu_input_events(SDL_Event*);
 };
 

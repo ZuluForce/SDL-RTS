@@ -100,6 +100,12 @@ void cGame::start_menu() {
     new_slider->set_return_val(0,MIX_MAX_VOLUME);
     new_slider->set_slider_pos(100);
     b_music_vol = main_menu->reg_menu_obj(new_slider, MakeDelegate(AMM, &cAudio_manager::AMM_set_music_vol));
+
+	/* Back Button */
+    back_button* back = new back_button(270,300,G_settings_button,G_settings_hover,G_quit_clicked);
+    b_back = main_menu->reg_menu_obj(back, MakeDelegate(main_menu, &std_menu::dummy_callback));
+    back->set_menu_list(main_menu->get_menu_state(), true);
+    back->reg_callback( MakeDelegate(main_menu, &std_menu::set_back));
 }
 
 void cGame::start_game(int& button) {
@@ -114,7 +120,7 @@ void cGame::start_game(int& button) {
     Dot* new_dot = new Dot(0);
     new_dot->set_pos(0,0);
     new_dot->set_image(G_dot_img);
-    new_dot->set_priority(1);
+    new_dot->set_priority(3);
     pAM->AM_register(new_dot);
     this->active_objs.push_back(new_dot);
     #endif
@@ -129,7 +135,7 @@ void cGame::start_game(int& button) {
 
 void cGame::load_settings(int& button) {
     main_menu->hide_menu(b_quit,b_settings);
-    main_menu->show_menu(b_music_vol,b_music_vol);
+    main_menu->show_menu(b_music_vol,b_back);
 }
 
 void cGame::game_quit(int& button) {

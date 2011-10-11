@@ -93,6 +93,10 @@ void menu_obj::hide() {
     update = false;
 }
 
+bool menu_obj::visible() {
+	return update;
+}
+
 /*------------------------------*/
 
 /*----------- Menu Button -------------*/
@@ -230,6 +234,28 @@ void menu_button::show() {
 
 void menu_button::hide() {
     update = false;
+}
+
+back_button::back_button(int x, int y, surfp std, surfp hover, surfp clicked)
+	: menu_button(x,y,std,hover,clicked)
+{
+	menu_list = NULL;
+}
+
+void back_button::set_menu_list(int *list, bool clear) {
+	if ( clear && menu_list ) {
+		free(menu_list);
+	}
+	menu_list = list;
+	return;
+}
+
+void back_button::reg_callback(array_clbck func) {
+	callback = func;
+}
+
+void back_button::call_clbck() {
+	callback(menu_list);
 }
 
 mute_button::mute_button(int x, int y, surfp std, surfp hover, surfp clicked)
