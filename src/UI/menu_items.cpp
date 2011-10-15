@@ -302,7 +302,7 @@ menu_slider::menu_slider(int x, int y, surfp scale, surfp s_load, surfp slider) 
     ret_vals = {0,0};
     ret_range = 0;
 
-    slider_actor = new static_obj(x,y,slider);
+    slider_actor = new static_obj(x,y-2,slider);
     slider_actor->lock_on_y();
     load_bar = new static_obj(x,y,s_load);
 

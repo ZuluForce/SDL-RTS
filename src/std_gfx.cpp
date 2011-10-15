@@ -1,5 +1,7 @@
 #include "std_gfx.h"
 
+#define CLOCKS_PER_MS CLOCKS_PER_SEC / 1000
+
 SDL_Surface* load_image(const char* filename, bool alpha) {
     printf("Loading Image: %s\n",filename);
     SDL_Surface* loadedImage = NULL;
@@ -42,7 +44,10 @@ void std_sleep(Uint32 timeout) {
     #ifdef __MINGW32__
     Sleep(timeout);
     #elif __linux__
-    SDL_Delay(timeout);
+	useconds_t stime = timeout * 1000;
+    //printf("Sleeping for %d microseconds\n", stime);
+    if ( usleep(stime) == -1)
+		perror("nanosleep failed");
     #endif
     return;
 }
@@ -124,22 +129,59 @@ bool std_timer::is_paused() {
 
 std_fuse::std_fuse() {
     fuseLength = 0;
-    startTicks = 0;
     return;
 }
 
 void std_fuse::start(int time) {
     fuseLength = time;
-    startTicks = SDL_GetTicks();
+	startTick = clock();
     return;
 }
 
 bool std_fuse::check() {
-    if ( (SDL_GetTicks() - startTicks) >= fuseLength ) return false;
+	waitTick = clock();
+    if ( (waitTick - startTick) / (CLOCKS_PER_MS) >= fuseLength ) return false;
     return true;
 }
 
 void std_fuse::wait_out() {
-    if ( !check() ) return;
-    SDL_Delay(1);
+	waitTick = clock();
+
+	int stime = fuseLength - ((waitTick - startTick) / (CLOCKS_PER_MS));
+
+	if ( stime >= 1000) {
+		SDL_Delay(stime);
+		return;
+	}
+
+	if ( stime < 0 ) return;
+    std_sleep(stime);
+}
+
+std_scale::std_scale(int msec) {
+	interval = (float) msec;
+}
+
+void std_scale::set_scale(int msec) {
+	interval = (float) msec;
+}
+
+void std_scale::start() {
+	struct timeval time;
+	if ( gettimeofday(&time,NULL) == -1) {
+		perror("std_scale:Failed to get time");
+		return;
+	}
+	last_tick = time.tv_usec; //Get time somehow;
+}
+
+float std_scale::measure() {
+	struct timeval time;
+	if ( gettimeofday(&time,NULL) == -1) {
+		perror("std_scale:Failed to get time");
+		return 0;
+	}
+
+	float scale = time.tv_usec - last_tick;
+	return scale / interval;
 }

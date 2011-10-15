@@ -1,7 +1,3 @@
-//#ifndef _cplusplus
-//#error A C++ compiler is required!!
-//#endif
-
 #include <cstdio>
 #include <string>
 #include <iostream>
@@ -87,7 +83,6 @@ int main(int argc, char** argv) {
     /* Setting up the screen */
     cScreen_manager SM = cScreen_manager(640, 480, 32, SDL_SWSURFACE, true);
     SM.SM_set_caption("Planeman-Engine");
-    SM.SM_maxFPS(2);
     SM_start(&SM);
     pSM = &SM;
 
@@ -111,10 +106,15 @@ int main(int argc, char** argv) {
     cGame game_manager = cGame();
     SDL_CreateThread(start_menu,&game_manager);
 
+	int update_rate = 1000 / 100;
+	std_fuse main_fuse = std_fuse();
+
     while( true && !quit_threads) {
+    	main_fuse.start(update_rate);
         EM.ED_manage_events(250);
         AM.AM_update();
-        std_sleep(2);
+
+        main_fuse.wait_out();
     }
 
     SM.cleanup(DEFAULT_TIMEOUT);

@@ -2,6 +2,8 @@
 #define STD_GFX_H_INCLUDED
 
 #include <ctime>
+#include <unistd.h>
+#include <sys/time.h>
 #include "SDL/SDL.h"
 #include "SDL/SDL_image.h"
 
@@ -46,7 +48,8 @@ typedef class std_timer {
 
 typedef class std_fuse {
     private:
-        int startTicks;
+		clock_t startTick;
+		clock_t waitTick;
         int fuseLength;
 
     public:
@@ -62,8 +65,11 @@ typedef class std_fuse {
 
 typedef class std_scale {
     private:
-        clock_t start_tick;
+        clock_t last_tick;
+        float interval;
+
     public:
+		std_scale(int msec);
         void set_scale(int msec);
         void start();
         float measure();

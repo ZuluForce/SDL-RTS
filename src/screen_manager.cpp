@@ -43,7 +43,7 @@ cScreen_manager::cScreen_manager(int width, int height, int bpp, Uint32 flags, b
 
     if ( show ) SDL_Flip(screen);
 
-    maxFPS = 30;
+    this->maxFPS = 30;
     fps_timer = new std_fuse();
     SM_active_thread = false;
     SM_thread_ptr = NULL;
@@ -65,7 +65,7 @@ cScreen_manager::~cScreen_manager() {
             SDL_KillThread( SM_thread_ptr );
             return;
         }
-        SDL_Delay(10);
+        std_sleep(10);
     }
     SDL_FreeSurface(screen);
     free(fps_timer);
@@ -84,7 +84,7 @@ void cScreen_manager::cleanup(int timeout) {
             SDL_KillThread( SM_thread_ptr );
             return;
         }
-        SDL_Delay(10);
+        std_sleep(10);
     }
 
     SDL_FreeSurface( screen );
@@ -199,18 +199,19 @@ int start_SM_thread(void* SM) {
     cScreen_manager* _SM = (cScreen_manager* ) SM;
     _SM->SM_active_thread = true;
 
-    int fps_interval = 1000 / _SM->maxFPS;
+    int fps_interval = 1000.0 / _SM->maxFPS;
+    printf("fps_interval = %d\n", fps_interval);
+    printf("_SM->maxFPS = %d\n", _SM->maxFPS);
 
     while (quit_threads == false) {
-        _SM->fps_timer->start(_SM->maxFPS);
-        _SM->fps_timer->wait_out();
+        _SM->fps_timer->start( fps_interval );
 
         SDL_SemWait( _SM->screen_lock );
         _SM -> SM_update();
 
         SDL_SemPost( _SM->screen_lock );
 
-
+		_SM->fps_timer->wait_out();
     }
     _SM->SM_active_thread = false;
     return 0;
