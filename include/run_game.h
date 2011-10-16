@@ -8,6 +8,7 @@
 #include "physics.h"
 #include "UI/menu.h"
 #include "Audio/audio_manager.h"
+#include "Settings/iniReader.h"
 
 class cGame {
     private:
@@ -32,6 +33,7 @@ class cGame {
 
         bool game_thread_active;
         SDL_Thread* game_thread_ptr;
+        INIReader *settings;
 
         vector< cActor* > active_objs;
 
@@ -42,7 +44,7 @@ class cGame {
     public:
         cAudio_manager* AMM;
 
-        cGame();
+        cGame(INIReader *settings = NULL);
         ~cGame();
         void update();
         void cleanup(int);
@@ -51,7 +53,7 @@ class cGame {
         void start_menu();
         /* Button Callbacks */
         void start_game(int&);
-        void load_settings(int&);
+        void load_settings_menu(int&);
         void game_quit(int&);
         /*------------------*/
 

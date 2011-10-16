@@ -97,6 +97,10 @@ bool menu_obj::visible() {
 	return update;
 }
 
+void menu_obj::reinit() {
+    return;
+}
+
 /*------------------------------*/
 
 /*----------- Menu Button -------------*/
@@ -236,6 +240,10 @@ void menu_button::hide() {
     update = false;
 }
 
+void menu_button::reinit() {
+    change_img(std);
+}
+
 back_button::back_button(int x, int y, surfp std, surfp hover, surfp clicked)
 	: menu_button(x,y,std,hover,clicked)
 {
@@ -290,6 +298,10 @@ void mute_button::change_img(surfp img) {
 }
 int mute_button::music_vol() {
     return pAMM->AMM_get_music_vol();
+}
+
+void mute_button::reinit() {
+    return;
 }
 
 menu_slider::menu_slider(int x, int y, surfp scale, surfp s_load, surfp slider) {

@@ -7,6 +7,7 @@ using namespace std;
 #define CLEANUP_TIMEOUT 2000
 
 extern bool quit_threads;
+extern INIReader* pSettings;
 
 /* --------------------- Private SM Functions ------------------------- */
 /* Converts SDL_Color to Uint32 */
@@ -43,12 +44,20 @@ cScreen_manager::cScreen_manager(int width, int height, int bpp, Uint32 flags, b
 
     if ( show ) SDL_Flip(screen);
 
-    this->maxFPS = 30;
+    if ( pSettings ) {
+        if ( pSettings->exists("Screen_Manager", "maxFPS") ) {
+            this->maxFPS = pSettings->extractValue<int>("Screen_Manager", "maxFPS");
+            printf("Loaded setting: maxFPS = %d\n", maxFPS);
+        } else {
+            this->maxFPS = 30;
+        }
+    }
     fps_timer = new std_fuse();
     SM_active_thread = false;
     SM_thread_ptr = NULL;
     cleaned = false;
     pixel_depth = bpp;
+    backlog = 0;
 
     screen_lock = SDL_CreateSemaphore(1);
     return;
@@ -131,6 +140,7 @@ bool cScreen_manager::SM_update() {
         fprintf(stderr, "Failed to flip the screen: %s on line %d\n",__FILE__,__LINE__);
         return false;
     }
+    backlog = 0;
     return true;
 }
 bool cScreen_manager::SM_set_bg(SDL_Color* fill_color,SDL_Surface* fill_image) {
@@ -158,6 +168,7 @@ bool cScreen_manager::SM_set_bg(SDL_Color* fill_color,SDL_Surface* fill_image) {
 void cScreen_manager::SM_blit(int x, int y, SDL_Surface* src, SDL_Rect* clip) {
     SDL_SemWait( screen_lock );
     apply_surface(x, y, src, screen, clip);
+    ++backlog;
     SDL_SemPost( screen_lock );
 return;
 }
@@ -165,6 +176,12 @@ return;
 bool cScreen_manager::SM_maxFPS(int max) {
     maxFPS = max;
     return true;
+}
+
+bool cScreen_manager::SM_backlog(int reset_if) {
+    if ( backlog >= reset_if )
+        return true;
+    return false;
 }
 
 /* To be used as a threaded function

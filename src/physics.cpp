@@ -612,8 +612,8 @@ void cPhysic_manager::PM_reset_grid_loc(phys_cont* cont) {
 
     cont->grid_locations->clear();
 
-    for (i = grid_x; i <= grid_x + x_span /*&& i < grid_w */; ++i) {
-        for (j = grid_y; j <= grid_y + y_span /*&& j < grid_h */; ++j) {
+    for (i = grid_x; i <= grid_x + x_span && i < grid_w ; ++i) {
+        for (j = grid_y; j <= grid_y + y_span && j < grid_h ; ++j) {
             cont->grid_locations->push_back(coordinates(i,j));
             #ifdef _DEBUG
             #ifdef D_ZONE

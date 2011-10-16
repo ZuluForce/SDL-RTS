@@ -56,6 +56,7 @@ class menu_obj : public cActor {
         virtual void show();
         virtual void hide();
         bool visible();
+        void reinit();
 };
 
 class menu_button: public menu_obj {
@@ -92,6 +93,8 @@ class menu_button: public menu_obj {
         sDisplay_info* get_display();
         void show();
         void hide();
+
+        void reinit();
 };
 
 class back_button : public menu_button {
@@ -117,6 +120,7 @@ class mute_button : public menu_button {
         mute_button(int x, int y, surfp std, surfp hover, surfp clicked);
         ~mute_button();
         int music_vol();
+        void reinit();
 };
 
 class menu_slider : public menu_obj {

@@ -14,7 +14,7 @@ Dot::Dot(int _typeID) {
     curr_info.clip = NULL;
     curr_info.surf = NULL;
 
-    move_speed = 2;
+    move_speed = 4;
     //pressed_key = {-1,-1};
 
     _event_binds = vector<Uint8>(1,SDL_KEYDOWN);
@@ -193,10 +193,10 @@ void Dot::check_events(event_vector** events, int* load, Uint8* key_states) {
         }
     }
     /* Make sure all collisions are checked and the obj is moved */
-    /*
+
     printf("%s's position is <%d,%d>\n",get_name(), p_container->x, p_container->y);
-    printf("Updating %s in the physics manager\n", get_name());
-    */
+    //printf("Updating %s in the physics manager\n", get_name());
+
     pPM->PM_update(p_container);
     return;
 }

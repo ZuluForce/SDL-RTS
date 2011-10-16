@@ -1,5 +1,7 @@
 #include "run_game.h"
 
+#define SETTING(sec,name) game->settings->exists(sec,name)
+
 extern cScreen_manager* pSM;
 extern cPhysic_manager* pPM;
 extern cEvent_dispatch* pEM;
@@ -10,8 +12,9 @@ extern void (*onQuit) (SDL_Event*);
 
 cAudio_manager* pAMM;
 
-cGame::cGame() {
+cGame::cGame(INIReader *settings) {
     init_resources();
+    this->settings = settings;
     game_thread_active = false;
 }
 
@@ -88,13 +91,14 @@ void cGame::start_menu() {
 
     /* Settings Button */
     new_button = new menu_button(270,160,G_settings_button,G_settings_hover,G_quit_clicked);
-    b_settings = main_menu->reg_menu_obj(new_button, MakeDelegate(this, &cGame::load_settings));
+    b_settings = main_menu->reg_menu_obj(new_button, MakeDelegate(this, &cGame::load_settings_menu));
 
     /* Mute Button */
     new_button = new mute_button(0,0,G_mute_button,G_mute_button,G_muted);
     b_mute = main_menu->reg_menu_obj(new_button, MakeDelegate(AMM, &cAudio_manager::AMM_set_music_vol));
     main_menu->show_menu(b_quit,b_mute);
 
+    /* Volume Slider */
     menu_slider* new_slider = new menu_slider(270,220,G_scale,G_scale_load,G_scale_slide);
     new_slider->set_style(true,0);
     new_slider->set_return_val(0,MIX_MAX_VOLUME);
@@ -133,7 +137,7 @@ void cGame::start_game(int& button) {
     pPM->PM_set_collide_zone(200, 200, temp_param, 0);
 }
 
-void cGame::load_settings(int& button) {
+void cGame::load_settings_menu(int& button) {
     main_menu->hide_menu(b_quit,b_settings);
     main_menu->show_menu(b_music_vol,b_back);
 }
@@ -153,8 +157,17 @@ int start_menu(void* args) {
     std_menu* main_menu = new std_menu();
     game->main_menu = main_menu;
     game->start_menu();
-    AMM->AMM_set_music("audio/menu_music.mp3");
-    //AMM->AMM_set_music("audio/Granite.flac");
+    if ( game->settings ) {
+        if ( SETTING("Music","main_menu_music") ) {
+            AMM->AMM_set_music(game->settings->extractString("Music", "main_menu_music"));
+        }
+
+        if ( SETTING("Music", "music_vol") ) {
+            int vol = game->settings->extractValue<int>("Music","music_vol");
+            AMM->AMM_set_music_vol(vol);
+        }
+
+    }
     AMM->AMM_play_music();
 
     while ( !quit_threads ) {

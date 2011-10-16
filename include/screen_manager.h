@@ -4,6 +4,7 @@
 #include <cstdio>
 #include <string>
 #include "std_gfx.h"
+#include "Settings/iniReader.h"
 
 using namespace std;
 
@@ -17,6 +18,7 @@ typedef class cScreen_manager {
         int maxFPS; //Initialized to 30
         int frame;
         int pixel_depth;
+        int backlog; //# frames blitted since last update
 
         std_fuse* fps_timer;
 
@@ -44,6 +46,7 @@ typedef class cScreen_manager {
         void SM_blit(int x, int y, SDL_Surface* src, SDL_Rect* clip = NULL);
         bool SM_maxFPS(int max);
         bool SM_showFPS();
+        bool SM_backlog(int reset_if);
 
         void cleanup(int timeout);
 

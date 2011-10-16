@@ -67,7 +67,8 @@ void std_menu::show_menu(int start, int end) {
 }
 
 void std_menu::show_menu(int list[]) {
-	for (int i = 1; i < list[0]; ++i) {
+	for (int i = 1; i <= list[0]; ++i) {
+	    menu[list[i]]->reinit();
 		menu[list[i]]->show();
 	}
 }

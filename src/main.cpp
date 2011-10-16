@@ -10,6 +10,7 @@
 #include "ID.h"
 #include "run_game.h"
 #include "UI/menu.h"
+#include "Settings/iniReader.h"
 
 #ifdef __MINGW32__
 
@@ -43,6 +44,7 @@ cEvent_dispatch* pEM;
 cActor_manager* pAM;
 cScreen_manager* pSM;
 cPhysic_manager* pPM;
+INIReader* pSettings;
 
 //------------------------------------------------------//
 
@@ -64,6 +66,18 @@ void onKeyDown(SDL_Event* event) {
     return;
 }
 
+void tune_update(int& sleeptime) {
+    if ( pSM->SM_backlog(3) ) {
+        printf("Adjusting sleeptime to %d milliseconds\n", sleeptime * 2);
+        sleeptime *= 2;
+        return;
+    } else if ( pSM->SM_backlog(2) ) {
+        printf("Adjusting sleeptime to %d milliseconds\n", sleeptime + 1);
+        ++sleeptime;
+        return;
+    }
+}
+
 int main(int argc, char** argv) {
 
     /* Chop executable filename off the directory argument */
@@ -80,6 +94,15 @@ int main(int argc, char** argv) {
         output.close();
     }
 
+    /* Checking for settings */
+    INIReader* game_settings = new INIReader("settings/engine_settings.ini");
+    if ( !game_settings->loaded() ) {
+        delete(game_settings);
+        game_settings = NULL;
+        pSettings = NULL;
+    } else {
+        pSettings = game_settings;
+    }
     /* Setting up the screen */
     cScreen_manager SM = cScreen_manager(640, 480, 32, SDL_SWSURFACE, true);
     SM.SM_set_caption("Planeman-Engine");
@@ -103,16 +126,35 @@ int main(int argc, char** argv) {
 
     /* Initializes the Actor Objects */
     //init_game_screen(&AM);
-    cGame game_manager = cGame();
+    cGame game_manager = cGame(game_settings);
     SDL_CreateThread(start_menu,&game_manager);
 
-	int update_rate = 1000 / 100;
+    int update_rate;
+    bool tune;
+    if ( pSettings ) {
+        if ( pSettings->exists("Core", "loop_rate") ) {
+            update_rate = 1000 / pSettings->extractValue<int>("Core", "loop_rate");
+        } else {
+            update_rate = 10;
+        }
+
+        if ( pSettings->exists("Core", "tune_rate") ) {
+            tune = pSettings->extractValue<bool>("Core", "tune_rate");
+        } else {
+            tune = true;
+        }
+    }
+
 	std_fuse main_fuse = std_fuse();
 
     while( true && !quit_threads) {
     	main_fuse.start(update_rate);
         EM.ED_manage_events(250);
         AM.AM_update();
+
+        if ( tune ) {
+            tune_update(update_rate);
+        }
 
         main_fuse.wait_out();
     }
