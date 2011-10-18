@@ -47,10 +47,15 @@ cScreen_manager::cScreen_manager(int width, int height, int bpp, Uint32 flags, b
     if ( pSettings ) {
         if ( pSettings->exists("Screen_Manager", "maxFPS") ) {
             this->maxFPS = pSettings->extractValue<int>("Screen_Manager", "maxFPS");
-            printf("Loaded setting: maxFPS = %d\n", maxFPS);
+            if ( maxFPS <= 0 ) //Bad setting
+				this->maxFPS = 30;
+			else
+				printf("Loaded setting: maxFPS = %d\n", maxFPS);
         } else {
             this->maxFPS = 30;
         }
+    } else {
+		this->maxFPS = 30;
     }
     fps_timer = new std_fuse();
     SM_active_thread = false;

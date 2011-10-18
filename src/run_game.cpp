@@ -120,14 +120,14 @@ void cGame::start_game(int& button) {
     /* Currently there is a problem with a xcb_io library in
        Ubuntu 11.04 that is not allowing the game to work if
        a Dot actor is created */
-    #ifdef __MINGW32__
+    //#ifdef __MINGW32__
     Dot* new_dot = new Dot(0);
     new_dot->set_pos(0,0);
     new_dot->set_image(G_dot_img);
     new_dot->set_priority(3);
     pAM->AM_register(new_dot);
     this->active_objs.push_back(new_dot);
-    #endif
+    //#endif
 
     params* temp_param = new params;
     temp_param->w_h = new coordinates;
